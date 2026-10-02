@@ -1,27 +1,60 @@
 # Deploy — EarthMap
 
-## Primary: GitHub Pages (Actions)
+## Primary (org): Hostinger FTP → earthmap.live
 
+Repo: **https://github.com/disasterdb/earthmap**  
+Workflow: `.github/workflows/deploy-production.yml`
+
+Triggers: push to `main`, or **Actions → Deploy production (Hostinger FTP) → Run workflow**.
+
+Build: `npm ci` + Vite with `VITE_BASE=/` → `dist/`.
+
+### Secrets (repo Settings → Secrets and variables → Actions)
+
+| Secret | Purpose |
+|--------|---------|
+| `EARTHMAP_FTP_SERVER` | Hostinger FTP hostname |
+| `EARTHMAP_FTP_USERNAME` | FTP user for the earthmap.live site |
+| `EARTHMAP_FTP_PASSWORD` | FTP password |
+
+If any secret is missing, the workflow fails with a clear error (no partial upload).
+
+### Hostinger Apache quirk
+
+FTP often lands in `/public_html`, but the Apache document root is the **parent** `/`. The workflow:
+
+1. `cd /`
+2. Removes Hostinger `default.php` / `Default.php` / `default.html`
+3. `mirror` of `dist/` into `.` (Apache root)
+4. Removes a nested `public_html/` if mirror created one
+
+Same pattern as `disasterdb-app` → app.disasterdb.com.
+
+### One-time Hostinger setup (Rob)
+
+1. Create website for **earthmap.live** in Hostinger
+2. Create an FTP account scoped to that site
+3. Add the three `EARTHMAP_FTP_*` secrets on **disasterdb/earthmap**
+4. Push to `main` (or run the workflow manually)
+
+Imagery stays on **sat.disasterdb.com** (client already points there; no Contabo deploy for this app).
+
+## Secondary (personal): GitHub Pages
+
+Repo: **https://github.com/GeoScobie/earthmap**  
 Workflow: `.github/workflows/pages.yml`
 
 - Push to `main` (or **Actions → Deploy GitHub Pages → Run workflow**)
-- Build: Vite static (`VITE_BASE=/earthmap/`) → `actions/upload-pages-artifact` → `deploy-pages`
+- Build with `VITE_BASE=/earthmap/` → Pages artifact
 - Live URL: **https://geoscobie.github.io/earthmap/**
 
-Repo settings (one-time):
+Repo settings (one-time): **Settings → Pages → Source: GitHub Actions**. Free-plan Pages needs a **public** repo.
 
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions**
-2. Free-plan Pages needs a **public** repo (this repo was set public for geoscobie.github.io/earthmap/; Pro keeps private Pages)
-
-Custom domain later: set Pages custom domain + rebuild with `VITE_BASE=/`.
-
-## Optional: Hostinger FTP (`earthmap.live`)
-
-`.github/workflows/deploy-production.yml` — `workflow_dispatch` only. Needs `PROD_FTP_*` secrets. Prefer Pages until Hostinger FTP works.
+Pages is a convenient personal preview; production for earthmap.live is Hostinger FTP on the org repo.
 
 ## Smoke
 
 1. Globe loads with OSM fills + hillshade under GeoColor
 2. Contour lines from ~z4; labels from ~z9
 3. Tip stamp refreshes from `sat.disasterdb.com/geocolor/latest.json`
-4. `/earthmap/countries/united-states/` CTA deep-links into the globe
+4. Country SEO pages CTA deep-links into the globe

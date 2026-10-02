@@ -1,16 +1,18 @@
-name: Deploy production (FTP — superseded)
+# Deploy Vite dist/ to earthmap.live (Hostinger)
+# Same quirk as disasterdb-app: FTP often lands in /public_html; Apache root is parent /.
 
-# Hostinger FTP blocked / not wired. Prefer GitHub Pages (pages.yml).
-# Kept for optional future earthmap.live cutover once Hostinger is ready.
+name: Deploy production (Hostinger FTP)
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,23 +29,37 @@ jobs:
           VITE_BASE: /
         run: npm ci && npm run build
 
-      - name: Deploy to earthmap.live (FTP)
+      - name: Deploy to earthmap.live (Apache root)
         env:
-          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.PROD_FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.PROD_FTP_PASSWORD }}
+          FTP_SERVER: ${{ secrets.EARTHMAP_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.EARTHMAP_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.EARTHMAP_FTP_PASSWORD }}
         run: |
           set -euo pipefail
           if [ -z "${FTP_SERVER:-}" ] || [ -z "${FTP_USERNAME:-}" ] || [ -z "${FTP_PASSWORD:-}" ]; then
-            echo "::error::Missing PROD_FTP_* secrets — use GitHub Pages (pages.yml) instead"
+            echo "::error::Missing EARTHMAP_FTP_* secrets (EARTHMAP_FTP_SERVER, EARTHMAP_FTP_USERNAME, EARTHMAP_FTP_PASSWORD)."
+            echo "::error::Create Hostinger website + FTP user for earthmap.live, then set those secrets on disasterdb/earthmap."
             exit 1
           fi
           sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+          # --ignore-time: always overwrite. Default lftp mirror can skip files
+          # whose remote mtime looks newer/equal even when content changed.
           lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "ftp://$FTP_SERVER:21" <<'LFTP'
           set ftp:ssl-allow false
           set ftp:passive-mode true
           set cmd:fail-exit yes
-          mirror -R --verbose --ignore-time dist/ .
+          pwd
+          cd /
+          pwd
+          ls -la
+          rm -f default.php Default.php default.html
+          set cmd:fail-exit false
+          rm -f index.html
+          set cmd:fail-exit yes
+          mirror -R --verbose --ignore-time --exclude-glob .git* dist/ .
+          set cmd:fail-exit false
+          rm -r -f public_html
+          ls -la
           bye
           LFTP
           echo "Deployed EarthMap @${GITHUB_SHA::7} -> earthmap.live"
