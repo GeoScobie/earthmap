@@ -58,3 +58,7 @@ Pages is a convenient personal preview; production for earthmap.live is Hostinge
 2. Contour lines from ~z4; labels from ~z9
 3. Tip stamp refreshes from `sat.disasterdb.com/geocolor/latest.json`
 4. Country SEO pages CTA deep-links into the globe
+
+## Node `start` script
+
+`package.json` includes `"start": "vite preview --host 0.0.0.0 --port 3000"` so Hostinger Node / Git auto-detect stops complaining. Prefer **static FTP** (`deploy-production.yml`) for earthmap.live — not a long-running Node process. If Hostinger asks for Build + Start: Build = `VITE_BASE=/ npm run build`, Start = `npm start` (preview serves `dist/`).
