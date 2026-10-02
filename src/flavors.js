@@ -5,8 +5,8 @@ export function earthmapTopoFlavor() {
   const light = namedFlavor('light');
   return {
     ...light,
-    background: '#0b1220',
-    earth: '#1a2438',
+    background: '#0a1628',
+    earth: '#122038',
     park_a: '#1e3a2e',
     park_b: '#1a3328',
     wood_a: '#1a3024',

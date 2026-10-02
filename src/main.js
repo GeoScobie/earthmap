@@ -3,6 +3,7 @@ import { Protocol } from 'pmtiles';
 import { setupContourDem } from './contour-dem.js';
 import { buildStyle } from './basemap.js';
 import { fetchTip, ensureGeocolorLayers, fmtStamp } from './geocolor.js';
+import { setupSearch } from './search.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 function parseDeepLink() {
@@ -53,17 +54,20 @@ function boot() {
     map.addControl(new maplibregl.GlobeControl(), 'bottom-right');
   }
 
+  setupSearch(map);
+
   map.on('load', async () => {
     try {
       if (map.setProjection) map.setProjection({ type: 'globe' });
     } catch (_) {}
 
     try {
+      // L5 navy / sky space fog (not FireMap charcoal)
       map.setFog({
-        color: 'rgb(8, 14, 28)',
-        'high-color': 'rgb(20, 40, 80)',
+        color: 'rgb(10, 22, 40)',
+        'high-color': 'rgb(24, 72, 140)',
         'horizon-blend': 0.04,
-        'space-color': 'rgb(2, 4, 12)',
+        'space-color': 'rgb(4, 10, 22)',
         'star-intensity': 0.35
       });
     } catch (_) {}

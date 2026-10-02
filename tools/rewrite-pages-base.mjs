@@ -29,8 +29,11 @@ let n = 0;
 for (const file of files) {
   let html = fs.readFileSync(file, 'utf8');
   const before = html;
-  // /css/... → /earthmap/css/...
-  html = html.replace(/(href|src)="\/(?!\/)(css\/[^"]*)"/g, `$1="${base}$2"`);
+  // /css/... and /icons/... → /earthmap/css|icons/...
+  html = html.replace(
+    /(href|src)="\/(?!\/)((?:css|icons)\/[^"]*)"/g,
+    `$1="${base}$2"`
+  );
   // href="/" and href="/countries/..." but not //cdn
   html = html.replace(/href="\/(?!\/)([^"]*)"/g, (_, rest) => {
     if (rest.startsWith('earthmap/')) return `href="/${rest}"`;

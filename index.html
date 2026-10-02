@@ -5,9 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex,follow" />
   <meta name="description" content="Near-real-time geostationary satellite views of Earth on a 3D globe. EarthMap — GEO-primary imagery with country discovery pages." />
+  <meta name="theme-color" content="#0a1628" />
   <link rel="canonical" href="https://earthmap.live/" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/earthmap-mark-32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/icons/earthmap-mark-64.png" />
+  <link rel="apple-touch-icon" href="/icons/earthmap-mark-180.png" />
   <title>EarthMap — Live Satellite Globe</title>
   <link rel="preconnect" href="https://sat.disasterdb.com" crossorigin />
+  <link rel="preconnect" href="https://geocode.disasterdb.com" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
@@ -15,21 +20,35 @@
 </head>
 <body>
   <div id="map" role="application" aria-label="EarthMap live satellite globe"></div>
+
   <div class="chrome">
-    <div class="brand">
-      <div>
-        <h1>EarthMap</h1>
-        <div class="tag">GEO satellite · OSM · hillshade · 3D globe</div>
+    <div class="search-wrap" id="searchWrap">
+      <div class="search-bar" role="search">
+        <button type="button" class="logo-btn" id="logoBtn" aria-label="EarthMap — reset globe view">
+          <img class="logo-mark" src="/icons/earthmap-mark-64.png" width="64" height="64" alt="" />
+          <span class="logo-word">EarthMap</span>
+        </button>
+        <div class="search-divider" aria-hidden="true"></div>
+        <label class="search-field">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M15.5 15.5 L20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="search" id="searchInput" placeholder="Search place or country…" autocomplete="off"
+            aria-label="Search place or country" aria-autocomplete="list" aria-controls="searchResults" />
+        </label>
       </div>
+      <ul id="searchResults" class="search-results" role="listbox" aria-label="Search results" hidden></ul>
     </div>
     <div class="stamp" id="tip-stamp">loading tip…</div>
   </div>
+
   <nav class="nav-dock" aria-label="Site">
     <a data-em-path="countries/">Countries</a>
     <a data-em-path="countries/united-states/">United States</a>
     <a data-em-path="countries/united-kingdom/">United Kingdom</a>
     <a data-em-path="countries/japan/">Japan</a>
-    <span style="color:var(--muted)">Deep-link: ?lng=&amp;lat=&amp;zoom=</span>
+    <span class="nav-hint">Deep-link: ?lng=&amp;lat=&amp;zoom=</span>
   </nav>
   <script type="module" src="/src/main.js"></script>
 </body>
