@@ -108,7 +108,9 @@
     });
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'bottom-right');
-    map.addControl(new maplibregl.GlobeControl(), 'bottom-right');
+    if (typeof maplibregl.GlobeControl === 'function') {
+      map.addControl(new maplibregl.GlobeControl(), 'bottom-right');
+    }
 
     map.on('load', async () => {
       try {
