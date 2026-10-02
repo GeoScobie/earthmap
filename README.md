@@ -7,12 +7,16 @@ GEO-primary **live satellite map on a 3D globe** — lean MVP (App experiment).
 ## What ships
 
 - MapLibre GL globe + GeoColor XYZ from `https://sat.disasterdb.com/geocolor/...`
-  - Layers: `gk2a`, `meteosat`, `goes-east`, `goes-west`
-  - Tip from `latest.json`, refreshed every 60s
-  - Deep-link: `?lng=&lat=&zoom=`
-- **Sat-live basemap (ported from App #114):** Protomaps OSM carto (DisasterDB planet PMTiles) + Mapterhorn Terrarium **hillshade** (all zooms) + **maplibre-contour** isolines from **z4** (labels z9), with GeoColor inserted under `contour-lines`
+  - Layers: GK2A → Meteosat → GOES-East → GOES-West family (same stack as DisasterDB App)
+  - **Client lon-alpha seam fades** (App `goes.js` protocols: EW / EM / MG / West-family IDL)
+  - Tip from `latest.json`, ~60s poll + wake refresh
+  - Deep-link: `?lng=&lat=&zoom=` · `?scrub=1`
+- **Time chrome (ported from App):**
+  - Search-bar tip / observation stamp (LIVE · local · UTC · age)
+  - Bottom-right chip ↔ expand transport: play loop (~4h), scrub slider, Latest, time-since
+- **Sat-live basemap (App #114):** Protomaps OSM carto (DisasterDB planet PMTiles) + Mapterhorn Terrarium hillshade + maplibre-contour isolines from z4
 - Country landings under `/countries/` (noindex until proven)
-- No FireMap / wildfire chrome
+- L5 branding (navy / sky / teal / coral) — no FireMap / wildfire chrome
 
 ## Stack
 
@@ -26,4 +30,4 @@ npm run build    # dist/ for Pages
 
 ## Deploy
 
-See `DEPLOY.md`. GitHub Actions → Pages is the default path.
+See `DEPLOY.md`. GitHub Actions → Pages is the default path. GIT owns Hostinger — do not FTP from agents.

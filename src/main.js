@@ -2,8 +2,13 @@ import maplibregl from 'maplibre-gl';
 import { Protocol } from 'pmtiles';
 import { setupContourDem } from './contour-dem.js';
 import { buildStyle } from './basemap.js';
-import { fetchTip, ensureGeocolorLayers, fmtStamp } from './geocolor.js';
+import {
+  ensureGoesGeocolorMounted,
+  wireGoesGeocolorLazy,
+  registerAllGoesSeamProtocols
+} from './goes.js';
 import { setupSearch } from './search.js';
+import { wireTipStampMirror } from './tipStamp.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 function parseDeepLink() {
@@ -24,15 +29,15 @@ function withBase(path) {
 }
 
 function boot() {
-  // Teach MapLibre pmtiles:// once (App app.js).
   if (!maplibregl._earthmapPmtiles) {
     maplibregl.addProtocol('pmtiles', new Protocol().tile);
     maplibregl._earthmapPmtiles = true;
   }
+  // Client lon-alpha seam fades (same protocols as DisasterDB App).
+  registerAllGoesSeamProtocols(maplibregl);
   setupContourDem(maplibregl);
 
   const deep = parseDeepLink();
-  const stampEl = document.getElementById('tip-stamp');
 
   const map = new maplibregl.Map({
     container: 'map',
@@ -55,6 +60,7 @@ function boot() {
   }
 
   setupSearch(map);
+  wireTipStampMirror();
 
   map.on('load', async () => {
     try {
@@ -72,25 +78,15 @@ function boot() {
       });
     } catch (_) {}
 
-    async function refresh() {
-      try {
-        const tip = await fetchTip();
-        ensureGeocolorLayers(map, tip);
-        if (stampEl) {
-          stampEl.innerHTML =
-            '<strong>NEAR-REAL-TIME</strong> · ' + fmtStamp(tip.sats);
-        }
-      } catch (err) {
-        console.warn('[earthmap] tip refresh failed', err);
-        if (stampEl) stampEl.textContent = 'tip unavailable — retrying…';
-      }
+    // Wire transport/play/scrub + mount seamed GeoColor (App path).
+    wireGoesGeocolorLazy(map);
+    try {
+      await ensureGoesGeocolorMounted(map);
+    } catch (err) {
+      console.warn('[earthmap] goes mount failed', err);
     }
-
-    await refresh();
-    setInterval(refresh, 60_000);
   });
 
-  // Fix country / nav links for project Pages base
   document.querySelectorAll('a[data-em-path]').forEach((a) => {
     a.setAttribute('href', withBase(a.getAttribute('data-em-path')));
   });
