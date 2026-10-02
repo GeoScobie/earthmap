@@ -1,3 +1,4 @@
 User-agent: *
-Disallow: /
-# Site ships noindex until HTTPS map CTAs are validated; tighten later.
+Allow: /
+Allow: /countries/
+Sitemap: https://earthmap.live/sitemap-countries.xml

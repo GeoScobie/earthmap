@@ -3,48 +3,65 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex,follow" />
-  <meta name="description" content="Browse EarthMap country landings for near-real-time GEO satellite views on a 3D globe—plus up to ~30 days of imagery history per view." />
+  <meta name="robots" content="index,follow" />
+  <meta name="description" content="Interactive live satellite imagery by country: clouds and storms on a live satellite map. Open a country and watch clouds and storms from space today." />
   <link rel="canonical" href="https://earthmap.live/countries/" />
   <title>Live Satellite Maps by Country | EarthMap</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="/icons/earthmap-mark-32.png" />
-  <meta name="theme-color" content="#0a1628" />
-
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
   <link href="/css/earthmap.css" rel="stylesheet" />
   <script type="application/ld+json">
   {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "EarthMap",
-      "item": "https://earthmap.live/"
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": "Countries",
-      "item": "https://earthmap.live/countries/"
-    }
-  ]
-}
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://earthmap.live/countries/",
+        "url": "https://earthmap.live/countries/",
+        "name": "Live Satellite Maps by Country | EarthMap",
+        "description": "Interactive live satellite imagery by country: clouds and storms on a live satellite map. Open a country and watch clouds and storms from space today."
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "EarthMap",
+            "item": "https://earthmap.live/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Countries",
+            "item": "https://earthmap.live/countries/"
+          }
+        ]
+      }
+    ]
+  }
   </script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59Q4Q2L53N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-59Q4Q2L53N');
+  </script>
+
 </head>
 <body>
   <main class="page">
     <header>
-      <a class="logo" href="/"><img src="/icons/earthmap-mark-64.png" width="64" height="64" alt="" />EarthMap</a>
-      <a href="/">Open globe</a>
+      <a class="logo" href="/">EarthMap</a>
+      <nav><a href="/">Open globe</a></nav>
     </header>
     <h1>Live satellite maps by country</h1>
-    <p class="meta">GEO-primary discovery · near-real-time · <code>noindex</code> until map CTAs are live on HTTPS</p>
-    <p>EarthMap country pages open focused near-real-time geostationary (GEO) satellite views on a 3D globe. Coverage depends on which GEO satellites cook for that region—Americas (GOES), Europe–Africa (Meteosat / MTG), and Asia–Pacific (Himawari, GK2A).</p>
-    <section aria-labelledby="r-Americas"><h2 id="r-Americas">Americas</h2><ul class="country-grid"><li><a href="/countries/united-states/">United States</a></li><li><a href="/countries/canada/">Canada</a></li><li><a href="/countries/mexico/">Mexico</a></li><li><a href="/countries/brazil/">Brazil</a></li><li><a href="/countries/argentina/">Argentina</a></li><li><a href="/countries/chile/">Chile</a></li><li><a href="/countries/colombia/">Colombia</a></li></ul></section><section aria-labelledby="r-Europe & Africa"><h2 id="r-Europe & Africa">Europe &amp; Africa</h2><ul class="country-grid"><li><a href="/countries/united-kingdom/">United Kingdom</a></li><li><a href="/countries/germany/">Germany</a></li><li><a href="/countries/france/">France</a></li><li><a href="/countries/italy/">Italy</a></li><li><a href="/countries/spain/">Spain</a></li><li><a href="/countries/netherlands/">Netherlands</a></li><li><a href="/countries/poland/">Poland</a></li><li><a href="/countries/turkey/">Turkey</a></li><li><a href="/countries/portugal/">Portugal</a></li><li><a href="/countries/ireland/">Ireland</a></li><li><a href="/countries/saudi-arabia/">Saudi Arabia</a></li><li><a href="/countries/united-arab-emirates/">United Arab Emirates</a></li><li><a href="/countries/south-africa/">South Africa</a></li><li><a href="/countries/egypt/">Egypt</a></li><li><a href="/countries/nigeria/">Nigeria</a></li></ul></section><section aria-labelledby="r-Asia–Pacific"><h2 id="r-Asia–Pacific">Asia–Pacific</h2><ul class="country-grid"><li><a href="/countries/japan/">Japan</a></li><li><a href="/countries/australia/">Australia</a></li><li><a href="/countries/india/">India</a></li><li><a href="/countries/south-korea/">South Korea</a></li><li><a href="/countries/china/">China</a></li><li><a href="/countries/indonesia/">Indonesia</a></li><li><a href="/countries/philippines/">Philippines</a></li><li><a href="/countries/thailand/">Thailand</a></li><li><a href="/countries/vietnam/">Vietnam</a></li><li><a href="/countries/taiwan/">Taiwan</a></li><li><a href="/countries/singapore/">Singapore</a></li><li><a href="/countries/new-zealand/">New Zealand</a></li><li><a href="/countries/malaysia/">Malaysia</a></li></ul></section>
+    <p>Interactive live satellite imagery by country: clouds and storms on a live map. Pick a country and open the view.</p>
+    <section aria-labelledby="r-A"><h2 id="r-A">A</h2><ul class="country-grid"><li><a href="/countries/afghanistan/">Afghanistan</a></li><li><a href="/countries/albania/">Albania</a></li><li><a href="/countries/algeria/">Algeria</a></li><li><a href="/countries/andorra/">Andorra</a></li><li><a href="/countries/angola/">Angola</a></li><li><a href="/countries/antigua-and-barbuda/">Antigua and Barbuda</a></li><li><a href="/countries/argentina/">Argentina</a></li><li><a href="/countries/armenia/">Armenia</a></li><li><a href="/countries/australia/">Australia</a></li><li><a href="/countries/austria/">Austria</a></li><li><a href="/countries/azerbaijan/">Azerbaijan</a></li></ul></section><section aria-labelledby="r-B"><h2 id="r-B">B</h2><ul class="country-grid"><li><a href="/countries/bahamas/">Bahamas</a></li><li><a href="/countries/bahrain/">Bahrain</a></li><li><a href="/countries/bangladesh/">Bangladesh</a></li><li><a href="/countries/barbados/">Barbados</a></li><li><a href="/countries/belarus/">Belarus</a></li><li><a href="/countries/belgium/">Belgium</a></li><li><a href="/countries/belize/">Belize</a></li><li><a href="/countries/benin/">Benin</a></li><li><a href="/countries/bhutan/">Bhutan</a></li><li><a href="/countries/bolivia/">Bolivia</a></li><li><a href="/countries/bosnia-and-herzegovina/">Bosnia and Herzegovina</a></li><li><a href="/countries/botswana/">Botswana</a></li><li><a href="/countries/brazil/">Brazil</a></li><li><a href="/countries/brunei/">Brunei</a></li><li><a href="/countries/bulgaria/">Bulgaria</a></li><li><a href="/countries/burkina-faso/">Burkina Faso</a></li><li><a href="/countries/burundi/">Burundi</a></li></ul></section><section aria-labelledby="r-C"><h2 id="r-C">C</h2><ul class="country-grid"><li><a href="/countries/cabo-verde/">Cabo Verde</a></li><li><a href="/countries/cambodia/">Cambodia</a></li><li><a href="/countries/cameroon/">Cameroon</a></li><li><a href="/countries/canada/">Canada</a></li><li><a href="/countries/central-african-republic/">Central African Republic</a></li><li><a href="/countries/chad/">Chad</a></li><li><a href="/countries/chile/">Chile</a></li><li><a href="/countries/china/">China</a></li><li><a href="/countries/colombia/">Colombia</a></li><li><a href="/countries/comoros/">Comoros</a></li><li><a href="/countries/costa-rica/">Costa Rica</a></li><li><a href="/countries/cote-divoire/">Côte d&#x27;Ivoire</a></li><li><a href="/countries/croatia/">Croatia</a></li><li><a href="/countries/cuba/">Cuba</a></li><li><a href="/countries/cyprus/">Cyprus</a></li><li><a href="/countries/czechia/">Czechia</a></li></ul></section><section aria-labelledby="r-D"><h2 id="r-D">D</h2><ul class="country-grid"><li><a href="/countries/democratic-republic-of-the-congo/">Democratic Republic of the Congo</a></li><li><a href="/countries/denmark/">Denmark</a></li><li><a href="/countries/djibouti/">Djibouti</a></li><li><a href="/countries/dominica/">Dominica</a></li><li><a href="/countries/dominican-republic/">Dominican Republic</a></li></ul></section><section aria-labelledby="r-E"><h2 id="r-E">E</h2><ul class="country-grid"><li><a href="/countries/ecuador/">Ecuador</a></li><li><a href="/countries/egypt/">Egypt</a></li><li><a href="/countries/el-salvador/">El Salvador</a></li><li><a href="/countries/equatorial-guinea/">Equatorial Guinea</a></li><li><a href="/countries/eritrea/">Eritrea</a></li><li><a href="/countries/estonia/">Estonia</a></li><li><a href="/countries/eswatini/">Eswatini</a></li><li><a href="/countries/ethiopia/">Ethiopia</a></li></ul></section><section aria-labelledby="r-F"><h2 id="r-F">F</h2><ul class="country-grid"><li><a href="/countries/fiji/">Fiji</a></li><li><a href="/countries/finland/">Finland</a></li><li><a href="/countries/france/">France</a></li></ul></section><section aria-labelledby="r-G"><h2 id="r-G">G</h2><ul class="country-grid"><li><a href="/countries/gabon/">Gabon</a></li><li><a href="/countries/the-gambia/">The Gambia</a></li><li><a href="/countries/georgia/">Georgia</a></li><li><a href="/countries/germany/">Germany</a></li><li><a href="/countries/ghana/">Ghana</a></li><li><a href="/countries/greece/">Greece</a></li><li><a href="/countries/grenada/">Grenada</a></li><li><a href="/countries/guatemala/">Guatemala</a></li><li><a href="/countries/guinea/">Guinea</a></li><li><a href="/countries/guinea-bissau/">Guinea-Bissau</a></li><li><a href="/countries/guyana/">Guyana</a></li></ul></section><section aria-labelledby="r-H"><h2 id="r-H">H</h2><ul class="country-grid"><li><a href="/countries/haiti/">Haiti</a></li><li><a href="/countries/honduras/">Honduras</a></li><li><a href="/countries/hungary/">Hungary</a></li></ul></section><section aria-labelledby="r-I"><h2 id="r-I">I</h2><ul class="country-grid"><li><a href="/countries/iceland/">Iceland</a></li><li><a href="/countries/india/">India</a></li><li><a href="/countries/indonesia/">Indonesia</a></li><li><a href="/countries/iran/">Iran</a></li><li><a href="/countries/iraq/">Iraq</a></li><li><a href="/countries/ireland/">Ireland</a></li><li><a href="/countries/israel/">Israel</a></li><li><a href="/countries/italy/">Italy</a></li></ul></section><section aria-labelledby="r-J"><h2 id="r-J">J</h2><ul class="country-grid"><li><a href="/countries/jamaica/">Jamaica</a></li><li><a href="/countries/japan/">Japan</a></li><li><a href="/countries/jordan/">Jordan</a></li></ul></section><section aria-labelledby="r-K"><h2 id="r-K">K</h2><ul class="country-grid"><li><a href="/countries/kazakhstan/">Kazakhstan</a></li><li><a href="/countries/kenya/">Kenya</a></li><li><a href="/countries/kiribati/">Kiribati</a></li><li><a href="/countries/kuwait/">Kuwait</a></li><li><a href="/countries/kyrgyzstan/">Kyrgyzstan</a></li></ul></section><section aria-labelledby="r-L"><h2 id="r-L">L</h2><ul class="country-grid"><li><a href="/countries/laos/">Laos</a></li><li><a href="/countries/latvia/">Latvia</a></li><li><a href="/countries/lebanon/">Lebanon</a></li><li><a href="/countries/lesotho/">Lesotho</a></li><li><a href="/countries/liberia/">Liberia</a></li><li><a href="/countries/libya/">Libya</a></li><li><a href="/countries/liechtenstein/">Liechtenstein</a></li><li><a href="/countries/lithuania/">Lithuania</a></li><li><a href="/countries/luxembourg/">Luxembourg</a></li></ul></section><section aria-labelledby="r-M"><h2 id="r-M">M</h2><ul class="country-grid"><li><a href="/countries/madagascar/">Madagascar</a></li><li><a href="/countries/malawi/">Malawi</a></li><li><a href="/countries/malaysia/">Malaysia</a></li><li><a href="/countries/maldives/">Maldives</a></li><li><a href="/countries/mali/">Mali</a></li><li><a href="/countries/malta/">Malta</a></li><li><a href="/countries/marshall-islands/">Marshall Islands</a></li><li><a href="/countries/mauritania/">Mauritania</a></li><li><a href="/countries/mauritius/">Mauritius</a></li><li><a href="/countries/mexico/">Mexico</a></li><li><a href="/countries/micronesia/">Micronesia</a></li><li><a href="/countries/moldova/">Moldova</a></li><li><a href="/countries/monaco/">Monaco</a></li><li><a href="/countries/mongolia/">Mongolia</a></li><li><a href="/countries/montenegro/">Montenegro</a></li><li><a href="/countries/morocco/">Morocco</a></li><li><a href="/countries/mozambique/">Mozambique</a></li><li><a href="/countries/myanmar/">Myanmar</a></li></ul></section><section aria-labelledby="r-N"><h2 id="r-N">N</h2><ul class="country-grid"><li><a href="/countries/namibia/">Namibia</a></li><li><a href="/countries/nauru/">Nauru</a></li><li><a href="/countries/nepal/">Nepal</a></li><li><a href="/countries/netherlands/">Netherlands</a></li><li><a href="/countries/new-zealand/">New Zealand</a></li><li><a href="/countries/nicaragua/">Nicaragua</a></li><li><a href="/countries/niger/">Niger</a></li><li><a href="/countries/nigeria/">Nigeria</a></li><li><a href="/countries/north-korea/">North Korea</a></li><li><a href="/countries/north-macedonia/">North Macedonia</a></li><li><a href="/countries/norway/">Norway</a></li></ul></section><section aria-labelledby="r-O"><h2 id="r-O">O</h2><ul class="country-grid"><li><a href="/countries/oman/">Oman</a></li></ul></section><section aria-labelledby="r-P"><h2 id="r-P">P</h2><ul class="country-grid"><li><a href="/countries/pakistan/">Pakistan</a></li><li><a href="/countries/palau/">Palau</a></li><li><a href="/countries/palestine/">Palestine</a></li><li><a href="/countries/panama/">Panama</a></li><li><a href="/countries/papua-new-guinea/">Papua New Guinea</a></li><li><a href="/countries/paraguay/">Paraguay</a></li><li><a href="/countries/peru/">Peru</a></li><li><a href="/countries/philippines/">Philippines</a></li><li><a href="/countries/poland/">Poland</a></li><li><a href="/countries/portugal/">Portugal</a></li></ul></section><section aria-labelledby="r-Q"><h2 id="r-Q">Q</h2><ul class="country-grid"><li><a href="/countries/qatar/">Qatar</a></li></ul></section><section aria-labelledby="r-R"><h2 id="r-R">R</h2><ul class="country-grid"><li><a href="/countries/republic-of-the-congo/">Republic of the Congo</a></li><li><a href="/countries/romania/">Romania</a></li><li><a href="/countries/russia/">Russia</a></li><li><a href="/countries/rwanda/">Rwanda</a></li></ul></section><section aria-labelledby="r-S"><h2 id="r-S">S</h2><ul class="country-grid"><li><a href="/countries/saint-kitts-and-nevis/">Saint Kitts and Nevis</a></li><li><a href="/countries/saint-lucia/">Saint Lucia</a></li><li><a href="/countries/saint-vincent-and-the-grenadines/">Saint Vincent and the Grenadines</a></li><li><a href="/countries/samoa/">Samoa</a></li><li><a href="/countries/san-marino/">San Marino</a></li><li><a href="/countries/sao-tome-and-principe/">São Tomé and Príncipe</a></li><li><a href="/countries/saudi-arabia/">Saudi Arabia</a></li><li><a href="/countries/senegal/">Senegal</a></li><li><a href="/countries/serbia/">Serbia</a></li><li><a href="/countries/seychelles/">Seychelles</a></li><li><a href="/countries/sierra-leone/">Sierra Leone</a></li><li><a href="/countries/singapore/">Singapore</a></li><li><a href="/countries/slovakia/">Slovakia</a></li><li><a href="/countries/slovenia/">Slovenia</a></li><li><a href="/countries/solomon-islands/">Solomon Islands</a></li><li><a href="/countries/somalia/">Somalia</a></li><li><a href="/countries/south-africa/">South Africa</a></li><li><a href="/countries/south-korea/">South Korea</a></li><li><a href="/countries/south-sudan/">South Sudan</a></li><li><a href="/countries/spain/">Spain</a></li><li><a href="/countries/sri-lanka/">Sri Lanka</a></li><li><a href="/countries/sudan/">Sudan</a></li><li><a href="/countries/suriname/">Suriname</a></li><li><a href="/countries/sweden/">Sweden</a></li><li><a href="/countries/switzerland/">Switzerland</a></li><li><a href="/countries/syria/">Syria</a></li></ul></section><section aria-labelledby="r-T"><h2 id="r-T">T</h2><ul class="country-grid"><li><a href="/countries/taiwan/">Taiwan</a></li><li><a href="/countries/tajikistan/">Tajikistan</a></li><li><a href="/countries/tanzania/">Tanzania</a></li><li><a href="/countries/thailand/">Thailand</a></li><li><a href="/countries/timor-leste/">Timor-Leste</a></li><li><a href="/countries/togo/">Togo</a></li><li><a href="/countries/tonga/">Tonga</a></li><li><a href="/countries/trinidad-and-tobago/">Trinidad and Tobago</a></li><li><a href="/countries/tunisia/">Tunisia</a></li><li><a href="/countries/turkey/">Turkey</a></li><li><a href="/countries/turkmenistan/">Turkmenistan</a></li><li><a href="/countries/tuvalu/">Tuvalu</a></li></ul></section><section aria-labelledby="r-U"><h2 id="r-U">U</h2><ul class="country-grid"><li><a href="/countries/uganda/">Uganda</a></li><li><a href="/countries/ukraine/">Ukraine</a></li><li><a href="/countries/united-arab-emirates/">United Arab Emirates</a></li><li><a href="/countries/united-kingdom/">United Kingdom</a></li><li><a href="/countries/united-states/">United States</a></li><li><a href="/countries/uruguay/">Uruguay</a></li><li><a href="/countries/uzbekistan/">Uzbekistan</a></li></ul></section><section aria-labelledby="r-V"><h2 id="r-V">V</h2><ul class="country-grid"><li><a href="/countries/vanuatu/">Vanuatu</a></li><li><a href="/countries/vatican-city/">Vatican City</a></li><li><a href="/countries/venezuela/">Venezuela</a></li><li><a href="/countries/vietnam/">Vietnam</a></li></ul></section><section aria-labelledby="r-Y"><h2 id="r-Y">Y</h2><ul class="country-grid"><li><a href="/countries/yemen/">Yemen</a></li></ul></section><section aria-labelledby="r-Z"><h2 id="r-Z">Z</h2><ul class="country-grid"><li><a href="/countries/zambia/">Zambia</a></li><li><a href="/countries/zimbabwe/">Zimbabwe</a></li></ul></section>
     <div class="ad-slot"><!-- ad slot: standard content page --></div>
-    <footer class="footer">Imagery tips from <code>sat.disasterdb.com/geocolor</code>. History “up to ~30 days” is a product hook; actual depth is pipeline-dependent.</footer>
+    <footer class="footer"><a href="/">Globe</a></footer>
   </main>
 </body>
 </html>
