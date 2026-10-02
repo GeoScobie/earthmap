@@ -87,15 +87,15 @@ export const SAT_ONLY_OUTLINE_IDS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Basemap selection (topo default — Rob OK 2026-09)
+// Basemap selection (satellite default on load)
 //
 // Ids:
-//   'disasterdb-topo'   Prod default — cartographic topo / Mapbox-Outdoors feel
-//                       via @protomaps/basemaps layers() + custom Flavor.
-//                       Own R2 PMTiles only.
-//   'satellite'         Blue Marble (+ optional Sentinel/AWS) + Protomaps
-//                       vector overlays. Still available via basemap switcher /
-//                       ?basemap=disasterdb-topo to force topo.
+//   'satellite'         Prod default — near-time GeoColor over Protomaps.
+//                       Ocean/land fills stay under the rasters (style.js).
+//                       ?basemap=disasterdb-topo still forces topo.
+//   'disasterdb-topo'   Cartographic topo / Mapbox-Outdoors feel via
+//                       @protomaps/basemaps layers() + custom Flavor.
+//                       Own R2 PMTiles only. Not the load default.
 //   'disasterdb-light'  Stub — stock Protomaps light Flavor path (same wiring).
 //   'disasterdb-dark'   Stub — stock Protomaps dark Flavor path (same wiring).
 //

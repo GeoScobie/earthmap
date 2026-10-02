@@ -224,7 +224,7 @@ function panels(map) {
   });
   $('closeAboutPanel')?.addEventListener('click', () => aboutPanel?.classList.remove('active'));
 
-  // Topo (Protomaps) ↔ NASA near-time (Blue Marble + GeoColor) — not globe/flat.
+  // Cold-start basemap (satellite default). Topo ↔ sat toolbar toggle removed.
   wireBasemapToggle(map);
 
   // Reset view (closing search keeps banner chrome tidy — FireMap SoT).

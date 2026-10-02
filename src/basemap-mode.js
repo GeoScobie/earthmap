@@ -182,14 +182,15 @@ export function cyclePrimaryBasemap(map) {
 }
 
 export function wireBasemapToggle(map) {
+  // Honour cold-start mode (URL / theme). Satellite is the load default.
+  // The topo ↔ sat toolbar button was removed; ?basemap= still overrides.
+  applyBasemapMode(map, resolveBasemapId());
   const btn = document.getElementById('basemapBtn');
   if (!btn || btn.dataset.basemapWired) return;
   btn.dataset.basemapWired = '1';
   btn.addEventListener('click', () => {
     cyclePrimaryBasemap(map);
   });
-  // Honour cold-start mode (URL / theme).
-  applyBasemapMode(map, resolveBasemapId());
 }
 
 export { isSatelliteBasemap, setRuntimeBasemapId } from './basemap-resolve.js';

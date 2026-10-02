@@ -21,7 +21,7 @@ import {
 import { sharedDemTilesUrl, contourTilesUrl } from './contour-dem.js';
 
 // ---------------------------------------------------------------------------
-// buildStyle() — cartographic topo (prod default) or satellite hybrid.
+// buildStyle() — satellite (prod default) or cartographic topo hybrid.
 // Cartographic modes use @protomaps/basemaps layers() + DisasterDB Flavor,
 // then splice white ADM borders + Lexend place/POI/water labels.
 // See docs/PR_DISASTERDB_TOPO.md.
@@ -801,8 +801,17 @@ function buildCartographicStyle(basemapId, opts = {}) {
   }
 
   if (useContours) {
-    // Isolines after water / before roads — readable over land fills + shade.
-    const roadsAt = base.findIndex((l) => String(l.id).startsWith('roads_'));
+    // Isolines after ocean/land fills, before the road stack that should read
+    // over imagery. GeoColor inserts immediately under contour-lines
+    // (goes.js beforeId). Protomaps paints roads_runway / roads_taxiway
+    // BEFORE the `water` fill — splicing contours at the first roads_* id
+    // put that ocean fill (and hillshade) ON TOP of the sat rasters.
+    const UNDER_SAT_RE =
+      /^(background|earth|landcover|landuse_|water$|water_stream|water_river|buildings|hillshade)/;
+    let insertAt = 0;
+    for (let i = 0; i < base.length; i++) {
+      if (UNDER_SAT_RE.test(base[i].id)) insertAt = i + 1;
+    }
     const contourLayers = [
       {
         id: 'contour-lines',
@@ -845,8 +854,7 @@ function buildCartographicStyle(basemapId, opts = {}) {
         }
       }
     ];
-    if (roadsAt >= 0) base.splice(roadsAt, 0, ...contourLayers);
-    else base.push(...contourLayers);
+    base.splice(insertAt, 0, ...contourLayers);
   }
 
   // roads-simple: same planet PMTiles as roads_*; thin grey FireMap look over

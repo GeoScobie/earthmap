@@ -1067,8 +1067,10 @@ export async function fetchGoesEastDefaultTime() {
 }
 
 function beforeId(map) {
-  // Prefer contour-lines so GeoColor sits under isolines at low zoom (sat-live
-  // OSM basemap + hillshade under imagery). Then roads-simple / coast/ADM.
+  // Prefer contour-lines so GeoColor sits under isolines at low zoom.
+  // contour-lines is spliced AFTER water/earth/landcover/landuse/buildings
+  // (style.js) — inserting here keeps those fills UNDER the sat rasters.
+  // Fallback: roads-simple / coast/ADM, which are also above the fills.
   if (map.getLayer(CONTOUR_LINES_LAYER_ID)) return CONTOUR_LINES_LAYER_ID;
   if (map.getLayer(SAT_ROADS_LAYER_ID)) return SAT_ROADS_LAYER_ID;
   if (map.getLayer(BOUNDARY_BEFORE_ID)) return BOUNDARY_BEFORE_ID;

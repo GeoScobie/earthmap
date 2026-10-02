@@ -94,6 +94,8 @@ export async function fetchGeocolorTimes() {
 }
 
 function beforeId(map) {
+  // contour-lines sits above ocean/land fills (style.js), so this keeps
+  // the mosaic under isolines and above the vector water fill.
   if (map.getLayer(CONTOUR_LINES_LAYER_ID)) return CONTOUR_LINES_LAYER_ID;
   if (map.getLayer(SAT_ROADS_LAYER_ID)) return SAT_ROADS_LAYER_ID;
   if (map.getLayer(BOUNDARY_BEFORE_ID)) return BOUNDARY_BEFORE_ID;
