@@ -1,29 +1,29 @@
-# EarthMap (`earthmap.live`)
+# EarthMap
 
-GEO-primary **live satellite map on a 3D globe** — fast-track MVP for clicks.
+GEO-primary **live satellite map on a 3D globe** — lean MVP (App experiment).
 
-**Status:** private repo; country pages `noindex,follow` until the live map CTA is proven on HTTPS.
+**Live (GitHub Pages):** https://geoscobie.github.io/earthmap/
 
 ## What ships
 
-- `/` — MapLibre GL globe + GeoColor XYZ from `https://sat.disasterdb.com/geocolor/...`
-  - Layers: `gk2a`, `meteosat`, `goes-east`, `goes-west` (Himawari omitted while tip parked)
+- MapLibre GL globe + GeoColor XYZ from `https://sat.disasterdb.com/geocolor/...`
+  - Layers: `gk2a`, `meteosat`, `goes-east`, `goes-west`
   - Tip from `latest.json`, refreshed every 60s
   - Deep-link: `?lng=&lat=&zoom=`
-- `/countries/` + 35 Tier-1 country landings (from `/workspace/earthmap-seo-draft`)
+- **Sat-live basemap (ported from App #114):** Protomaps OSM carto (DisasterDB planet PMTiles) + Mapterhorn Terrarium **hillshade** (all zooms) + **maplibre-contour** isolines from **z4** (labels z9), with GeoColor inserted under `contour-lines`
+- Country landings under `/countries/` (noindex until proven)
 - No FireMap / wildfire chrome
 
-## Not in this MVP
+## Stack
 
-- Soft seam protocols / dual-route west family (App `goes.js` stays untouched)
-- Scrubber / animation / wind
-- Ad network wiring (placeholder only)
-- Fork-path widget
+Vite + MapLibre 5.6 + `pmtiles` + `@protomaps/basemaps` + `maplibre-contour`
+
+```bash
+npm install
+npm run dev      # http://localhost:5174/earthmap/
+npm run build    # dist/ for Pages
+```
 
 ## Deploy
 
-See `DEPLOY.md`. Pattern mirrors `disasterdb/firemap-live` Hostinger FTP.
-
-## Repo home
-
-Created as `GeoScobie/earthmap` (gh auth). Prefer transfer/recreate under `disasterdb/earthmap` when that account can create repos.
+See `DEPLOY.md`. GitHub Actions → Pages is the default path.

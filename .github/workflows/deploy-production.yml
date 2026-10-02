@@ -1,8 +1,9 @@
-name: Deploy production
+name: Deploy production (FTP — superseded)
+
+# Hostinger FTP blocked / not wired. Prefer GitHub Pages (pages.yml).
+# Kept for optional future earthmap.live cutover once Hostinger is ready.
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -15,21 +16,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare publish folder
-        run: |
-          set -euo pipefail
-          rm -rf publish
-          mkdir -p publish
-          shopt -s dotglob nullglob
-          for item in *; do
-            case "$item" in
-              .git|.github|publish|DEPLOY.md|README.md|tools|seo-notes) continue ;;
-            esac
-            cp -a "$item" publish/
-          done
-          # keep .htaccess
-          echo "Publish size:"; du -sh publish
-          find publish -type f | wc -l
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install + build (root base for custom domain)
+        env:
+          VITE_BASE: /
+        run: npm ci && npm run build
 
       - name: Deploy to earthmap.live (FTP)
         env:
@@ -39,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${FTP_SERVER:-}" ] || [ -z "${FTP_USERNAME:-}" ] || [ -z "${FTP_PASSWORD:-}" ]; then
-            echo "::error::Missing PROD_FTP_* secrets — attach Hostinger website + FTP first (see DEPLOY.md)"
+            echo "::error::Missing PROD_FTP_* secrets — use GitHub Pages (pages.yml) instead"
             exit 1
           fi
           sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
@@ -47,10 +43,7 @@ jobs:
           set ftp:ssl-allow false
           set ftp:passive-mode true
           set cmd:fail-exit yes
-          pwd
-          ls -la
-          mirror -R --verbose --ignore-time publish/ .
-          ls -la
+          mirror -R --verbose --ignore-time dist/ .
           bye
           LFTP
           echo "Deployed EarthMap @${GITHUB_SHA::7} -> earthmap.live"

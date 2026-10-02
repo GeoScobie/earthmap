@@ -11,7 +11,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
-  <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
   <link href="/css/earthmap.css" rel="stylesheet" />
 </head>
 <body>
@@ -20,19 +19,18 @@
     <div class="brand">
       <div>
         <h1>EarthMap</h1>
-        <div class="tag">GEO satellite · 3D globe</div>
+        <div class="tag">GEO satellite · OSM · hillshade · 3D globe</div>
       </div>
     </div>
     <div class="stamp" id="tip-stamp">loading tip…</div>
   </div>
   <nav class="nav-dock" aria-label="Site">
-    <a href="/countries/">Countries</a>
-    <a href="/countries/united-states/">United States</a>
-    <a href="/countries/united-kingdom/">United Kingdom</a>
-    <a href="/countries/japan/">Japan</a>
+    <a data-em-path="countries/">Countries</a>
+    <a data-em-path="countries/united-states/">United States</a>
+    <a data-em-path="countries/united-kingdom/">United Kingdom</a>
+    <a data-em-path="countries/japan/">Japan</a>
     <span style="color:var(--muted)">Deep-link: ?lng=&amp;lat=&amp;zoom=</span>
   </nav>
-  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
-  <script src="/js/earthmap.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

@@ -1,41 +1,27 @@
-# Deploy — earthmap.live
+# Deploy — EarthMap
 
-## Preferred pattern (same as firemap.live / app.disasterdb.com)
+## Primary: GitHub Pages (Actions)
 
-Hostinger shared hosting + GitHub Actions `lftp` mirror.
+Workflow: `.github/workflows/pages.yml`
 
-### 1) Unpark / attach website
+- Push to `main` (or **Actions → Deploy GitHub Pages → Run workflow**)
+- Build: Vite static (`VITE_BASE=/earthmap/`) → `actions/upload-pages-artifact` → `deploy-pages`
+- Live URL: **https://geoscobie.github.io/earthmap/**
 
-`earthmap.live` currently resolves to Hostinger parked (`2.57.91.91`, hcdn “Parked Domain”).
+Repo settings (one-time):
 
-In hPanel:
-1. Add website / addon domain `earthmap.live` on an active hosting order (same plan family as firemap if available).
-2. Confirm document root (typically `…/earthmap.live/public_html` or account root — match firemap quirk docs).
-3. Create an FTP user rooted at that public_html (e.g. `u….earthmap`).
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions**
+2. Private repo Pages requires GitHub Pro (or make the repo public)
 
-### 2) GitHub Actions secrets (this repo)
+Custom domain later: set Pages custom domain + rebuild with `VITE_BASE=/`.
 
-| Secret | Example |
-|--------|---------|
-| `PROD_FTP_SERVER` | FTP host / IP (firemap uses `ftp.firemap.live` or IP) |
-| `PROD_FTP_USERNAME` | Hostinger FTP user for earthmap.live |
-| `PROD_FTP_PASSWORD` | FTP password |
+## Optional: Hostinger FTP (`earthmap.live`)
 
-Workflow: `.github/workflows/deploy-production.yml` (workflow_dispatch + push to `main`).
+`.github/workflows/deploy-production.yml` — `workflow_dispatch` only. Needs `PROD_FTP_*` secrets. Prefer Pages until Hostinger FTP works.
 
-### 3) DNS
+## Smoke
 
-Keep Hostinger nameservers (or point A/`@` and `www` at the hosting IP once the site exists).
-HTTPS: Hostinger auto-SSL once the website is attached (parked page already answers TLS).
-
-### Fast-track alternatives (if FTP not ready)
-
-- **Cloudflare Pages** or **GitHub Pages** on a temporary host, then CNAME `earthmap.live` — only if you’re willing to move DNS off parked Hostinger.
-- Manual zip upload via hPanel File Manager into public_html.
-
-## Smoke after deploy
-
-1. `https://earthmap.live/` shows globe + tip stamp (not parked page).
-2. Tiles load from `sat.disasterdb.com` (CORS already open for public GeoColor).
-3. `/countries/united-states/` CTA → `/?lng=-98.5&lat=39.8&zoom=4` centers CONUS.
-4. Confirm `noindex` still present until Rob flips indexing.
+1. Globe loads with OSM fills + hillshade under GeoColor
+2. Contour lines from ~z4; labels from ~z9
+3. Tip stamp refreshes from `sat.disasterdb.com/geocolor/latest.json`
+4. `/earthmap/countries/united-states/` CTA deep-links into the globe
