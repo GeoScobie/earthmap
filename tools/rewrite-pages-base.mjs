@@ -31,7 +31,7 @@ for (const file of files) {
   const before = html;
   // /css/... and /icons/... → /earthmap/css|icons/...
   html = html.replace(
-    /(href|src)="\/(?!\/)((?:css|icons)\/[^"]*)"/g,
+    /(href|src)="\/(?!\/)((?:css|icons|js)\/[^"]*)"/g,
     `$1="${base}$2"`
   );
   // href="/" and href="/countries/..." but not //cdn

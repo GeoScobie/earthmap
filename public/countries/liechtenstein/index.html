@@ -51,15 +51,41 @@
     ]
   }
   </script>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59Q4Q2L53N"></script>
+  <!-- Consent Mode v2 defaults, then Google tag (gtag.js). Banner: /js/consent.js -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'analytics_storage': 'denied',
+      'region': ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH']
+    });
+    gtag('consent', 'default', {
+      'ad_storage': 'granted',
+      'ad_user_data': 'granted',
+      'ad_personalization': 'granted',
+      'analytics_storage': 'granted'
+    });
+    try {
+      var emc = localStorage.getItem('em_consent_v2');
+      if (emc === 'granted' || emc === 'denied') {
+        gtag('consent', 'update', {
+          'ad_storage': emc,
+          'ad_user_data': emc,
+          'ad_personalization': emc,
+          'analytics_storage': emc
+        });
+      }
+    } catch (e) {}
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59Q4Q2L53N"></script>
+  <script>
     gtag('js', new Date());
-
     gtag('config', 'G-59Q4Q2L53N');
   </script>
+  <script src="/js/consent.js" defer></script>
 
 </head>
 <body>
@@ -70,7 +96,8 @@
     </header>
     <h1>Liechtenstein live satellite map</h1>
     <p>Interactive live satellite imagery of Liechtenstein. Liechtenstein is a small landlocked Alpine country on the upper Rhine.</p>
-    <p><a class="cta" href="/#10/47.2/9.5">Open Liechtenstein on EarthMap</a></p>
+    <div class="map-embed"><iframe title="Liechtenstein live satellite map" src="https://earthmap.live/?embed=1#7.5/47.2/9.5" loading="lazy"></iframe></div>
+    <p><a class="cta" href="/">Open globe</a></p>
     <div class="ad-slot"><!-- ad slot: standard content page --></div>
     <footer class="footer"><a href="/countries/">All countries</a> · <a href="/">Globe</a></footer>
   </main>

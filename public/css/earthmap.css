@@ -286,6 +286,9 @@ a:hover { text-decoration: underline; }
   border-radius: 10px; text-decoration: none !important;
 }
 .cta:hover { filter: brightness(1.06); }
+.map-embed { margin: 16px 0 8px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #061018; }
+.map-embed iframe { display: block; width: 100%; height: 480px; border: 0; }
+
 .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px 16px; padding: 0; list-style: none; }
 .country-grid a { color: var(--text); }
 .country-grid a:hover { color: var(--teal); }
