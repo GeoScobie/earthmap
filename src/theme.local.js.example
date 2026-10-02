@@ -1,0 +1,21 @@
+// Copy to theme.local.js (gitignored). Restrict referers to https://app.disasterdb.com + localhost.
+export const awsLocation = { apiKey: '' };
+
+// Owned GeoColor CDN (Path B stub). Live East is already wired via goesEast
+// in theme.js (sat.disasterdb.com). Path B product toggle stays off unless:
+// export const geocolor = {
+//   baseUrl: 'https://sat.disasterdb.com',
+//   pathPrefix: '/geocolor/goes-east',
+//   enabled: true
+// };
+
+// --- Basemap QA (optional) -------------------------------------------------
+// theme.local.js is NOT auto-imported yet. Prefer either:
+//   - ?basemap=disasterdb-topo on the URL (contours + hillshade ON; &hillshade=0 to disable), or
+//   - flip basemapId in theme.js for a local rebuild.
+// When local merge is wired, you could export:
+//   export const basemapId = 'disasterdb-topo';
+//   export const hillshadeEnabled = true; // light/dark stubs only; topo defaults ON
+
+// Geocoder URL is not theme.local — use .env / VITE_GEOCODER_URL (see .env.example).
+// Default: https://geocode.disasterdb.com

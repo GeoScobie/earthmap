@@ -3580,7 +3580,7 @@ export async function addGoesGeocolorLayers(map) {
   paintTransportMeta(map);
   if (transportShouldShow()) startTransportAgeTicker();
   // Settle: prime/rebuild may race mount; re-assert latest tip + tiles once.
-  Promise.resolve().then(() => {
+  queue.resolve().then(() => {
     if (goesUiState !== state || !goesUiMap) return;
     if (gkUserDragging || gkPlaying || gkBuffering) return;
     gkIntentionalScrub = false;

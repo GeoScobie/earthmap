@@ -2,74 +2,283 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex,follow" />
-  <meta name="description" content="Near-real-time geostationary satellite views of Earth on a 3D globe. EarthMap — GEO-primary imagery with country discovery pages." />
-  <meta name="theme-color" content="#0a1628" />
-  <link rel="canonical" href="https://earthmap.live/" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/icons/earthmap-mark-32.png" />
-  <link rel="icon" type="image/png" sizes="64x64" href="/icons/earthmap-mark-64.png" />
-  <link rel="apple-touch-icon" href="/icons/earthmap-mark-180.png" />
-  <title>EarthMap — Live Satellite Globe</title>
-  <link rel="preconnect" href="https://sat.disasterdb.com" crossorigin />
-  <link rel="preconnect" href="https://geocode.disasterdb.com" crossorigin />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2b2b2b" />
+  <title>EarthMap — Global Wildfire Map</title>
+
+  <link rel="icon" href="/icons/earthmap-mark-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="/icons/earthmap-mark-64.png" type="image/png" sizes="64x64" />
+  <link rel="apple-touch-icon" href="/icons/earthmap-mark-180.png" sizes="180x180" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
-  <link href="/css/earthmap.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
+  <!-- Lexend for chrome and headings, Nunito for panel body text — same pair
+       as firemap.live. Map LABELS come from self-hosted SDF glyphs (see
+       theme.js), which is a separate system from these web fonts. -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&family=JetBrains+Mono:wght@400&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- FireMap parity: FA Free 6.6.0 solid webfont subset (fa-hurricane / f751) -->
+  <link href="/vendor/fontawesome/css/fa-hurricane-only.css" rel="stylesheet" />
+
 </head>
 <body>
-  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
-    <symbol id="i-play" viewBox="0 0 384 512"><path fill="currentColor" d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></symbol>
-    <symbol id="i-pause" viewBox="0 0 320 512"><path fill="currentColor" d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"/></symbol>
+  <!-- Embed FOUC guard: apply html/body.embed-mode before CSS paints chrome.
+       Mirrors src/embed.js resolveEmbedMode (?embed=1|true|yes|on|bare).
+       Forced fire name: ?fireLabel=… (alias ?label=) + optional ?fire= (fire_id_source) — see src/embed-fire-label.js. -->
+  <script>
+  (function () {
+    try {
+      var p = new URLSearchParams(location.search);
+      if (!p.has('embed')) return;
+      var v = String(p.get('embed') || '').toLowerCase();
+      if (v === '0' || v === 'false' || v === 'no' || v === 'off') return;
+      if (v === '' || v === '1' || v === 'true' || v === 'yes' || v === 'on') {
+        document.documentElement.classList.add('embed-mode');
+        document.body.classList.add('embed-mode');
+      }
+    } catch (e) { /* ignore */ }
+  })();
+  </script>
+
+
+  <!-- Inline SVG icon defs. The original pulls the whole Font Awesome kit
+       (29 MB) for these nine glyphs; these are the equivalent paths. -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-layers" viewBox="0 0 576 512"><path d="M264.5 5.2c14.9-6.9 32.1-6.9 47 0l218.6 101c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 149.8C37.4 145.8 32 137.3 32 128s5.4-17.9 13.9-21.8L264.5 5.2zM476.9 209.6l53.2 24.6c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 277.8C37.4 273.8 32 265.3 32 256s5.4-17.9 13.9-21.8l53.2-24.6 152 70.2c23.4 10.8 50.4 10.8 73.8 0l152-70.2zm-152 198.2l152-70.2 53.2 24.6c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 405.8C37.4 401.8 32 393.3 32 384s5.4-17.9 13.9-21.8l53.2-24.6 152 70.2c23.4 10.8 50.4 10.8 73.8 0z"/></symbol>
+    <symbol id="i-satellite" viewBox="0 0 512 512"><path d="M233 7c-9.4-9.4-24.6-9.4-33.9 0l-96 96c-9.4 9.4-9.4 24.6 0 33.9l89.4 89.4-15.5 15.5C152.3 230.4 124.9 224 96 224c-31.7 0-61.5 7.7-87.8 21.2c-9 4.7-10.3 16.7-3.1 23.8L112.7 376.7 96.3 393.1c-2.6-.7-5.4-1.1-8.3-1.1c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32c0-2.9-.4-5.6-1.1-8.3l16.4-16.4L242.9 506.9c7.2 7.2 19.2 5.9 23.8-3.1C280.3 477.5 288 447.7 288 416c0-28.9-6.4-56.3-17.8-80.9l15.5-15.5L375 409c9.4 9.4 24.6 9.4 33.9 0l96-96c9.4-9.4 9.4-24.6 0-33.9l-89.4-89.4 55-55c12.5-12.5 12.5-32.8 0-45.3l-48-48c-12.5-12.5-32.8-12.5-45.3 0l-55 55L233 7zm159 351l-72.4-72.4 62.1-62.1L454.1 296 392 358.1zM226.3 192.4L153.9 120 216 57.9l72.4 72.4-62.1 62.1z"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 512 512"><path d="M288 120c0-30.9 25.1-56 56-56s56 25.1 56 56c0 5.5-4.5 10-10 10s-10-4.5-10-10c0-19.9-16.1-36-36-36s-36 16.1-36 36v8H464c8.8 0 16 7.2 16 16s-7.2 16-16 16H280c-13.3 0-24-10.7-24-24V120zM32 192c-8.8 0-16 7.2-16 16s7.2 16 16 16H208c13.3 0 24 10.7 24 24v8c0 30.9-25.1 56-56 56s-56-25.1-56-56c0-5.5-4.5-10-10-10s-10 4.5-10 10c0 41.9 34.1 76 76 76s76-34.1 76-76v-8c0-30.9-25.1-56-56-56H32zm0 160c-8.8 0-16 7.2-16 16s7.2 16 16 16H336c13.3 0 24 10.7 24 24v8c0 30.9-25.1 56-56 56s-56-25.1-56-56c0-5.5-4.5-10-10-10s-10 4.5-10 10c0 41.9 34.1 76 76 76s76-34.1 76-76v-8c0-30.9-25.1-56-56-56H32z"/></symbol>
+    <symbol id="i-map" viewBox="0 0 576 512"><path d="M384 476.1L192 421.2V35.9L384 90.8V476.1zm32-1.2V88.4L543.1 37.5c15.8-6.3 32.9 5.3 32.9 22.3V394.6c0 9.8-6 18.6-15.1 22.3L416 474.8zM15.1 95.1L160 37.2V423.6L32.9 474.5C17.1 480.8 0 469.2 0 452.2V117.4c0-9.8 6-18.6 15.1-22.3z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></symbol>
+    <symbol id="i-locate" viewBox="0 0 512 512"><path d="M256 0c17.7 0 32 14.3 32 32V66.7C378.1 80.8 431.2 133.9 445.3 224H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H445.3C431.2 378.1 378.1 431.2 288 445.3V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V445.3C133.9 431.2 80.8 378.1 66.7 288H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H66.7C80.8 133.9 133.9 80.8 224 66.7V32c0-17.7 14.3-32 32-32zM128 256a128 128 0 1 0 256 0 128 128 0 1 0-256 0zm128-80a80 80 0 1 1 0 160 80 80 0 1 1 0-160z"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 512 512"><path d="M177.9 494.1c-18.7 18.7-49.1 18.7-67.9 0L17.9 401.9c-18.7-18.7-18.7-49.1 0-67.9l50.7-50.7 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 41.4-41.4 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 41.4-41.4 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 41.4-41.4 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 50.7-50.7c18.7-18.7 49.1-18.7 67.9 0l92.1 92.1c18.7 18.7 18.7 49.1 0 67.9L177.9 494.1z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 576 512"><path d="M400 255.4V240 208c0-8.8-7.2-16-16-16H352 336 289.5c-50.9 0-93.9 33.5-108.3 79.6c-3.3-9.4-5.2-19.8-5.2-31.6c0-61.9 50.1-112 112-112h48 16 32c8.8 0 16-7.2 16-16V80 64.6L506 160 400 255.4zM336 240h16v48c0 17.7 14.3 32 32 32h1.1c8 0 15.6-3 21.5-8.3l152-136.6c6-5.4 9.4-13.1 9.4-21.1s-3.4-15.7-9.4-21.1L406.5 8.3C400.6 3 393 0 385.1 0H384c-17.7 0-32 14.3-32 32V80H336 288c-88.4 0-160 71.6-160 160c0 60.4 34.6 99.1 63.9 120.9c5.9 4.4 11.5 8.1 16.7 11.2c4.4 2.7 8.5 4.9 11.9 6.6c3.4 1.7 6.2 3 8.2 3.9c2.2 1 4.6 1.4 7.1 1.4h2.5c9.8 0 17.8-8 17.8-17.8c0-7.8-5.3-14.7-11.6-19.5l0 0c-.4-.3-.7-.5-1.1-.8c-1.7-1.1-3.4-2.5-5-4.1c-.8-.8-1.7-1.6-2.5-2.6s-1.6-1.9-2.4-2.9c-1.8-2.5-3.5-5.3-5-8.5c-2.6-6-4.3-13.3-4.3-22.4c0-36.1 29.3-65.5 65.5-65.5H336zM72 32C32.2 32 0 64.2 0 104V440c0 39.8 32.2 72 72 72H408c39.8 0 72-32.2 72-72V376c0-13.3-10.7-24-24-24s-24 10.7-24 24v64c0 13.3-10.7 24-24 24H72c-13.3 0-24-10.7-24-24V104c0-13.3 10.7-24 24-24h64c13.3 0 24-10.7 24-24s-10.7-24-24-24H72z"/></symbol>
+    <symbol id="i-legend" viewBox="0 0 512 512"><path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 512 512"><path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 384 512"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 320 512"><path d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 512 512"><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></symbol>
   </svg>
 
-  <div id="map" role="application" aria-label="EarthMap live satellite globe"></div>
+  <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">EarthMap — Real-Time Global Wildfire and Smoke Tracking Map</h1>
 
-  <!-- Hidden TOC checkboxes — App goes.js visibilityFromCheckbox (all ON) -->
-  <div id="emGoesGates" hidden aria-hidden="true">
-    <input type="checkbox" id="lyr-goes-east-demo" checked />
-    <input type="checkbox" id="lyr-goes-west-demo" checked />
-    <input type="checkbox" id="lyr-goes-meteosat-demo" checked />
-    <input type="checkbox" id="lyr-goes-gk2a-demo" checked />
-  </div>
-
-  <div class="chrome">
-    <div class="search-wrap" id="searchWrap">
-      <div class="search-bar" role="search">
-        <button type="button" class="logo-btn" id="logoBtn" aria-label="EarthMap — reset globe view">
-          <img class="logo-mark" src="/icons/earthmap-mark-64.png" width="64" height="64" alt="" />
-          <span class="logo-stack">
-            <span class="logo-word">EarthMap</span>
-            <!-- Tip / observation time (mirrors App transport tip stamp) -->
-            <span class="tip-clock" id="tipClock" aria-live="polite" title="Observation time of mosaic tip for map center">
-              <span class="tip-dot" aria-hidden="true"></span>
-              <span class="tip-label">LIVE</span>
-              <span class="tip-times">
-                <span class="tip-local" id="tipObsLocal">—</span>
-                <span class="tip-sep" aria-hidden="true">·</span>
-                <span class="tip-utc" id="tipObsUtc">—</span>
-                <span class="tip-sep" aria-hidden="true">·</span>
-                <span class="tip-age" id="tipObsAge">—</span>
+  <!-- Logo + live clock + banner search (one connected card; panel flush under chip) -->
+  <div class="top-left-bar" id="searchWrap">
+    <div class="ddb-banner-chip">
+      <button class="logo-box" id="logoBtn" aria-label="EarthMap — reset map view">
+        <img src="/icons/earthmap-l5-512.png" alt="" class="logo-icon" width="512" height="512">
+        <span class="logo-stack">
+          <span class="logo-wordmark">EarthMap</span>
+          <span class="live-clock" id="liveClock">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span class="live-label">LIVE</span>
+            <span class="live-clock-times">
+              <span class="clock-entry clock-entry-primary">
+                <span class="clock-time" id="clockLocalTime">--:--</span>
+                <span class="clock-zone" id="clockLocalZone">LOCAL</span>
+              </span>
+              <span class="clock-sep" aria-hidden="true">&middot;</span>
+              <span class="clock-entry clock-entry-secondary">
+                <span class="clock-time" id="clockUtcTime">--:--</span>
+                <span class="clock-zone">UTC</span>
               </span>
             </span>
           </span>
-        </button>
-        <div class="search-divider" aria-hidden="true"></div>
-        <label class="search-field">
-          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M15.5 15.5 L20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <input type="search" id="searchInput" placeholder="Search place or country…" autocomplete="off"
-            aria-label="Search place or country" aria-autocomplete="list" aria-controls="searchResults" />
-        </label>
+        </span>
+      </button>
+      <button type="button" class="search-banner-btn" id="searchBtn"
+        aria-label="Search fire name or place" aria-expanded="false" aria-controls="searchPanel"
+        title="Search">
+        <svg class="search-banner-icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <svg class="search-banner-chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+      </button>
+    </div>
+    <div id="searchPanel" class="search-banner-dropdown" role="dialog" aria-label="Search fire name or place" hidden>
+      <div class="search-banner-row">
+        <input type="search" id="searchInput" placeholder="Search fire name or place" autocomplete="off"
+          aria-label="Search fire name or place" aria-autocomplete="list" aria-controls="searchResults">
+        <button type="button" class="search-banner-close" id="closeSearchPanel" aria-label="Close search">×</button>
       </div>
-      <ul id="searchResults" class="search-results" role="listbox" aria-label="Search results" hidden></ul>
+      <ul id="searchResults" role="listbox" aria-label="Search results"></ul>
     </div>
   </div>
 
-  <!-- Bottom-right GeoColor time transport (chip ↔ expand) — same DOM ids as App -->
+  <!-- Layer list -->
+  <div id="layerListPanel" class="layer-list-panel" aria-label="Layer List">
+    <div class="panel-header">
+      <h3>Layer List</h3>
+      <button id="closeLayerList" class="close-btn" aria-label="Close Layer List">×</button>
+    </div>
+    <div class="panel-content">
+      <form id="layerListForm">
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-perimeters" checked>
+          <label for="lyr-perimeters">Fire Perimeters</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-hotspots" checked>
+          <label for="lyr-hotspots">Satellite Hotspots</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-firms" checked>
+          <label for="lyr-firms">NASA FIRMS 24h</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-usa-fires" checked>
+          <label for="lyr-usa-fires">USA Fire Points</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-canada-fires" checked>
+          <label for="lyr-canada-fires">Canada Fire Points</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-aus-fires" checked>
+          <label for="lyr-aus-fires">Australia Bushfire Points</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-europe-fires" checked>
+          <label for="lyr-europe-fires">European Fire Points</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-historical">
+          <label for="lyr-historical">Burned Areas</label>
+        </div>
+        <div class="layer-item smoke-layer-item">
+          <div class="layer-item-main-controls">
+            <input type="checkbox" id="lyr-smoke">
+            <label for="lyr-smoke">Wildfire Smoke Plume</label>
+          </div>
+          <div class="opacity-slider-container">
+            <label for="smokeOpacitySlider" class="opacity-slider-label">Opacity:</label>
+            <input type="range" id="smokeOpacitySlider" min="0" max="100" value="55" class="opacity-slider" aria-label="Smoke layer opacity">
+            <span id="smokeOpacityValue" class="opacity-value-display">55%</span>
+          </div>
+        </div>
+
+        <div class="layer-item"><input type="checkbox" id="lyr-wind" checked><label for="lyr-wind">Wind (10 m)</label></div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-goes-east-demo" checked>
+          <label for="lyr-goes-east-demo">GOES-East GeoColor</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-goes-west-demo" checked>
+          <label for="lyr-goes-west-demo">GOES-West GeoColor</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-goes-meteosat-demo" checked>
+          <label for="lyr-goes-meteosat-demo">Meteosat GeoColor</label>
+        </div>
+        <div class="layer-item" id="lyr-goes-himawari-row" hidden>
+          <input type="checkbox" id="lyr-goes-himawari-demo">
+          <label for="lyr-goes-himawari-demo">Himawari GeoColor</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-goes-gk2a-demo" checked>
+          <label for="lyr-goes-gk2a-demo">GK2A GeoColor</label>
+        </div>
+        <div class="layer-item" id="lyr-geocolor-row" hidden>
+          <input type="checkbox" id="lyr-geocolor">
+          <label for="lyr-geocolor">GeoColor (owned mosaic)</label>
+        </div>
+        <div class="layer-item"><input type="checkbox" id="lyr-roads" checked><label for="lyr-roads">Roads</label></div>
+
+        <div class="layer-item pending">
+          <input type="checkbox" disabled>
+          <label>GDACS Alerts</label>
+          <span class="pending-note">data exists — UI not ported yet</span>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-satellite" checked>
+          <label for="lyr-satellite">Satellite Tracks</label>
+        </div>
+        <div class="layer-item">
+          <input type="checkbox" id="lyr-hurricane" checked>
+          <label for="lyr-hurricane">Hurricane Tracks</label>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div id="legendPanel" class="legend-panel" aria-labelledby="legendPanelTitle">
+    <div class="panel-header">
+      <h3 id="legendPanelTitle">Map Legend</h3>
+      <button id="closeLegendPanel" class="close-btn" aria-label="Close Legend">×</button>
+    </div>
+    <div class="panel-content">
+      <h4>Fire Perimeters</h4>
+      <ul class="legend-group">
+        <li><span class="legend-color" style="background-color:#FFFF00;opacity:.45;border:1.8px solid #8B0000;"></span> Active perimeter</li>
+        <li><span class="legend-color" style="background-color:#FF5722;opacity:.45;border:1px solid #BF360C;"></span> Burned area</li>
+      </ul>
+      <h4>Satellite Detections</h4>
+      <ul class="legend-group">
+        <li><span class="legend-color" style="background-color:#D50000;"></span> 0–3 h old</li>
+        <li><span class="legend-color" style="background-color:#FF4500;"></span> 6 h</li>
+        <li><span class="legend-color" style="background-color:#FFA500;"></span> 18 h</li>
+        <li><span class="legend-color" style="background-color:#FFD996;"></span> 36 h</li>
+        <li><span class="legend-color" style="background-color:#FFF5E0;"></span> 48 h+</li>
+        <li>(Opacity and size decrease with age)</li>
+      </ul>
+      <div id="smokeLegendItemContainer">
+        <h4>Wildfire Smoke/Plume (Hourly)</h4>
+        <ul class="legend-group">
+          <li id="smokeLegendTrigger"><span class="legend-color smoke-gradient-icon"></span> Surface PM2.5 <span style="margin-left:5px;color:#ccc;">&#9432;</span></li>
+          <li>(Higher concentrations are darker)</li>
+        </ul>
+        <div id="smokeColorRampPopup" class="smoke-color-ramp-popup">
+          <div class="legend-ramp-title">PM2.5 Concentration (µg/m³)</div>
+          <div class="legend-ramp-item"><div class="color-box color-s1"></div><div>1 µg/m³</div></div>
+          <div class="legend-ramp-item"><div class="color-box color-s3"></div><div>20 µg/m³</div></div>
+          <div class="legend-ramp-item"><div class="color-box color-s5"></div><div>40 µg/m³</div></div>
+          <div class="legend-ramp-item"><div class="color-box color-s7"></div><div>60 µg/m³</div></div>
+          <div class="legend-ramp-item"><div class="color-box color-s9"></div><div>80 µg/m³</div></div>
+          <div class="legend-ramp-item"><div class="color-box color-s11"></div><div>100 µg/m³</div></div>
+          <div class="legend-ramp-item"><div class="color-box color-s13"></div><div>500 µg/m³</div></div>
+        </div>
+      </div>
+      <h4>Hurricane Tracks</h4>
+      <ul class="legend-group">
+        <li><span class="legend-color" style="background-color:#D96BE8;"></span> Category 5</li>
+        <li><span class="legend-color" style="background-color:#FF5A5A;"></span> Category 4</li>
+        <li><span class="legend-color" style="background-color:#FF8C42;"></span> Category 3</li>
+        <li><span class="legend-color" style="background-color:#FFB84D;"></span> Category 2</li>
+        <li><span class="legend-color" style="background-color:#FFE066;"></span> Category 1</li>
+        <li><span class="legend-color" style="background-color:#4DD0C7;"></span> Tropical Storm</li>
+        <li><span class="legend-color" style="background-color:#6EC1FF;"></span> Tropical Depression</li>
+        <li><span class="legend-line dashed" style="border-top-color:#FF8C42;"></span> Forecast track (dashed)</li>
+        <li><i class="fa-solid fa-hurricane" style="color:#FF5A5A;font-size:14px;text-shadow:0 0 6px currentColor;" aria-hidden="true"></i> Active storm position</li>
+      </ul>
+      <h4>Basemap</h4>
+      <ul class="legend-group">
+        <li>Imagery: Blue Marble &rarr; Amazon Location</li>
+        <li>Vector: Protomaps, self-hosted on R2</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Legacy 1h range scrubber — hidden unused; bottom transport is tip UX -->
+  <div id="geocolorTimeBar" class="geocolor-time-bar" aria-label="GeoColor time" hidden>
+    <div class="geocolor-time-head">
+      <span id="geocolorTimeLabel" class="geocolor-time-iso">—</span>
+      <button type="button" id="geocolorTimeNowBtn" class="geocolor-time-now" hidden>Latest</button>
+    </div>
+    <input type="range" id="geocolorTimeSlider" class="geocolor-time-slider"
+      min="0" max="0" value="0" step="1"
+      aria-label="GeoColor time slider (last 1 hour, test)">
+    <div class="geocolor-time-meta">
+      <span class="geocolor-time-title">GeoColor · last hour (test)</span>
+    </div>
+  </div>
+
+  <!-- Bottom-right GeoColor time transport (chip ↔ expand) -->
   <div id="goesTimeTransport" class="goes-time-transport minimized" hidden aria-label="GeoColor time — tap to expand">
     <button type="button" id="goesTimeHideBtn" class="goes-time-handle" aria-label="Hide time controls">
       Hide
@@ -84,7 +293,7 @@
       <svg class="goes-time-chip-chev" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5"/></svg>
     </button>
     <div class="goes-time-transport-expanded">
-      <button type="button" id="goesTimePlayBtn" class="goes-time-play" aria-label="Play GeoColor loop" title="Play last ~4h GeoColor (loops)" aria-pressed="false">
+      <button type="button" id="goesTimePlayBtn" class="goes-time-play" aria-label="Play GeoColor loop" title="Play last ~4h GK2A GeoColor (loops)" aria-pressed="false">
         <svg class="goes-time-play-icon goes-time-play-icon--play" aria-hidden="true"><use href="#i-play"/></svg>
         <svg class="goes-time-play-icon goes-time-play-icon--pause" aria-hidden="true" hidden><use href="#i-pause"/></svg>
         <span class="goes-time-play-icon goes-time-play-icon--spin" aria-hidden="true" hidden></span>
@@ -109,23 +318,136 @@
     </div>
   </div>
 
-  <!-- Legacy 1h range scrubber (App keeps hidden; goes.js looks it up) -->
-  <div id="geocolorTimeBar" class="geocolor-time-bar" aria-label="GeoColor time" hidden>
-    <div class="geocolor-time-head">
-      <span id="geocolorTimeLabel" class="geocolor-time-iso">—</span>
-      <button type="button" id="geocolorTimeNowBtn" class="geocolor-time-now" hidden>Latest</button>
-    </div>
-    <input type="range" id="geocolorTimeSlider" class="geocolor-time-slider"
-      min="0" max="0" value="0" step="1" aria-label="GeoColor time slider">
+  <div id="infoBox" class="info-box"></div>
+
+  <!-- Toolbar — find → drawn layers → tools → info -->
+  <div class="vertical-toolbar" aria-label="Map Toolbar">
+    <button class="toolbar-btn" id="toggleLayersBtn" aria-label="Toggle Layers" title="Toggle Layers">
+      <svg><use href="#i-layers"/></svg>
+    </button>
+    <button class="toolbar-btn" id="basemapBtn" aria-label="Change Basemap" title="Change Basemap">
+      <svg><use href="#i-map"/></svg>
+    </button>
+    <button class="toolbar-btn active" id="goesSatModeBtn" aria-label="Satellite" title="Satellite (on) — tap again to turn off (chip expands controls)" aria-pressed="true">
+      <svg><use href="#i-satellite"/></svg>
+    </button>
+    <button class="toolbar-btn" id="windBtn" aria-label="Wind" title="Wind" aria-pressed="false">
+      <svg><use href="#i-wind"/></svg>
+    </button>
+    <div class="toolbar-sep" aria-hidden="true"></div>
+    <button class="toolbar-btn" id="measureBtn" aria-label="Measure Distance" title="Measure Distance" aria-pressed="false">
+      <svg><use href="#i-ruler"/></svg>
+    </button>
+    <button class="toolbar-btn" id="shareMapBtn" aria-label="Share Map" title="Share Map">
+      <svg><use href="#i-share"/></svg>
+    </button>
+    <div class="toolbar-sep" aria-hidden="true"></div>
+    <button class="toolbar-btn" id="legendBtn" aria-label="Show Map Legend" title="Show Map Legend" aria-expanded="false">
+      <svg><use href="#i-legend"/></svg>
+    </button>
+    <button class="toolbar-btn" id="aboutBtn" aria-label="About EarthMap" title="About EarthMap">
+      <svg><use href="#i-info"/></svg>
+    </button>
   </div>
 
-  <nav class="nav-dock" aria-label="Site">
-    <a data-em-path="countries/">Countries</a>
-    <a data-em-path="countries/united-states/">United States</a>
-    <a data-em-path="countries/united-kingdom/">United Kingdom</a>
-    <a data-em-path="countries/japan/">Japan</a>
-    <span class="nav-hint">Deep-link: ?lng=&amp;lat=&amp;zoom= · ?scrub=1</span>
-  </nav>
+  <!-- Share -->
+  <div id="shareMapModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shareMapModalTitle">
+    <div class="modal-content">
+      <span class="close-btn" aria-label="Close">×</span>
+      <h2 id="shareMapModalTitle">Share Map</h2>
+      <p>Share the current map view by copying the URL below:</p>
+      <input type="text" id="shareMapURL" readonly />
+      <button id="copyURLBtn">Copy URL</button>
+    </div>
+  </div>
+
+  <!-- Measure -->
+  <div id="measurePanel" class="measure-panel" role="status" aria-live="polite" aria-label="Distance Measurement">
+    <div class="measure-readout">
+      <span class="measure-km" id="measureKm">0.00 km</span>
+      <span class="measure-sep">/</span>
+      <span class="measure-mi" id="measureMi">0.00 mi</span>
+    </div>
+    <div class="measure-hint" id="measureHint">Click the map to start measuring</div>
+    <div class="measure-actions">
+      <button type="button" class="measure-btn-sm" id="measureClearBtn">Clear</button>
+      <button type="button" class="measure-btn-sm measure-btn-done" id="measureDoneBtn">Done</button>
+    </div>
+  </div>
+
+  <!-- About -->
+  <div id="aboutPanel" class="fullscreen-panel" aria-label="About EarthMap">
+    <div class="panel-header">
+      <h2>About EarthMap</h2>
+      <button class="close-panel-btn" id="closeAboutPanel" aria-label="Close About Panel">×</button>
+    </div>
+    <div class="panel-content">
+      <h3>Disclaimer</h3>
+      <p>EarthMap provides wildfire, smoke, and related environmental data for informational and situational awareness only. Conditions change quickly; layers can be incomplete, delayed, or wrong. Do not use EarthMap as a substitute for official evacuation orders, emergency alerts, or air-quality guidance. Always verify with local authorities and official agencies. EarthMap is not liable for decisions made from this map.</p>
+
+      <h3>What EarthMap is</h3>
+      <p>EarthMap is a global wildfire tracking platform built on an entirely self-hosted map stack. It is powered by <strong>FireDB</strong>, which enhances NASA <strong>FIRMS</strong> satellite detections with authoritative agency fire points (USA / Canada / Europe / Australia), plus GeoColor (GOES-East/West, Meteosat, GK2A), North America smoke, GFS wind, burned areas, GDACS, satellite tracks, and Google DeepMind hurricane tracks. Browse incidents on <a href="https://disasterdb.com/firedb" target="_blank" rel="noopener">disasterdb.com/firedb</a>.</p>
+      <p>The basemap is served from our own infrastructure: Protomaps vector tiles on Cloudflare R2, NASA Blue Marble imagery, and self-hosted Lexend map fonts. No third-party map provider sits between you and the data.</p>
+
+      <h3>Data sources</h3>
+
+      <h4>Agency fire points</h4>
+      <ul class="about-list">
+        <li><strong>USA Fire Points</strong> — agency status; Fire Weather Index where shown.</li>
+        <li><strong>Canada Fire Points</strong> — agency status; fire danger rating where shown.</li>
+        <li><strong>European Fire Points</strong> — agency / heat footprints where shown.</li>
+        <li><strong>Australia Bushfire Points</strong> — live agency points.</li>
+      </ul>
+
+      <h4>Fire of Note</h4>
+      <p><strong>Fire of Note</strong> means an agency Fire of Note or, in North America, roughly <strong>~1,000 acres</strong> of growth in the last 24 hours. Status legend also includes Out of Control, Being Held / Under Control, and Out.</p>
+
+      <h4>Satellite hotspots</h4>
+      <ul class="about-list">
+        <li><strong>Hotspot clusters</strong> / NASA FIRMS — multi-sensor thermal points (VIIRS, MODIS, Sentinel-3 SLSTR where shown). Newer detections appear stronger; older ones fade.</li>
+      </ul>
+
+      <h4>Geostationary GeoColor</h4>
+      <ul class="about-list">
+        <li><strong>GeoColor</strong> — NOAA GOES-East, NOAA GOES-West, EUMETSAT Meteosat, KMA GK2A. Himawari may be parked — do not assume live.</li>
+      </ul>
+
+      <h4>Wildfire smoke</h4>
+      <ul class="about-list">
+        <li>Surface PM2.5 / wildfire smoke — RDAQA (Environment and Climate Change Canada); North America; BETA.</li>
+      </ul>
+
+      <h4>Wind</h4>
+      <ul class="about-list">
+        <li>Current and forecast conditions from <strong>NOAA’s global GFS</strong> model.</li>
+      </ul>
+
+      <h4>Burned Areas</h4>
+      <ul class="about-list">
+        <li><strong>Burned Areas</strong> — historical / burned-area product where shown.</li>
+      </ul>
+
+      <h4>Hurricane Tracks</h4>
+      <ul class="about-list">
+        <li>Source: <strong>Google DeepMind</strong> cyclone forecast.</li>
+      </ul>
+
+      <h4>GDACS Alerts</h4>
+      <ul class="about-list">
+        <li><a href="https://www.gdacs.org" target="_blank" rel="noopener">https://www.gdacs.org</a></li>
+      </ul>
+
+      <h4>Fire weather</h4>
+      <ul class="about-list">
+        <li><strong>Fire Weather Index</strong> (USA) is based on Copernicus / ECMWF global fire weather forecasts. Canada: fire danger rating.</li>
+      </ul>
+
+      <p id="aboutBuildStamp" class="about-build-stamp about-version" aria-live="polite" aria-label="App version"></p>
+    </div>
+  </div>
+
+  <div class="readout" id="readout" aria-live="off"></div>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
