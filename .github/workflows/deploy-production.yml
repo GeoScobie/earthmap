@@ -1,0 +1,56 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare publish folder
+        run: |
+          set -euo pipefail
+          rm -rf publish
+          mkdir -p publish
+          shopt -s dotglob nullglob
+          for item in *; do
+            case "$item" in
+              .git|.github|publish|DEPLOY.md|README.md|tools|seo-notes) continue ;;
+            esac
+            cp -a "$item" publish/
+          done
+          # keep .htaccess
+          echo "Publish size:"; du -sh publish
+          find publish -type f | wc -l
+
+      - name: Deploy to earthmap.live (FTP)
+        env:
+          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.PROD_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.PROD_FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FTP_SERVER:-}" ] || [ -z "${FTP_USERNAME:-}" ] || [ -z "${FTP_PASSWORD:-}" ]; then
+            echo "::error::Missing PROD_FTP_* secrets — attach Hostinger website + FTP first (see DEPLOY.md)"
+            exit 1
+          fi
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "ftp://$FTP_SERVER:21" <<'LFTP'
+          set ftp:ssl-allow false
+          set ftp:passive-mode true
+          set cmd:fail-exit yes
+          pwd
+          ls -la
+          mirror -R --verbose --ignore-time publish/ .
+          ls -la
+          bye
+          LFTP
+          echo "Deployed EarthMap @${GITHUB_SHA::7} -> earthmap.live"

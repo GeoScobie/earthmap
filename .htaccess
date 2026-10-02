@@ -1,0 +1,7 @@
+DirectoryIndex index.html index.htm
+Options -Indexes
+RewriteEngine On
+# Trailing-slash for directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.+[^/])$ $1/ [R=301,L]

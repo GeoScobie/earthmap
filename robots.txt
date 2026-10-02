@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /
+# Site ships noindex until HTTPS map CTAs are validated; tighten later.
