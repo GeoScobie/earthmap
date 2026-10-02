@@ -11,7 +11,7 @@ Workflow: `.github/workflows/pages.yml`
 Repo settings (one-time):
 
 1. **Settings → Pages → Build and deployment → Source: GitHub Actions**
-2. Private repo Pages requires GitHub Pro (or make the repo public)
+2. Free-plan Pages needs a **public** repo (this repo was set public for geoscobie.github.io/earthmap/; Pro keeps private Pages)
 
 Custom domain later: set Pages custom domain + rebuild with `VITE_BASE=/`.
 
