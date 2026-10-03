@@ -2730,36 +2730,29 @@ html:not(.embed-mode) #map {
   pointer-events: none;
 }
 
-.map-legal {
+/* Sat scene age sits under the title chip. Not a control. */
+.sat-scene-age {
   position: relative;
   z-index: 1;
   align-self: flex-start;
-  margin-top: 8px;
-  display: flex;
-  gap: 12px;
-  padding: 6px 12px;
-  border-radius: 999px;
+  margin: 6px 0 0;
+  padding: 4px 10px;
+  border-radius: 8px;
   background: rgba(0, 0, 0, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  color: #e8eef8;
   font-family: 'Lexend', sans-serif;
   font-size: 12px;
   font-weight: 600;
-  line-height: 1.4;
-  pointer-events: auto;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
 }
-.map-legal a {
-  color: #e8eef8;
-  text-decoration: none;
-}
-.map-legal a:hover,
-.map-legal a:focus-visible {
-  color: #ffffff;
-  text-decoration: underline;
-}
+.sat-scene-age[hidden] { display: none !important; }
 
 html.embed-mode .ad-slot,
-html.embed-mode .map-legal {
+html.embed-mode .sat-scene-age {
   display: none !important;
 }
 

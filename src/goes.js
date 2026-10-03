@@ -1666,18 +1666,10 @@ function syncSatModeButton() {
   const btn = document.getElementById('goesSatModeBtn');
   if (!btn) return;
   const on = eitherGeocolorOn();
-  const transportOn = transportShouldShow();
-  const expanded = transportOn && transportExpanded;
   btn.classList.toggle('active', on);
   btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   btn.setAttribute('aria-label', 'Satellite');
-  if (!on) {
-    btn.title = 'Satellite — Sat and time controls';
-  } else if (expanded) {
-    btn.title = 'Satellite (on) — hide time controls';
-  } else {
-    btn.title = 'Satellite (on) — tap again to turn off (chip expands controls)';
-  }
+  btn.title = on ? 'Satellite (on)' : 'Satellite';
   // Hurricane track thicken in sat (no casing).
   try {
     applyHurricaneSatPaint(on);
@@ -2120,22 +2112,30 @@ function isTransportChipLive() {
   return idx >= state.gkPlayFrames.length - 1;
 }
 
+/** Under-title label: "Sat 38 min ago". Public name is Sat. */
+function formatSatSceneLabel(ms) {
+  if (!Number.isFinite(ms)) return '';
+  const sec = Math.max(0, Math.floor((Date.now() - ms) / 1000));
+  if (sec < 60) return `Sat ${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `Sat ${min} min ago`;
+  const hr = Math.floor(min / 60);
+  const remMin = min % 60;
+  if (hr < 48) {
+    if (remMin === 0) return `Sat ${hr}h ago`;
+    return `Sat ${hr}h ${remMin}m ago`;
+  }
+  return `Sat ${Math.floor(hr / 24)}d ago`;
+}
+
 function paintMinimizedChip(frame) {
   const chipEl = document.getElementById('goesTimeAgeChip');
-  const pill = document.querySelector('.goes-time-chip-pill');
-  const transport = document.getElementById('goesTimeTransport');
+  const host = document.getElementById('satSceneAge');
   const ms = frameMs(frame);
-  const age = formatAge(ms, false);
-  const live = isTransportChipLive();
-  if (pill) pill.classList.toggle('scrubbed', !live);
-  if (transport) transport.classList.toggle('scrubbed', !live);
-  if (chipEl) chipEl.textContent = Number.isFinite(ms) ? age : '—';
-  const chipBtn = document.getElementById('goesTimeChip');
-  if (chipBtn) {
-    chipBtn.title = live
-      ? `Satellite live — ${age} · show time controls`
-      : `Satellite scrubbed — ${age} · show time controls`;
-  }
+  const on = eitherGeocolorOn() && Number.isFinite(ms);
+  const label = on ? formatSatSceneLabel(ms) : '';
+  if (chipEl) chipEl.textContent = label;
+  if (host) host.hidden = !on;
 }
 
 function paintTransportAge(frame) {
@@ -2155,10 +2155,11 @@ function stopTransportAgeTicker() {
 function startTransportAgeTicker() {
   stopTransportAgeTicker();
   paintTransportAge(transportClockFrame);
-  if (!eitherGeocolorOn() || !transportShouldShow()) return;
+  // Label lives under the title. Tick whenever Sat is on, even with the
+  // scrubber removed. New scenes still rewrite transportClockFrame from
+  // latest.json; this interval only re-formats that frame's age.
+  if (!eitherGeocolorOn()) return;
   transportAgeTimer = setInterval(() => {
-    // Age ticker only re-formats the painted tip/scrub frame — does not
-    // re-pick center sat (that happens on moveend/zoomend / tip refresh).
     paintTransportAge(transportClockFrame);
   }, 1000);
 }
@@ -2376,16 +2377,21 @@ function setTransportExpanded(expanded) {
 
 function setTransportVisible(on) {
   const transport = document.getElementById('goesTimeTransport');
-  if (!transport) return;
-  transport.hidden = !on;
-  if (on) {
-    paintTransportMeta(goesUiMap);
-    transport.classList.toggle('minimized', !transportExpanded);
-    positionTransport();
-    startTransportAgeTicker();
-  } else {
+  if (transport) {
+    transport.hidden = !on;
+    if (on) {
+      paintTransportMeta(goesUiMap);
+      transport.classList.toggle('minimized', !transportExpanded);
+      positionTransport();
+    } else {
+      syncGoesLift(transport, true, 0);
+    }
+  }
+  // Age label is under the title, not on the removed transport.
+  if (on && eitherGeocolorOn()) startTransportAgeTicker();
+  else {
     stopTransportAgeTicker();
-    syncGoesLift(transport, true, 0);
+    paintMinimizedChip(null);
   }
 }
 
@@ -2414,6 +2420,7 @@ function paintGkPlayLabel(frame, { show } = {}) {
     if (label) label.textContent = '';
     if (localEl) localEl.textContent = '';
     if (utcEl) utcEl.textContent = '';
+    paintTransportAge(frame);
     return;
   }
   const compact = frame ? formatCompactClock(frame) : '—';
@@ -3262,32 +3269,14 @@ export function wireGoesSatMode(map) {
     syncSatRoadsVisibility(map);
   };
 
-  const openTransport = ({ expand = false } = {}) => {
-    transportUserOpen = true;
-    setTransportExpanded(expand);
-    refreshTransportVisibility();
-    syncSatModeButton();
-    // No camera move on sat enable / transport open — keep user's zoom/center.
-    return primeTimeTransport(map);
-  };
-
   btn.addEventListener('click', () => {
     const satOn = eitherGeocolorOn();
-    const transportOn = transportShouldShow();
-
     if (!satOn) {
-      // Off → GeoColor on + minimized chip.
       setBoxes(true);
-      openTransport({ expand: false });
+      // Existing tip pipeline (latest.json). No scrubber.
+      primeTimeTransport(map);
       return;
     }
-    // Sat on + expanded → minimize to age chip (keep mosaic). Matches Hide.
-    if (transportOn && transportExpanded) {
-      setTransportExpanded(false);
-      syncSatModeButton();
-      return;
-    }
-    // Sat on + minimized chip → turn sat OFF (chip tap expands instead).
     setBoxes(false);
   });
 

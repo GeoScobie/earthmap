@@ -141,6 +141,9 @@
         <svg class="search-banner-chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg>
       </button>
     </div>
+    <p class="sat-scene-age" id="satSceneAge" hidden>
+      <span id="goesTimeAgeChip">Sat —</span>
+    </p>
     <div id="searchPanel" class="search-banner-dropdown" role="dialog" aria-label="Search a place" hidden>
       <div class="search-banner-row">
         <input type="search" id="searchInput" placeholder="Search a place" autocomplete="off"
@@ -149,10 +152,6 @@
       </div>
       <ul id="searchResults" role="listbox" aria-label="Search results"></ul>
     </div>
-  <nav class="map-legal" aria-label="EarthMap">
-    <a href="/" aria-current="page">Map</a>
-    <a href="/countries/">Countries</a>
-  </nav>
   </div>
 
   <!-- Layer list -->
@@ -310,60 +309,6 @@
 
   <div id="map"></div>
 
-  <!-- Legacy 1h range scrubber — hidden unused; bottom transport is tip UX -->
-  <div id="geocolorTimeBar" class="geocolor-time-bar" aria-label="Satellite time" hidden>
-    <div class="geocolor-time-head">
-      <span id="geocolorTimeLabel" class="geocolor-time-iso">—</span>
-      <button type="button" id="geocolorTimeNowBtn" class="geocolor-time-now" hidden>Latest</button>
-    </div>
-    <input type="range" id="geocolorTimeSlider" class="geocolor-time-slider"
-      min="0" max="0" value="0" step="1"
-      aria-label="Satellite time slider">
-    <div class="geocolor-time-meta">
-      <span class="geocolor-time-title">Sat · recent scenes</span>
-    </div>
-  </div>
-
-  <!-- Bottom-right satellite time transport (chip ↔ expand) -->
-  <div id="goesTimeTransport" class="goes-time-transport minimized" hidden aria-label="Satellite time — tap to expand">
-    <button type="button" id="goesTimeHideBtn" class="goes-time-handle" aria-label="Hide time controls">
-      Hide
-      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5"/></svg>
-    </button>
-    <button type="button" id="goesTimeChip" class="goes-time-chip" aria-label="Show satellite time controls" title="Show time controls">
-      <span class="goes-time-chip-pill" aria-hidden="true">
-        <svg class="goes-time-chip-sat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
-        <b class="goes-time-chip-dot"></b>
-        <span id="goesTimeAgeChip" class="goes-time-chip-text">—</span>
-      </span>
-      <svg class="goes-time-chip-chev" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5"/></svg>
-    </button>
-    <div class="goes-time-transport-expanded">
-      <button type="button" id="goesTimePlayBtn" class="goes-time-play" aria-label="Play satellite loop" title="Play recent scenes" aria-pressed="false">
-        <svg class="goes-time-play-icon goes-time-play-icon--play" aria-hidden="true"><use href="#i-play"/></svg>
-        <svg class="goes-time-play-icon goes-time-play-icon--pause" aria-hidden="true" hidden><use href="#i-pause"/></svg>
-        <span class="goes-time-play-icon goes-time-play-icon--spin" aria-hidden="true" hidden></span>
-      </button>
-      <div class="goes-time-transport-body">
-        <div class="goes-time-transport-head">
-          <div class="goes-time-when" aria-live="polite">
-            <span id="goesTimeLocal" class="goes-time-local">—</span>
-            <span id="goesTimeUtc" class="goes-time-utc">—</span>
-          </div>
-          <span id="goesTimeAge" class="goes-time-age" title="Age of the current scene">—</span>
-          <span id="goesTimeScrubLabel" class="goes-time-transport-clock" hidden aria-hidden="true">—</span>
-          <button type="button" id="goesTimeLatestBtn" class="goes-time-latest" hidden>Latest</button>
-        </div>
-        <input type="range" id="goesTimeScrubRange" class="goes-time-scrub-range"
-          min="0" max="0" value="0" step="1"
-          aria-label="Scrub satellite time">
-        <div class="goes-time-transport-meta">
-          <span id="goesTimeTransportMeta">Last ~4h</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div id="infoBox" class="info-box"></div>
 
   <!-- Toolbar — find → drawn layers → tools → info -->
@@ -371,7 +316,7 @@
     <button class="toolbar-btn" id="toggleLayersBtn" aria-label="Toggle Layers" title="Toggle Layers">
       <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
     </button>
-    <button class="toolbar-btn active" id="goesSatModeBtn" aria-label="Satellite" title="Satellite (on) — tap again to turn off (chip expands controls)" aria-pressed="true">
+    <button class="toolbar-btn active" id="goesSatModeBtn" aria-label="Satellite" title="Satellite" aria-pressed="true">
       <i class="fa-solid fa-satellite" aria-hidden="true"></i>
     </button>
     <button class="toolbar-btn" id="windBtn" aria-label="Wind" title="Wind" aria-pressed="false">
