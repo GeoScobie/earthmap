@@ -1,7 +1,14 @@
-// Sat overview player. Swaps prebuilt 0/0/0 PNGs. Does not stitch tiles.
+// Sat player. One prebuilt z3 tile per satellite, not a stitched mosaic.
+// Tile chosen because it already exists on the CDN and fills the frame.
 (function () {
   var FOUR_H = 4 * 60 * 60;
   var DWELL_MS = 500;
+  var TILE = {
+    'goes-east': { z: 3, x: 2, y: 3 },
+    'goes-west': { z: 3, x: 0, y: 3 },
+    'meteosat': { z: 3, x: 4, y: 2 },
+    'gk2a': { z: 3, x: 6, y: 5 }
+  };
   var root = document.querySelector('[data-sat-slug]');
   if (!root) return;
   var slug = root.getAttribute('data-sat-slug');
@@ -24,11 +31,12 @@
     var ymd = d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
     var hhmm = pad(d.getUTCHours()) + pad(d.getUTCMinutes());
     var label = ymd + ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ' UTC';
+    var tile = TILE[slug] || { z: 0, x: 0, y: 0 };
     return {
       t: sec,
       label: label,
       iso: d.toISOString().replace(/\.\d{3}Z$/, 'Z'),
-      url: 'https://sat.disasterdb.com/geocolor/' + slug + '/' + ymd + '/' + hhmm + '/0/0/0.png'
+      url: 'https://sat.disasterdb.com/geocolor/' + slug + '/' + ymd + '/' + hhmm + '/' + tile.z + '/' + tile.x + '/' + tile.y + '.png'
     };
   }
 
