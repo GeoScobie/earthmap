@@ -2875,7 +2875,7 @@ html:not(.embed-mode) #em-consent { bottom: calc(90px + 12px) !important; }
   html:not(.embed-mode) .measure-panel { bottom: calc(120px + var(--em-ad-h)); }
 }
 
-/* /satellites/ loop controls only. Not the homepage time scrubber. */
+/* /satellite-loop/ controls only. Not the homepage time scrubber. */
 html:not(.sat-mosaic-page) #satMosaicLoop { display: none !important; }
 html.sat-mosaic-page #satSceneAge,
 html.sat-mosaic-page .goes-time-transport,

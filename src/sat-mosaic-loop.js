@@ -1,4 +1,4 @@
-// /satellites/ only. Steps the live Sat layers together. Does not stitch images.
+// /satellite-loop/ only. Steps the live Sat layers together. Does not stitch images.
 import { goesGeocolor } from './theme.js';
 import { applySatLoopFrames, floorUtcToOwnedFrame } from './goes.js';
 
@@ -8,8 +8,8 @@ const SLUGS = ['goes-east', 'goes-west', 'meteosat', 'gk2a'];
 
 export function isSatMosaicPage() {
   let path = (location.pathname || '/').replace(/\/+$/, '') || '/';
-  if (path === '/earthmap/satellites') path = '/satellites';
-  return path === '/satellites';
+  if (path === '/earthmap/satellite-loop') path = '/satellite-loop';
+  return path === '/satellite-loop';
 }
 
 function stampsOf(manifest, slug) {
@@ -51,7 +51,7 @@ export function startSatMosaicLoop(map) {
   const scrub = document.getElementById('satMosaicScrub');
   if (!bar || !map) return;
   bar.hidden = false;
-  document.title = 'Sat · EarthMap';
+  document.title = 'Satellite loop';
 
   let steps = [];
   let catalogs = {};

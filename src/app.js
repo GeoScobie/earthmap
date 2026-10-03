@@ -172,7 +172,7 @@ export function createMap(maplibregl, Protocol) {
   // Locate above zoom (flex order:0). FireMap SoT — not on vertical toolbar / near search.
   map.addControl(new LocateMeControl(), 'bottom-right');
 
-  // /satellites/ is a flat map. Homepage keeps the globe from the style.
+  // /satellite-loop/ is a flat map. Homepage keeps the globe from the style.
   if (isSatMosaicPage()) {
     const flatten = () => {
       try { map.setProjection({ type: 'mercator' }); } catch { /* ignore */ }
