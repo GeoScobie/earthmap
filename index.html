@@ -133,20 +133,26 @@
         </span>
       </button>
       <button type="button" class="search-banner-btn" id="searchBtn"
-        aria-label="Search fire name or place" aria-expanded="false" aria-controls="searchPanel"
+        aria-label="Search a place" aria-expanded="false" aria-controls="searchPanel"
         title="Search">
         <svg class="search-banner-icon" aria-hidden="true"><use href="#i-search"/></svg>
         <svg class="search-banner-chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg>
       </button>
     </div>
-    <div id="searchPanel" class="search-banner-dropdown" role="dialog" aria-label="Search fire name or place" hidden>
+    <div id="searchPanel" class="search-banner-dropdown" role="dialog" aria-label="Search a place" hidden>
       <div class="search-banner-row">
-        <input type="search" id="searchInput" placeholder="Search fire name or place" autocomplete="off"
-          aria-label="Search fire name or place" aria-autocomplete="list" aria-controls="searchResults">
+        <input type="search" id="searchInput" placeholder="Search a place" autocomplete="off"
+          aria-label="Search a place" aria-autocomplete="list" aria-controls="searchResults">
         <button type="button" class="search-banner-close" id="closeSearchPanel" aria-label="Close search">×</button>
       </div>
       <ul id="searchResults" role="listbox" aria-label="Search results"></ul>
     </div>
+  <nav class="map-legal" aria-label="EarthMap">
+    <a href="/" aria-current="page">Map</a>
+    <a href="/countries/">Countries</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy</a>
+  </nav>
   </div>
 
   <!-- Layer list -->
@@ -203,14 +209,18 @@
 
         <div class="layer-item"><input type="checkbox" id="lyr-wind" checked><label for="lyr-wind">Wind (10 m)</label></div>
         <div class="layer-item">
+          <input type="checkbox" id="lyr-sat" checked>
+          <label for="lyr-sat">Sat</label>
+        </div>
+        <div class="layer-item" hidden>
           <input type="checkbox" id="lyr-goes-east-demo" checked>
           <label for="lyr-goes-east-demo">GOES-East</label>
         </div>
-        <div class="layer-item">
+        <div class="layer-item" hidden>
           <input type="checkbox" id="lyr-goes-west-demo" checked>
           <label for="lyr-goes-west-demo">GOES-West</label>
         </div>
-        <div class="layer-item">
+        <div class="layer-item" hidden>
           <input type="checkbox" id="lyr-goes-meteosat-demo" checked>
           <label for="lyr-goes-meteosat-demo">Meteosat</label>
         </div>
@@ -218,7 +228,7 @@
           <input type="checkbox" id="lyr-goes-himawari-demo">
           <label for="lyr-goes-himawari-demo">Unused disk</label>
         </div>
-        <div class="layer-item">
+        <div class="layer-item" hidden>
           <input type="checkbox" id="lyr-goes-gk2a-demo" checked>
           <label for="lyr-goes-gk2a-demo">Asia–Pacific</label>
         </div>
@@ -228,11 +238,6 @@
         </div>
         <div class="layer-item"><input type="checkbox" id="lyr-roads" checked><label for="lyr-roads">Roads</label></div>
 
-        <div class="layer-item pending">
-          <input type="checkbox" disabled>
-          <label>GDACS Alerts</label>
-          <span class="pending-note">data exists — UI not ported yet</span>
-        </div>
         <div class="layer-item">
           <input type="checkbox" id="lyr-satellite" checked>
           <label for="lyr-satellite">Satellite Tracks</label>
@@ -487,10 +492,6 @@
 
   <div class="readout" id="readout" aria-live="off"></div>
 
-  <nav class="map-legal" aria-label="EarthMap">
-    <a href="/privacy/">Privacy</a>
-    <a href="/about/">About</a>
-  </nav>
   <div class="ad-slot" aria-hidden="true"></div>
 
   <script type="module" src="/src/main.js"></script>

@@ -57,6 +57,7 @@ export function initUI(map) {
   gateProductGeocolorRow();
   forcePlaceLabelsOn(map);
   layerList(map);
+  wireSatControl();
   measure(map);
   share(map);
   locate(map);
@@ -257,6 +258,22 @@ function panels(map) {
   try {
     window.addEventListener('resize', notifySatChromeLayout);
   } catch { /* ignore */ }
+}
+
+
+/** One visible Sat checkbox drives the four disk toggles. */
+function wireSatControl() {
+  const master = document.getElementById('lyr-sat');
+  const ids = ['lyr-goes-east-demo', 'lyr-goes-west-demo', 'lyr-goes-meteosat-demo', 'lyr-goes-gk2a-demo'];
+  if (!master) return;
+  master.addEventListener('change', () => {
+    for (const id of ids) {
+      const box = document.getElementById(id);
+      if (!box || box.checked === master.checked) continue;
+      box.checked = master.checked;
+      box.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  });
 }
 
 // --- Layer list -------------------------------------------------------------

@@ -3237,6 +3237,8 @@ export function wireGoesSatMode(map) {
     if (met) met.checked = on;
     // Himawari parked — sat-mode does not enable it
     if (gk) gk.checked = on;
+    const satMaster = document.getElementById('lyr-sat');
+    if (satMaster) satMaster.checked = on;
     honourCheckbox(map, 'lyr-goes-east-demo', GOES_EAST_LAYER_ID);
     honourCheckbox(map, 'lyr-goes-west-demo', GOES_WEST_LAYER_ID);
     honourCheckbox(map, 'lyr-goes-meteosat-demo', GOES_METEOSAT_LAYER_ID);
