@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="index,follow" />
-  <meta name="description" content="A 4-hour Sat image loop from Meteosat. New scenes about every 10 minutes." />
-  <link rel="canonical" href="https://earthmap.live/satellites/meteosat/" />
-  <title>Meteosat Sat · EarthMap</title>
+  <meta name="description" content="A 4-hour Sat image loop of GOES-East, GOES-West, Meteosat, and GK2A together. New scenes about every 10 minutes." />
+  <link rel="canonical" href="https://earthmap.live/satellites/" />
+  <title>Sat · EarthMap</title>
   <link rel="icon" href="/icons/earthmap-mark-32.png?v=20261002" type="image/png" sizes="32x32" />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
   <link href="/css/earthmap.css" rel="stylesheet" />
@@ -47,30 +47,56 @@
   <script src="/js/consent.js" defer></script>
 </head>
 <body>
-  <main class="page sat-loop" data-sat-slug="meteosat" data-sat-title="Meteosat">
+  <main class="page sat-loop" data-sat-all>
     <header class="sat-bar">
       <a class="logo" href="https://earthmap.live/"><img src="/icons/earthmap-l5-512.png?v=20261002" alt="" class="logo-mark" width="32" height="32"><span class="logo-word">EarthMap</span></a>
       <div class="sat-heading">
-        <h1>Meteosat</h1>
+        <h1>Sat</h1>
         <p class="sat-status" id="satStatus">Loading Sat scenes…</p>
       </div>
       <div class="sat-actions">
-        <time class="sat-when" id="satWhen">—</time>
         <button type="button" class="sat-play" id="satPlay" disabled aria-pressed="false">Play</button>
         <a href="https://earthmap.live/">Map</a>
       </div>
       <nav aria-label="Satellites">
         <ul class="sat-nav">
-          <li><a href="https://earthmap.live/satellites/">All</a></li>
+          <li><a href="https://earthmap.live/satellites/" aria-current="page">All</a></li>
           <li><a href="https://earthmap.live/satellites/goes-east/">GOES-East</a></li>
           <li><a href="https://earthmap.live/satellites/goes-west/">GOES-West</a></li>
-          <li><a href="https://earthmap.live/satellites/meteosat/" aria-current="page">Meteosat</a></li>
+          <li><a href="https://earthmap.live/satellites/meteosat/">Meteosat</a></li>
           <li><a href="https://earthmap.live/satellites/gk2a/">GK2A</a></li>
         </ul>
       </nav>
     </header>
-    <div class="sat-stage">
-      <img id="satFrame" alt="" width="256" height="256" />
+    <div class="sat-grid">
+      <figure class="sat-cell" data-sat-slug="goes-east">
+        <img alt="" width="256" height="256" />
+        <figcaption class="sat-cell-label">
+          <a href="https://earthmap.live/satellites/goes-east/">GOES-East</a>
+          <time class="sat-cell-when">—</time>
+        </figcaption>
+      </figure>
+      <figure class="sat-cell" data-sat-slug="goes-west">
+        <img alt="" width="256" height="256" />
+        <figcaption class="sat-cell-label">
+          <a href="https://earthmap.live/satellites/goes-west/">GOES-West</a>
+          <time class="sat-cell-when">—</time>
+        </figcaption>
+      </figure>
+      <figure class="sat-cell" data-sat-slug="meteosat">
+        <img alt="" width="256" height="256" />
+        <figcaption class="sat-cell-label">
+          <a href="https://earthmap.live/satellites/meteosat/">Meteosat</a>
+          <time class="sat-cell-when">—</time>
+        </figcaption>
+      </figure>
+      <figure class="sat-cell" data-sat-slug="gk2a">
+        <img alt="" width="256" height="256" />
+        <figcaption class="sat-cell-label">
+          <a href="https://earthmap.live/satellites/gk2a/">GK2A</a>
+          <time class="sat-cell-when">—</time>
+        </figcaption>
+      </figure>
     </div>
     <p class="sat-credit">Contains modified EUMETSAT Meteosat data.</p>
   </main>

@@ -109,3 +109,54 @@
   .sat-actions { width: 100%; margin-left: 0; justify-content: space-between; }
   .sat-stage img { max-height: calc(100dvh - 150px); }
 }
+
+.sat-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.sat-cell {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  background: #061018;
+}
+.sat-cell img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #061018;
+}
+.sat-cell-label {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: calc(100% - 16px);
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(6, 16, 24, 0.82);
+}
+.sat-cell-label a {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.sat-cell-label a:hover { color: var(--teal); }
+.sat-cell-when {
+  font-family: var(--serif);
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

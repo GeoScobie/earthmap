@@ -9,6 +9,11 @@
     'meteosat': { z: 3, x: 4, y: 2 },
     'gk2a': { z: 3, x: 6, y: 5 }
   };
+  if (document.querySelector('[data-sat-all]')) {
+    runAll();
+    return;
+  }
+
   var root = document.querySelector('[data-sat-slug]');
   if (!root) return;
   var slug = root.getAttribute('data-sat-slug');
@@ -26,17 +31,17 @@
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
-  function frameFromStamp(sec) {
+  function frameFromStamp(forSlug, sec) {
     var d = new Date(sec * 1000);
     var ymd = d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
     var hhmm = pad(d.getUTCHours()) + pad(d.getUTCMinutes());
     var label = ymd + ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ' UTC';
-    var tile = TILE[slug] || { z: 0, x: 0, y: 0 };
+    var tile = TILE[forSlug] || { z: 0, x: 0, y: 0 };
     return {
       t: sec,
       label: label,
       iso: d.toISOString().replace(/\.\d{3}Z$/, 'Z'),
-      url: 'https://sat.disasterdb.com/geocolor/' + slug + '/' + ymd + '/' + hhmm + '/' + tile.z + '/' + tile.x + '/' + tile.y + '.png'
+      url: 'https://sat.disasterdb.com/geocolor/' + forSlug + '/' + ymd + '/' + hhmm + '/' + tile.z + '/' + tile.x + '/' + tile.y + '.png'
     };
   }
 
@@ -122,7 +127,7 @@
     })
     .then(function (data) {
       var chosen = selectStamps(data && data[slug], Date.now() / 1000);
-      var built = chosen.stamps.map(frameFromStamp);
+      var built = chosen.stamps.map(function (sec) { return frameFromStamp(slug, sec); });
       return Promise.all(built.map(preload)).then(function (loaded) {
         frames = loaded.filter(Boolean);
         if (!frames.length) {
@@ -145,4 +150,133 @@
       setStatus('Could not load scene times.');
       if (playBtn) playBtn.disabled = true;
     });
+
+  function runAll() {
+    var statusEl = document.getElementById('satStatus');
+    var playBtn = document.getElementById('satPlay');
+    var sats = [
+      { slug: 'goes-east', title: 'GOES-East' },
+      { slug: 'goes-west', title: 'GOES-West' },
+      { slug: 'meteosat', title: 'Meteosat' },
+      { slug: 'gk2a', title: 'GK2A' }
+    ];
+    var panels = sats.map(function (sat) {
+      var cell = document.querySelector('.sat-cell[data-sat-slug="' + sat.slug + '"]');
+      return {
+        slug: sat.slug,
+        title: sat.title,
+        img: cell ? cell.querySelector('img') : null,
+        whenEl: cell ? cell.querySelector('.sat-cell-when') : null,
+        frames: [],
+        index: 0
+      };
+    });
+    var playing = false;
+    var timer = null;
+
+    function setStatus(text) {
+      if (statusEl) statusEl.textContent = text;
+    }
+
+    function show(panel, i) {
+      if (!panel.frames.length || !panel.img) return;
+      panel.index = (i + panel.frames.length) % panel.frames.length;
+      var frame = panel.frames[panel.index];
+      panel.img.src = frame.url;
+      panel.img.alt = panel.title + ' Sat ' + frame.label;
+      if (panel.whenEl) {
+        panel.whenEl.textContent = frame.label + ' · ' + (panel.index + 1) + '/' + panel.frames.length;
+        panel.whenEl.setAttribute('datetime', frame.iso);
+      }
+    }
+
+    function anyLoop() {
+      return panels.some(function (panel) { return panel.frames.length > 1; });
+    }
+
+    function stop() {
+      if (timer) clearTimeout(timer);
+      timer = null;
+    }
+
+    function tick() {
+      stop();
+      if (!playing || !anyLoop()) return;
+      timer = setTimeout(function () {
+        panels.forEach(function (panel) {
+          if (panel.frames.length > 1) show(panel, panel.index + 1);
+        });
+        tick();
+      }, DWELL_MS);
+    }
+
+    function setPlaying(on) {
+      playing = on && anyLoop();
+      if (playBtn) {
+        playBtn.textContent = playing ? 'Pause' : 'Play';
+        playBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+        playBtn.disabled = !anyLoop();
+      }
+      if (playing) tick();
+      else stop();
+    }
+
+    if (playBtn) {
+      playBtn.addEventListener('click', function () { setPlaying(!playing); });
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop();
+      else if (playing) tick();
+    });
+
+    setStatus('Loading Sat scenes…');
+    fetch('https://sat.disasterdb.com/geocolor/times.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('times ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var nowSec = Date.now() / 1000;
+        var jobs = panels.map(function (panel) {
+          var chosen = selectStamps(data && data[panel.slug], nowSec);
+          var built = chosen.stamps.map(function (sec) { return frameFromStamp(panel.slug, sec); });
+          return Promise.all(built.map(preload)).then(function (loaded) {
+            panel.frames = loaded.filter(Boolean);
+            panel.fallback = chosen.fallback && panel.frames.length > 0;
+            panel.listed = chosen.stamps.length;
+          });
+        });
+        return Promise.all(jobs);
+      })
+      .then(function () {
+        var fallbacks = [];
+        var shown = 0;
+        panels.forEach(function (panel) {
+          if (!panel.frames.length) {
+            if (panel.whenEl) panel.whenEl.textContent = panel.listed ? 'Images did not load' : 'No scenes';
+            return;
+          }
+          shown += 1;
+          if (panel.fallback) fallbacks.push(panel.title);
+          show(panel, 0);
+        });
+        if (!shown) {
+          setStatus('No scenes on file.');
+          if (playBtn) playBtn.disabled = true;
+          return;
+        }
+        if (fallbacks.length) {
+          setStatus('No scenes in the last 4 hours for ' + fallbacks.join(', ') + '. Showing the newest scenes on file. New scenes are about every 10 minutes.');
+        } else {
+          setStatus('4-hour Sat loop. Each satellite uses its own scenes, about every 10 minutes.');
+        }
+        setPlaying(true);
+      })
+      .catch(function () {
+        setStatus('Could not load scene times.');
+        if (playBtn) playBtn.disabled = true;
+      });
+  }
+
 })();
