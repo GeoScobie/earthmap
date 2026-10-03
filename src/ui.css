@@ -2656,14 +2656,71 @@ body, html {
 
 
 /* GFS weather makeup. Pressed state is a light fill, not a color ramp. */
-.vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"] {
+.vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"],
+.gfs-advanced-bar .gfs-layer-btn[aria-pressed="true"],
+.vertical-toolbar .toolbar-btn#gfsAdvancedBtn[aria-expanded="true"],
+.vertical-toolbar .toolbar-btn#gfsAdvancedBtn.has-selection {
   background-color: rgba(255, 255, 255, 0.18);
   color: #ffffff;
 }
 .vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"]:hover,
-.vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"]:focus {
+.vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"]:focus,
+.gfs-advanced-bar .gfs-layer-btn[aria-pressed="true"]:hover,
+.gfs-advanced-bar .gfs-layer-btn[aria-pressed="true"]:focus,
+.vertical-toolbar .toolbar-btn#gfsAdvancedBtn[aria-expanded="true"]:hover,
+.vertical-toolbar .toolbar-btn#gfsAdvancedBtn[aria-expanded="true"]:focus,
+.vertical-toolbar .toolbar-btn#gfsAdvancedBtn.has-selection:hover,
+.vertical-toolbar .toolbar-btn#gfsAdvancedBtn.has-selection:focus {
   background-color: rgba(255, 255, 255, 0.22);
   color: #ffffff;
+}
+
+/* Horizontal extra-field bar. Not a second tall rail. */
+.gfs-advanced-bar {
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  background-color: rgba(0, 0, 0, 0.72);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+.gfs-advanced-bar[hidden] { display: none !important; }
+.gfs-advanced-bar .gfs-layer-btn {
+  background-color: transparent;
+  border: none;
+  color: #f4f7fb;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.gfs-advanced-bar .gfs-layer-btn i {
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+}
+.gfs-advanced-bar .gfs-layer-btn:hover,
+.gfs-advanced-bar .gfs-layer-btn:focus {
+  background-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  outline: none;
+}
+@media (max-width: 480px) {
+  .gfs-advanced-bar { padding: 4px; gap: 2px; }
+  .gfs-advanced-bar .gfs-layer-btn { width: 32px; height: 32px; font-size: 14px; }
+  .gfs-advanced-bar .gfs-layer-btn i { font-size: 14px; }
 }
 
 .gfs-legend-card {
@@ -2791,7 +2848,8 @@ html:not(.embed-mode) #map {
 
 html.embed-mode .ad-slot,
 html.embed-mode .sat-scene-age,
-html.embed-mode #gfsLegendCard {
+html.embed-mode #gfsLegendCard,
+html.embed-mode #gfsAdvancedBar {
   display: none !important;
 }
 

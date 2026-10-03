@@ -338,9 +338,12 @@ function layerList(map) {
 
 // GFS field buttons are makeup. They only toggle a text legend.
 // They do not add a raster, a time slider, or a second wind control.
+// Extra fields sit in a horizontal bar; closing it keeps the legend.
 function wireGfsMakeup() {
-  const buttons = [...document.querySelectorAll('.vertical-toolbar .gfs-layer-btn')];
+  const buttons = [...document.querySelectorAll('.gfs-layer-btn')];
   const card = $('gfsLegendCard');
+  const bar = $('gfsAdvancedBar');
+  const advBtn = $('gfsAdvancedBtn');
   if (!buttons.length || !card) return;
   const nameEl = card.querySelector('.gfs-legend-name');
   const fieldEl = card.querySelector('.gfs-legend-field');
@@ -348,10 +351,21 @@ function wireGfsMakeup() {
   const rail = document.querySelector('.vertical-toolbar');
   let active = null;
 
-  const place = () => {
-    if (!active || card.hidden) return;
-    const r = active.getBoundingClientRect();
-    const railRect = rail ? rail.getBoundingClientRect() : null;
+  const boxOf = (el) => {
+    if (!el || el.hidden) return null;
+    const r = el.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) return null;
+    return r;
+  };
+
+  const placeCard = (anchor) => {
+    const r = boxOf(anchor);
+    if (!r) {
+      card.style.visibility = 'hidden';
+      return;
+    }
+    const inRail = rail && rail.contains(anchor);
+    const railRect = inRail ? rail.getBoundingClientRect() : null;
     const clipped = railRect && (r.bottom <= railRect.top + 1 || r.top >= railRect.bottom - 1);
     if (clipped) {
       card.style.visibility = 'hidden';
@@ -369,11 +383,68 @@ function wireGfsMakeup() {
     card.style.left = `${Math.round(left)}px`;
   };
 
+  const place = () => {
+    if (!active || card.hidden) return;
+    const inOpenBar = bar && !bar.hidden && bar.contains(active);
+    if (inOpenBar) {
+      const btnRect = boxOf(active);
+      const barRect = boxOf(bar);
+      if (!btnRect || !barRect) {
+        placeCard(advBtn);
+        return;
+      }
+      card.style.visibility = '';
+      const cardW = card.offsetWidth;
+      const cardH = card.offsetHeight;
+      let top = barRect.top - cardH - 8;
+      if (top < 8) top = barRect.bottom + 8;
+      const maxTop = Math.max(8, window.innerHeight - cardH - 8);
+      if (top > maxTop) top = maxTop;
+      let left = btnRect.left + (btnRect.width - cardW) / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - cardW - 8));
+      card.style.top = `${Math.round(top)}px`;
+      card.style.left = `${Math.round(left)}px`;
+      return;
+    }
+    const anchor = boxOf(active) ? active : advBtn;
+    placeCard(anchor);
+  };
+
+  const placeBar = () => {
+    if (!bar || bar.hidden || !advBtn) return;
+    const r = boxOf(advBtn);
+    if (!r) return;
+    const w = bar.offsetWidth;
+    const h = bar.offsetHeight;
+    let top = r.top + (r.height - h) / 2;
+    const maxTop = Math.max(8, window.innerHeight - h - 8);
+    if (top < 8) top = 8;
+    if (top > maxTop) top = maxTop;
+    const left = Math.max(8, r.left - w - 8);
+    bar.style.top = `${Math.round(top)}px`;
+    bar.style.left = `${Math.round(left)}px`;
+  };
+
+  const syncAdv = () => {
+    if (!advBtn || !bar) return;
+    const on = buttons.some((b) => bar.contains(b) && b.getAttribute('aria-pressed') === 'true');
+    advBtn.classList.toggle('has-selection', on);
+  };
+
+  const setBar = (open) => {
+    if (!bar || !advBtn) return;
+    bar.hidden = !open;
+    advBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) placeBar();
+    place();
+  };
+
   const clear = () => {
     active = null;
     for (const b of buttons) b.setAttribute('aria-pressed', 'false');
     card.hidden = true;
     card.style.visibility = '';
+    syncAdv();
   };
 
   const show = (btn) => {
@@ -385,6 +456,7 @@ function wireGfsMakeup() {
     if (fieldEl) fieldEl.textContent = field ? `GFS ${field}` : '';
     if (unitEl) unitEl.textContent = btn.dataset.unit || '';
     card.hidden = false;
+    syncAdv();
     place();
   };
 
@@ -395,8 +467,27 @@ function wireGfsMakeup() {
     });
   }
 
-  rail?.addEventListener('scroll', place, { passive: true });
-  window.addEventListener('resize', place);
+  advBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setBar(bar?.hidden !== false);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!bar || bar.hidden) return;
+    if (bar.contains(e.target) || advBtn?.contains(e.target)) return;
+    setBar(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setBar(false);
+  });
+
+  const follow = () => {
+    placeBar();
+    place();
+  };
+  rail?.addEventListener('scroll', follow, { passive: true });
+  window.addEventListener('resize', follow);
 }
 
 // --- Measure ----------------------------------------------------------------
