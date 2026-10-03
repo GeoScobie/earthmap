@@ -61,7 +61,7 @@ function styleName(basemapId) {
   if (basemapId === 'disasterdb-topo') return 'EarthMap — Topo';
   if (basemapId === 'disasterdb-light') return 'EarthMap — Light (stub)';
   if (basemapId === 'disasterdb-dark') return 'EarthMap — Dark (stub)';
-  if (basemapId === 'satellite') return 'EarthMap — Near-time (NASA + GeoColor)';
+  if (basemapId === 'satellite') return 'EarthMap — Sat';
   return 'EarthMap — Satellite Hybrid';
 }
 

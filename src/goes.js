@@ -1672,7 +1672,7 @@ function syncSatModeButton() {
   btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   btn.setAttribute('aria-label', 'Satellite');
   if (!on) {
-    btn.title = 'Satellite — GeoColor + time controls';
+    btn.title = 'Satellite — Sat and time controls';
   } else if (expanded) {
     btn.title = 'Satellite (on) — hide time controls';
   } else {
@@ -1944,8 +1944,8 @@ async function rebuildTimeList(state, tipFrame) {
   if (metaEl) {
     metaEl.textContent =
       times.length > 1
-        ? `GeoColor · last hour · ${times.length} frames (test)`
-        : 'GeoColor · latest only';
+        ? `Sat · last hour · ${times.length} frames`
+        : 'Sat · latest scene';
   }
   if (slider && times.length) {
     slider.min = '0';
@@ -2362,8 +2362,8 @@ function setTransportExpanded(expanded) {
     transport.setAttribute(
       'aria-label',
       transportExpanded
-        ? 'GeoColor time transport'
-        : 'GeoColor time — tap to expand'
+        ? 'Satellite time'
+        : 'Satellite time — tap to expand'
     );
   }
   if (!transportExpanded && (gkPlaying || gkBuffering)) {
@@ -3006,17 +3006,17 @@ function syncTimeTransport() {
 
   const playHours = playHoursLabel();
   if (gkBuffering) {
-    btn.title = 'Buffering GeoColor frames…';
-    btn.setAttribute('aria-label', 'Buffering GeoColor play');
+    btn.title = 'Buffering scenes…';
+    btn.setAttribute('aria-label', 'Buffering satellite play');
   } else if (gkPlaying) {
-    btn.title = 'Pause GeoColor play';
-    btn.setAttribute('aria-label', 'Pause GeoColor play');
+    btn.title = 'Pause';
+    btn.setAttribute('aria-label', 'Pause satellite play');
   } else if (mid) {
-    btn.title = 'Resume GeoColor play';
-    btn.setAttribute('aria-label', 'Resume GeoColor play');
+    btn.title = 'Resume';
+    btn.setAttribute('aria-label', 'Resume satellite play');
   } else {
-    btn.title = `Play last ~${playHours}h GK2A GeoColor (loops)`;
-    btn.setAttribute('aria-label', 'Play GeoColor loop');
+    btn.title = `Play last ~${playHours}h of scenes`;
+    btn.setAttribute('aria-label', 'Play satellite loop');
   }
 
   const latestBtn = document.getElementById('goesTimeLatestBtn');

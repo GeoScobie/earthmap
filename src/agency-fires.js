@@ -501,8 +501,7 @@ function npFciDetectionNoteHTML() {
       <div class="np-firms-note-body">
         <p>Heat signatures come from <strong>Meteosat MTG FCI</strong>, a
         geostationary satellite that rescans Europe every few minutes --
-        near-real-time detection, but with coarse pixels a few kilometres
-        across.</p>
+        pixels are a few kilometres across.</p>
         <p><strong>Geostationary detections can be false positives.</strong>
         Sun glint, hot bare ground and cloud edges can all register as heat,
         and the source location is approximate.</p>
