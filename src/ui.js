@@ -501,6 +501,22 @@ const GEOCODER_BASE = String(
     'https://geocode.disasterdb.com'
 ).replace(/\/$/, '');
 
+/** Resolve the language used for Photon results in the map or its SEO iframe. */
+function resolveGeocoderLanguage() {
+  const search =
+    typeof window !== 'undefined' && window.location ? window.location.search : '';
+  const queryLang = new URLSearchParams(search).get('lang');
+  if (queryLang && /^[a-z]{2}$/i.test(queryLang.trim())) {
+    return queryLang.trim().toLowerCase();
+  }
+
+  const referrer = typeof document !== 'undefined' ? document.referrer : '';
+  const match = /^https:\/\/earthmap\.live\/([a-z]{2})\/countries\//.exec(referrer);
+  return match ? match[1] : 'en';
+}
+
+const GEOCODER_LANGUAGE = resolveGeocoderLanguage();
+
 const GEOCODER_ZOOM_BY_TYPE = {
   continent: 2.5,
   country: 5,
@@ -756,12 +772,17 @@ function search(map) {
     const fires = searchAgencyFiresByName(q);
     renderUnified(fires, [], { loading: true });
 
-    const url = `${GEOCODER_BASE}/api?q=${encodeURIComponent(q)}&limit=5`;
+    const url =
+      `${GEOCODER_BASE}/api?q=${encodeURIComponent(q)}&limit=5` +
+      `&lang=${encodeURIComponent(GEOCODER_LANGUAGE)}`;
 
     try {
       const res = await fetch(url, {
         method: 'GET',
-        headers: { Accept: 'application/json' }
+        headers: {
+          Accept: 'application/json',
+          'Accept-Language': GEOCODER_LANGUAGE
+        }
       });
       if (my !== seq) return;
       if (!res.ok) {
