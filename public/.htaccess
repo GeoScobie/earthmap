@@ -4,19 +4,19 @@ RewriteEngine On
 
 # Canada region cameras: open the normal map. Not HTML pages.
 # Country URL /countries/canada/ still serves its own index.
-RewriteRule ^countries/canada/british-columbia/?$ /#4.4/55.00/-125.00 [R=302,L,NE]
-RewriteRule ^countries/canada/alberta/?$ /#4.6/55.00/-115.00 [R=302,L,NE]
-RewriteRule ^countries/canada/saskatchewan/?$ /#4.5/55.53/-106.14 [R=302,L,NE]
-RewriteRule ^countries/canada/manitoba/?$ /#4.6/55.00/-97.00 [R=302,L,NE]
-RewriteRule ^countries/canada/ontario/?$ /#4.3/50.00/-86.00 [R=302,L,NE]
-RewriteRule ^countries/canada/quebec/?$ /#3.6/52.48/-71.83 [R=302,L,NE]
-RewriteRule ^countries/canada/new-brunswick/?$ /#6.2/46.50/-66.75 [R=302,L,NE]
-RewriteRule ^countries/canada/nova-scotia/?$ /#6.0/45.20/-63.17 [R=302,L,NE]
-RewriteRule ^countries/canada/prince-edward-island/?$ /#7.0/46.34/-63.15 [R=302,L,NE]
-RewriteRule ^countries/canada/newfoundland-and-labrador/?$ /#4.3/53.82/-61.23 [R=302,L,NE]
-RewriteRule ^countries/canada/yukon/?$ /#3.8/63.00/-136.00 [R=302,L,NE]
-RewriteRule ^countries/canada/northwest-territories/?$ /#2.3/65.00/-118.00 [R=302,L,NE]
-RewriteRule ^countries/canada/nunavut/?$ /#1.6/65.04/-92.55 [R=302,L,NE]
+RewriteRule ^countries/canada/british-columbia/?$ "/#4.4/55.00/-125.00" [R=302,L,NE]
+RewriteRule ^countries/canada/alberta/?$ "/#4.6/55.00/-115.00" [R=302,L,NE]
+RewriteRule ^countries/canada/saskatchewan/?$ "/#4.5/55.53/-106.14" [R=302,L,NE]
+RewriteRule ^countries/canada/manitoba/?$ "/#4.6/55.00/-97.00" [R=302,L,NE]
+RewriteRule ^countries/canada/ontario/?$ "/#4.3/50.00/-86.00" [R=302,L,NE]
+RewriteRule ^countries/canada/quebec/?$ "/#3.6/52.48/-71.83" [R=302,L,NE]
+RewriteRule ^countries/canada/new-brunswick/?$ "/#6.2/46.50/-66.75" [R=302,L,NE]
+RewriteRule ^countries/canada/nova-scotia/?$ "/#6.0/45.20/-63.17" [R=302,L,NE]
+RewriteRule ^countries/canada/prince-edward-island/?$ "/#7.0/46.34/-63.15" [R=302,L,NE]
+RewriteRule ^countries/canada/newfoundland-and-labrador/?$ "/#4.3/53.82/-61.23" [R=302,L,NE]
+RewriteRule ^countries/canada/yukon/?$ "/#3.8/63.00/-136.00" [R=302,L,NE]
+RewriteRule ^countries/canada/northwest-territories/?$ "/#2.3/65.00/-118.00" [R=302,L,NE]
+RewriteRule ^countries/canada/nunavut/?$ "/#1.6/65.04/-92.55" [R=302,L,NE]
 # Trailing-slash for directories
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} -d

@@ -826,3 +826,30 @@ a:hover { text-decoration: underline; }
   .tip-clock { max-width: min(180px, 52vw); }
   .search-wrap { flex-basis: min(320px, 72vw); }
 }
+
+/* Country URL stays /countries/{slug}/. The page is the normal map, not an article. */
+body.country-landing {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #061018;
+}
+body.country-landing .country-landing-h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+body.country-landing iframe {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
