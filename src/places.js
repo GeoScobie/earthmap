@@ -3409,6 +3409,19 @@ export const PLACES = {
   "/zh-Hans/countries/china/xinjiang": { z: 3.2, lat: 42.4805, lng: 85.4633, title: "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی实时卫星地图", description: "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی实时卫星地图，中国。" },
   "/zh-Hans/countries/china/yunnan": { z: 4.3, lat: 25.0000, lng: 102.0000, title: "云南省实时卫星地图", description: "云南省实时卫星地图，中国。" },
   "/zh-Hans/countries/china/zhejiang": { z: 5.2, lat: 29.0000, lng: 120.0000, title: "浙江省实时卫星地图", description: "浙江省实时卫星地图，中国。" },
+  "/id/countries/indonesia/aceh": { z: 5.2, lat: 4.3685, lng: 97.0253, title: "Peta Satelit Langsung Aceh", description: "Peta Satelit Langsung Aceh, Indonesia." },
+  "/id/countries/indonesia/bali": { z: 6.8, lat: -8.2271, lng: 115.1919, title: "Peta Satelit Langsung Bali", description: "Peta Satelit Langsung Bali, Indonesia." },
+  "/id/countries/indonesia/banten": { z: 6.5, lat: -6.4454, lng: 106.1376, title: "Peta Satelit Langsung Banten", description: "Peta Satelit Langsung Banten, Indonesia." },
+  "/id/countries/indonesia/bengkulu": { z: 5.7, lat: -4.0035, lng: 101.8393, title: "Peta Satelit Langsung Bengkulu", description: "Peta Satelit Langsung Bengkulu, Indonesia." },
+  "/id/countries/indonesia/gorontalo": { z: 7.0, lat: 0.7186, lng: 122.4556, title: "Peta Satelit Langsung Gorontalo", description: "Peta Satelit Langsung Gorontalo, Indonesia." },
+  "/id/countries/indonesia/jambi": { z: 6.4, lat: -1.7070, lng: 102.7140, title: "Peta Satelit Langsung Jambi", description: "Peta Satelit Langsung Jambi, Indonesia." },
+  "/id/countries/indonesia/lampung": { z: 6.0, lat: -4.8555, lng: 105.0273, title: "Peta Satelit Langsung Lampung", description: "Peta Satelit Langsung Lampung, Indonesia." },
+  "/id/countries/indonesia/maluku": { z: 4.9, lat: 0.6301, lng: 127.9720, title: "Peta Satelit Langsung Maluku Utara", description: "Peta Satelit Langsung Maluku Utara, Indonesia." },
+  "/id/countries/indonesia/nusa-tenggara-barat": { z: 6.5, lat: -8.7893, lng: 117.1462, title: "Peta Satelit Langsung Nusa Tenggara Barat", description: "Peta Satelit Langsung Nusa Tenggara Barat, Indonesia." },
+  "/id/countries/indonesia/nusa-tenggara-timur": { z: 5.3, lat: -8.5657, lng: 120.6979, title: "Peta Satelit Langsung Nusa Tenggara Timur", description: "Peta Satelit Langsung Nusa Tenggara Timur, Indonesia." },
+  "/id/countries/indonesia/papua": { z: 5.1, lat: -2.4749, lng: 138.0848, title: "Peta Satelit Langsung Papua", description: "Peta Satelit Langsung Papua, Indonesia." },
+  "/id/countries/indonesia/papua-barat": { z: 5.1, lat: -2.4749, lng: 138.0848, title: "Peta Satelit Langsung Papua", description: "Peta Satelit Langsung Papua, Indonesia." },
+  "/id/countries/indonesia/riau": { z: 5.4, lat: 1.0498, lng: 101.6548, title: "Peta Satelit Langsung Riau", description: "Peta Satelit Langsung Riau, Indonesia." },
 };
 
 /** If this URL is a place, point the main map at its camera before MapLibre reads the hash. */
