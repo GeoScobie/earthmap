@@ -1246,6 +1246,7 @@ export const PLACES = {
   "/countries/japan/tochigi": { z: 7.2, lat: 36.6782, lng: 139.8097, title: "Live satellite map of Tochigi", description: "Live satellite map of Tochigi, Japan." },
   "/countries/japan/tokushima": { z: 7.2, lat: 33.9196, lng: 134.2510, title: "Live satellite map of Tokushima", description: "Live satellite map of Tokushima, Japan." },
   "/countries/japan/tokyo": { z: 3.3, lat: 35.6769, lng: 139.7639, title: "Live satellite map of Tokyo", description: "Live satellite map of Tokyo, Japan." },
+  "/countries/japan/tokyo/tokyo": { z: 7.5, lat: 35.68, lng: 139.76, title: "Live satellite map of Tokyo", description: "Live satellite map of Tokyo, Japan." },
   "/countries/japan/tottori": { z: 7.5, lat: 35.3555, lng: 133.8679, title: "Live satellite map of Tottori", description: "Live satellite map of Tottori, Japan." },
   "/countries/japan/toyama": { z: 7.2, lat: 36.6468, lng: 137.2184, title: "Live satellite map of Toyama", description: "Live satellite map of Toyama, Japan." },
   "/countries/japan/toyama/toyama": { z: 7.5, lat: 36.70, lng: 137.21, title: "Live satellite map of Toyama", description: "Live satellite map of Toyama, Japan." },
