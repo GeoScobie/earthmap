@@ -8,6 +8,8 @@ RewriteRule ^countries/[a-z0-9-]+/?$ /index.html [L]
 RewriteRule ^countries/[a-z0-9-]+/[a-z0-9-]+/?$ /index.html [L]
 RewriteRule ^countries/[a-z0-9-]+/[a-z0-9-]+/[a-z0-9-]+/?$ /index.html [L]
 RewriteRule ^(ja|ko|de|fr|es|pt-BR|zh-Hans|id|ru)/countries/[a-z0-9-]+/?$ /index.html [L]
+RewriteRule ^(ja|ko|de|fr|es|pt-BR|zh-Hans|id|ru)/countries/[a-z0-9-]+/[a-z0-9-]+/?$ /index.html [L]
+RewriteRule ^(ja|ko|de|fr|es|pt-BR|zh-Hans|id|ru)/countries/[a-z0-9-]+/[a-z0-9-]+/[a-z0-9-]+/?$ /index.html [L]
 
 # Trailing-slash for real directories
 RewriteCond %{REQUEST_FILENAME} !-f
