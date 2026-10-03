@@ -11,6 +11,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 
 import { createMap } from './app.js';
+import { applyPlaceRoute } from './places.js';
 import './ui.css';
 
 // MapLibre v6 is ESM-only and loads its parser in a Web Worker. If the worker
@@ -19,4 +20,5 @@ import './ui.css';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 maplibregl.setWorkerUrl(workerUrl);
 
+applyPlaceRoute();
 window.map = createMap(maplibregl, Protocol); // handy in the browser console
