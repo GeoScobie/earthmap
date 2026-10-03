@@ -9,7 +9,7 @@ import {
   hillshadeEnabled as themeHillshade
 } from './theme.js';
 
-/** @type {null|'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'} */
+/** @type {null|'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'} */
 let runtimeBasemapId = null;
 
 function queryParams() {
@@ -21,7 +21,7 @@ function queryParams() {
   }
 }
 
-/** @returns {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'} */
+/** @returns {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'} */
 export function resolveBasemapId() {
   if (runtimeBasemapId && BASEMAP_IDS.includes(runtimeBasemapId)) {
     return runtimeBasemapId;
@@ -79,17 +79,17 @@ export function resolveHillshadeEnabled(basemap = resolveBasemapId()) {
 }
 
 export function isCartographicBasemap(id = resolveBasemapId()) {
-  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-dark';
+  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-dark' || id === 'disasterdb-streets' || id === 'disasterdb-navigation' || id === 'disasterdb-gray';
 }
 
 export function isLightCartographic(id = resolveBasemapId()) {
-  return id === 'disasterdb-topo' || id === 'disasterdb-light';
+  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-streets' || id === 'disasterdb-navigation' || id === 'disasterdb-gray';
 }
 
 /** Contours on topo always; on light/dark when hillshade/DEM is on. */
 export function resolveContoursEnabled(basemap = resolveBasemapId()) {
   if (basemap === 'disasterdb-topo') return true;
-  if (basemap === 'disasterdb-light' || basemap === 'disasterdb-dark') {
+  if (basemap === 'disasterdb-light' || basemap === 'disasterdb-dark' || basemap === 'disasterdb-streets' || basemap === 'disasterdb-navigation' || basemap === 'disasterdb-gray') {
     return resolveHillshadeEnabled(basemap);
   }
   return false;

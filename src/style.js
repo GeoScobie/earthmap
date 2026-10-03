@@ -8,6 +8,9 @@ import {
   disasterdbTopoFlavor,
   disasterdbLightFlavor,
   disasterdbDarkFlavor,
+  disasterdbStreetsFlavor,
+  disasterdbNavigationFlavor,
+  disasterdbGrayFlavor,
   isCartoBaseLayer
 } from './flavors.js';
 import {
@@ -54,13 +57,19 @@ function paintColors(basemapId) {
 function flavorFor(basemapId) {
   if (basemapId === 'disasterdb-light') return disasterdbLightFlavor();
   if (basemapId === 'disasterdb-dark') return disasterdbDarkFlavor();
+  if (basemapId === 'disasterdb-streets') return disasterdbStreetsFlavor();
+  if (basemapId === 'disasterdb-navigation') return disasterdbNavigationFlavor();
+  if (basemapId === 'disasterdb-gray') return disasterdbGrayFlavor();
   return disasterdbTopoFlavor(); // disasterdb-topo
 }
 
 function styleName(basemapId) {
   if (basemapId === 'disasterdb-topo') return 'EarthMap — Topo';
-  if (basemapId === 'disasterdb-light') return 'EarthMap — Light (stub)';
-  if (basemapId === 'disasterdb-dark') return 'EarthMap — Dark (stub)';
+  if (basemapId === 'disasterdb-light') return 'EarthMap — Light';
+  if (basemapId === 'disasterdb-dark') return 'EarthMap — Dark';
+  if (basemapId === 'disasterdb-streets') return 'EarthMap — Streets';
+  if (basemapId === 'disasterdb-navigation') return 'EarthMap — Navigation';
+  if (basemapId === 'disasterdb-gray') return 'EarthMap — Gray';
   if (basemapId === 'satellite') return 'EarthMap — Sat';
   return 'EarthMap — Satellite Hybrid';
 }
@@ -917,7 +926,11 @@ export function buildStyle() {
   // shows OSM under GeoColor (Blue Marble stays hidden).
   if (isCartographicBasemap(basemapId) || basemapId === 'satellite') {
     return buildCartographicStyle(
-      basemapId === 'disasterdb-light' || basemapId === 'disasterdb-dark'
+      basemapId === 'disasterdb-light' ||
+      basemapId === 'disasterdb-dark' ||
+      basemapId === 'disasterdb-streets' ||
+      basemapId === 'disasterdb-navigation' ||
+      basemapId === 'disasterdb-gray'
         ? basemapId
         : 'disasterdb-topo',
       { nearTime: basemapId === 'satellite' }
