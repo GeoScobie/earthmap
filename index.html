@@ -319,8 +319,41 @@
     <button class="toolbar-btn active" id="goesSatModeBtn" aria-label="Satellite" title="Satellite" aria-pressed="true">
       <i class="fa-solid fa-satellite" aria-hidden="true"></i>
     </button>
+    <!-- GFS makeup. Primary order matches a weather column without Radar.
+         Wind stays the real #windBtn. Nothing here draws on the map. -->
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-precip" aria-label="Precipitation" aria-pressed="false" data-gfs="APCP / PRATE" data-unit="mm">
+      <i class="fa-solid fa-cloud-rain" aria-hidden="true"></i>
+    </button>
     <button class="toolbar-btn" id="windBtn" aria-label="Wind" title="Wind" aria-pressed="false">
       <i class="fa-solid fa-wind" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-temp" aria-label="Temperature" aria-pressed="false" data-gfs="TMP 2 m" data-unit="°C">
+      <i class="fa-solid fa-temperature-half" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-humidity" aria-label="Humidity" aria-pressed="false" data-gfs="RH 2 m" data-unit="%">
+      <i class="fa-solid fa-droplet" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-pressure" aria-label="Pressure" aria-pressed="false" data-gfs="PRMSL" data-unit="hPa">
+      <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+    </button>
+    <div class="toolbar-sep" aria-hidden="true"></div>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-clouds" aria-label="Cloud cover" aria-pressed="false" data-gfs="TCDC entire atmosphere" data-unit="%">
+      <i class="fa-solid fa-cloud" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-dewpoint" aria-label="Dew point" aria-pressed="false" data-gfs="DPT 2 m" data-unit="°C">
+      <i class="fa-solid fa-temperature-low" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-gust" aria-label="Wind gusts" aria-pressed="false" data-gfs="GUST surface" data-unit="m/s">
+      <i class="fa-solid fa-wind" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-snow" aria-label="Snow" aria-pressed="false" data-gfs="SNOD / WEASD" data-unit="mm">
+      <i class="fa-solid fa-snowflake" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-cape" aria-label="Instability" aria-pressed="false" data-gfs="CAPE surface" data-unit="J/kg">
+      <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="toolbar-btn gfs-layer-btn" id="gfs-pwat" aria-label="Precipitable water" aria-pressed="false" data-gfs="PWAT" data-unit="mm">
+      <i class="fa-solid fa-glass-water" aria-hidden="true"></i>
     </button>
     <div class="toolbar-sep" aria-hidden="true"></div>
     <button class="toolbar-btn" id="measureBtn" aria-label="Measure Distance" title="Measure Distance" aria-pressed="false">
@@ -336,6 +369,14 @@
     <button class="toolbar-btn" id="aboutBtn" aria-label="About EarthMap" title="About EarthMap">
       <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
     </button>
+  </div>
+
+
+  <div id="gfsLegendCard" class="gfs-legend-card" hidden role="status" aria-live="polite">
+    <p class="gfs-legend-name"></p>
+    <p class="gfs-legend-field"></p>
+    <p class="gfs-legend-unit"></p>
+    <p class="gfs-legend-note">Not on the map yet</p>
   </div>
 
   <!-- Share -->

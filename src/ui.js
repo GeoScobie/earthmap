@@ -59,6 +59,7 @@ export function initUI(map) {
   layerList(map);
   wireSatControl();
   measure(map);
+  wireGfsMakeup();
   share(map);
   locate(map);
   search(map);
@@ -332,6 +333,70 @@ function layerList(map) {
       map.setPaintProperty('fire-smoke', 'raster-opacity', pct / 100);
     }
   });
+}
+
+
+// GFS field buttons are makeup. They only toggle a text legend.
+// They do not add a raster, a time slider, or a second wind control.
+function wireGfsMakeup() {
+  const buttons = [...document.querySelectorAll('.vertical-toolbar .gfs-layer-btn')];
+  const card = $('gfsLegendCard');
+  if (!buttons.length || !card) return;
+  const nameEl = card.querySelector('.gfs-legend-name');
+  const fieldEl = card.querySelector('.gfs-legend-field');
+  const unitEl = card.querySelector('.gfs-legend-unit');
+  const rail = document.querySelector('.vertical-toolbar');
+  let active = null;
+
+  const place = () => {
+    if (!active || card.hidden) return;
+    const r = active.getBoundingClientRect();
+    const railRect = rail ? rail.getBoundingClientRect() : null;
+    const clipped = railRect && (r.bottom <= railRect.top + 1 || r.top >= railRect.bottom - 1);
+    if (clipped) {
+      card.style.visibility = 'hidden';
+      return;
+    }
+    card.style.visibility = '';
+    const cardW = card.offsetWidth;
+    const cardH = card.offsetHeight;
+    let top = r.top + (r.height - cardH) / 2;
+    const maxTop = Math.max(8, window.innerHeight - cardH - 8);
+    if (top < 8) top = 8;
+    if (top > maxTop) top = maxTop;
+    const left = Math.max(8, r.left - cardW - 10);
+    card.style.top = `${Math.round(top)}px`;
+    card.style.left = `${Math.round(left)}px`;
+  };
+
+  const clear = () => {
+    active = null;
+    for (const b of buttons) b.setAttribute('aria-pressed', 'false');
+    card.hidden = true;
+    card.style.visibility = '';
+  };
+
+  const show = (btn) => {
+    for (const b of buttons) b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+    active = btn;
+    const label = btn.getAttribute('aria-label') || '';
+    const field = btn.dataset.gfs || '';
+    if (nameEl) nameEl.textContent = label;
+    if (fieldEl) fieldEl.textContent = field ? `GFS ${field}` : '';
+    if (unitEl) unitEl.textContent = btn.dataset.unit || '';
+    card.hidden = false;
+    place();
+  };
+
+  for (const btn of buttons) {
+    btn.addEventListener('click', () => {
+      if (btn.getAttribute('aria-pressed') === 'true') clear();
+      else show(btn);
+    });
+  }
+
+  rail?.addEventListener('scroll', place, { passive: true });
+  window.addEventListener('resize', place);
 }
 
 // --- Measure ----------------------------------------------------------------

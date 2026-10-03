@@ -2654,6 +2654,44 @@ body, html {
    so chrome does not flash before the module bundle runs.
    --------------------------------------------------------------------------- */
 
+
+/* GFS weather makeup. Pressed state is a light fill, not a color ramp. */
+.vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"] {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+.vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"]:hover,
+.vertical-toolbar .toolbar-btn.gfs-layer-btn[aria-pressed="true"]:focus {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.gfs-legend-card {
+  position: fixed;
+  z-index: 1101;
+  margin: 0;
+  padding: 8px 10px;
+  width: max-content;
+  max-width: 220px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #f4f7fb;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.35;
+  pointer-events: none;
+}
+.gfs-legend-card[hidden] { display: none !important; }
+.gfs-legend-card p { margin: 0; }
+.gfs-legend-name { font-weight: 600; }
+.gfs-legend-field,
+.gfs-legend-unit { color: #d5dee8; }
+.gfs-legend-note {
+  margin-top: 6px !important;
+  color: #c5ced8;
+}
+
 html.embed-mode .top-left-bar,
 html.embed-mode .vertical-toolbar,
 html.embed-mode .layer-list-panel,
@@ -2752,7 +2790,8 @@ html:not(.embed-mode) #map {
 .sat-scene-age[hidden] { display: none !important; }
 
 html.embed-mode .ad-slot,
-html.embed-mode .sat-scene-age {
+html.embed-mode .sat-scene-age,
+html.embed-mode #gfsLegendCard {
   display: none !important;
 }
 
