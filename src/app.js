@@ -15,7 +15,8 @@ import { addFireLayers } from './fire.js';
 import { initUI, LocateMeControl } from './ui.js';
 import { addWindLayer, wireWindZoomGate, wireWindToggle } from './wind.js';
 import { addGeocolorLayers } from './geocolor.js';
-import { ensureGoesGeocolorMounted, wireGoesGeocolorLazy, wireGoesSatMode } from './goes.js';
+import { ensureGoesGeocolorMounted, setSatLoopClockLock, wireGoesGeocolorLazy, wireGoesSatMode } from './goes.js';
+import { isSatMosaicPage, startSatMosaicLoop } from './sat-mosaic-loop.js';
 import { addHurricaneLayers, wireHurricaneToggle } from './hurricane.js';
 import { addSatelliteLayers, wireSatelliteToggle } from './satellite.js';
 import { addAgencyFireLayers, wireAgencyFireToggles } from './agency-fires.js';
@@ -138,8 +139,8 @@ export function createMap(maplibregl, Protocol) {
   const map = new maplibregl.Map({
     container: 'map',
     style: buildStyle(),
-    center: [-119.7, 37.6],   // Sierra Nevada — good terrain to test 3D against
-    zoom: 6,
+    center: isSatMosaicPage() ? [10, 12] : [-119.7, 37.6],
+    zoom: isSatMosaicPage() ? 2.4 : 6,
     hash: true,               // keeps position in the URL so reloads don't lose you
     maxPitch: 80,
     attributionControl: false,
@@ -227,8 +228,16 @@ export function createMap(maplibregl, Protocol) {
       // Cold mount only via ensureGoesGeocolorMounted so later ensure calls share one promise.
       wireGoesSatMode(map);
       wireGoesGeocolorLazy(map);
-      if (resolveGoesGeocolorDefaultOn()) {
-        ensureGoesGeocolorMounted(map).catch((e) => console.warn('[goes-geocolor]', e.message));
+      if (isSatMosaicPage()) setSatLoopClockLock(true);
+      const goesMount = resolveGoesGeocolorDefaultOn()
+        ? ensureGoesGeocolorMounted(map)
+        : Promise.resolve();
+      if (isSatMosaicPage()) {
+        goesMount
+          .then(() => startSatMosaicLoop(map))
+          .catch((e) => console.warn('[sat-mosaic]', e.message));
+      } else {
+        goesMount.catch((e) => console.warn('[goes-geocolor]', e.message));
       }
     }
 

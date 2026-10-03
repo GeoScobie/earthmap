@@ -2874,3 +2874,79 @@ html:not(.embed-mode) #em-consent { bottom: calc(90px + 12px) !important; }
 @media (max-width: 480px) {
   html:not(.embed-mode) .measure-panel { bottom: calc(120px + var(--em-ad-h)); }
 }
+
+/* /satellites/ loop controls only. Not the homepage time scrubber. */
+html:not(.sat-mosaic-page) #satMosaicLoop { display: none !important; }
+html.sat-mosaic-page #satSceneAge,
+html.sat-mosaic-page .goes-time-transport,
+html.sat-mosaic-page .geocolor-time-bar { display: none !important; }
+.sat-mosaic-loop {
+  position: fixed;
+  z-index: 1102;
+  left: 12px;
+  right: 64px;
+  bottom: calc(12px + var(--em-ad-h, 0px));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #f4f7fb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  font-family: 'Lexend', system-ui, sans-serif;
+}
+.sat-mosaic-loop[hidden] { display: none !important; }
+html.sat-mosaic-page .sat-mosaic-loop { display: flex; }
+.sat-mosaic-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.sat-mosaic-play {
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f7fb;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.sat-mosaic-play:hover,
+.sat-mosaic-play:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+}
+.sat-mosaic-play:disabled { opacity: 0.45; cursor: default; }
+#satMosaicWhen {
+  font-weight: 600;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+#satMosaicStatus {
+  margin: 0;
+  color: #c5ced8;
+  font-size: 12px;
+}
+.sat-mosaic-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+}
+.sat-mosaic-nav a { color: #f4f7fb; text-decoration: none; }
+.sat-mosaic-nav a:hover { color: #7fd4ff; }
+.sat-mosaic-credit {
+  flex: 1 1 100%;
+  margin: 0;
+  color: #c5ced8;
+  font-size: 11px;
+}
+

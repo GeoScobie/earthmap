@@ -705,6 +705,8 @@ let transportAgeTimer = 0;
 let transportClockFrame = null;
 /** GK2A bottom-transport play loop (opt-in via Satellite button / ?scrub=1 / timeSlider). */
 let gkPlaying = false;
+/** /satellites/ loop owns setTiles. Tip polls must not snap the mosaic back to latest. */
+let satLoopClockLock = false;
 let gkPlayTimer = null;
 /** True while preloading the first play buffer (spinner on transport play btn). */
 let gkBuffering = false;
@@ -1640,6 +1642,19 @@ function applyGk2aOwned(map, frame, opts = {}) {
     ownedGoesGk2aTileUrl(frame.ymd, frame.hhmm),
     opts
   );
+}
+
+/** Step the four live disks to real frames. West includes the date-line half. No Himawari. */
+export function applySatLoopFrames(map, frames) {
+  if (!map || !frames) return;
+  if (frames.east) applyEastOwned(map, frames.east);
+  if (frames.west) applyWestFamilyOwned(map, frames.west);
+  if (frames.met) applyMeteosatOwned(map, frames.met);
+  if (frames.gk) applyGk2aOwned(map, frames.gk);
+}
+
+export function setSatLoopClockLock(on) {
+  satLoopClockLock = Boolean(on);
 }
 
 function applyOwnedFrameBoth(map, frame, opts = {}) {
@@ -3401,7 +3416,7 @@ function wireTipWatch() {
       run({ fromWake: true }).then(() => {
         // Snap to tip unless user is actively dragging scrub (parked mid-
         // timeline / mid-play still catch up after background throttle).
-        if (!eitherGeocolorOn() || gkUserDragging) return;
+        if (!eitherGeocolorOn() || gkUserDragging || satLoopClockLock) return;
         const map = goesUiMap;
         const state = goesUiState;
         if (!map || !state) return;
@@ -3575,7 +3590,7 @@ export async function addGoesGeocolorLayers(map) {
   // Settle: prime/rebuild may race mount; re-assert latest tip + tiles once.
   queue.resolve().then(() => {
     if (goesUiState !== state || !goesUiMap) return;
-    if (gkUserDragging || gkPlaying || gkBuffering) return;
+    if (gkUserDragging || gkPlaying || gkBuffering || satLoopClockLock) return;
     gkIntentionalScrub = false;
     forceLiveTipFromPoll(goesUiMap, state, { forceTiles: true });
     console.info(
@@ -3786,7 +3801,9 @@ export async function addGoesGeocolorLayers(map) {
     // tipAdvanced / fromWake also rebuild the play-list tip edge. forceTiles
     // remounts when the template string is unchanged but clock lagged tip
     // (frozen ~03:30 / ~2h5m chip while latest.json is fresh).
-    if (!gkUserDragging) {
+    if (satLoopClockLock) {
+      // Mosaic loop paints its own frames. Keep tip bookkeeping, do not retile.
+    } else if (!gkUserDragging) {
       const forceTiles = tipAdvanced || fromWake || clockStale;
       if (tipAdvanced || fromWake) {
         await catchUpToLiveTips(map, state, { forceTiles });

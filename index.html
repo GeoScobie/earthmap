@@ -489,6 +489,33 @@
 
   <div class="ad-slot" aria-hidden="true"></div>
 
+  <script>
+  (function () {
+    try {
+      var path = (location.pathname || '/').replace(/\/+$/, '') || '/';
+      if (path === '/satellites' || path === '/earthmap/satellites') {
+        document.documentElement.classList.add('sat-mosaic-page');
+      }
+    } catch (e) {}
+  })();
+  </script>
+
+  <div id="satMosaicLoop" class="sat-mosaic-loop" hidden>
+    <div class="sat-mosaic-main">
+      <button type="button" class="sat-mosaic-play" id="satMosaicPlay" disabled aria-pressed="false">Play</button>
+      <time id="satMosaicWhen">—</time>
+      <p id="satMosaicStatus">Loading Sat scenes…</p>
+    </div>
+    <nav class="sat-mosaic-nav" aria-label="Satellites">
+      <a href="https://earthmap.live/">Map</a>
+      <a href="https://earthmap.live/satellites/goes-east/">GOES-East</a>
+      <a href="https://earthmap.live/satellites/goes-west/">GOES-West</a>
+      <a href="https://earthmap.live/satellites/meteosat/">Meteosat</a>
+      <a href="https://earthmap.live/satellites/gk2a/">GK2A</a>
+    </nav>
+    <p class="sat-mosaic-credit">Contains modified EUMETSAT Meteosat data.</p>
+  </div>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
