@@ -96,8 +96,11 @@ export const SAT_ONLY_OUTLINE_IDS = [
 //   'disasterdb-topo'   Cartographic topo / Mapbox-Outdoors feel via
 //                       @protomaps/basemaps layers() + custom Flavor.
 //                       Own R2 PMTiles only. Not the load default.
-//   'disasterdb-light'  Stub — stock Protomaps light Flavor path (same wiring).
-//   'disasterdb-dark'   Stub — stock Protomaps dark Flavor path (same wiring).
+//   'disasterdb-light'  Light — paper land, blue water, quiet roads.
+//   'disasterdb-dark'   Dark — night recolor of topo.
+//   'disasterdb-streets' Streets — streets-v11 recolor of the light structure.
+//   'disasterdb-navigation' Navigation — pale ground, strong yellow/white roads.
+//   'disasterdb-gray'   Gray — muted grayscale cartography.
 //
 // Override cold start:
 //   1) ?basemap=satellite (or disasterdb-light / disasterdb-dark)
@@ -111,10 +114,13 @@ export const BASEMAP_IDS = [
   'satellite',
   'disasterdb-topo',
   'disasterdb-light',
-  'disasterdb-dark'
+  'disasterdb-dark',
+  'disasterdb-streets',
+  'disasterdb-navigation',
+  'disasterdb-gray'
 ];
 
-/** @type {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'} */
+/** @type {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'} */
 export const basemapId = 'satellite';  // near-time NASA + GeoColor (Rob 2026-09-21)
 
 // Optional hillshade for cartographic modes (topo / light / dark).
