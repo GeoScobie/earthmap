@@ -24,6 +24,8 @@
     rel="stylesheet"
   />
 
+  <!-- Official Font Awesome Free stylesheet for the map toolbar. -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- FireMap parity: FA Free 6.6.0 solid webfont subset (fa-hurricane / f751) -->
   <link href="/vendor/fontawesome/css/fa-hurricane-only.css" rel="stylesheet" />
 
@@ -150,8 +152,6 @@
   <nav class="map-legal" aria-label="EarthMap">
     <a href="/" aria-current="page">Map</a>
     <a href="/countries/">Countries</a>
-    <a href="/about/">About</a>
-    <a href="/privacy/">Privacy</a>
   </nav>
   </div>
 
@@ -369,27 +369,27 @@
   <!-- Toolbar — find → drawn layers → tools → info -->
   <div class="vertical-toolbar" aria-label="Map Toolbar">
     <button class="toolbar-btn" id="toggleLayersBtn" aria-label="Toggle Layers" title="Toggle Layers">
-      <svg><use href="#i-layers"/></svg>
+      <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
     </button>
     <button class="toolbar-btn active" id="goesSatModeBtn" aria-label="Satellite" title="Satellite (on) — tap again to turn off (chip expands controls)" aria-pressed="true">
-      <svg><use href="#i-satellite"/></svg>
+      <i class="fa-solid fa-satellite" aria-hidden="true"></i>
     </button>
     <button class="toolbar-btn" id="windBtn" aria-label="Wind" title="Wind" aria-pressed="false">
-      <svg><use href="#i-wind"/></svg>
+      <i class="fa-solid fa-wind" aria-hidden="true"></i>
     </button>
     <div class="toolbar-sep" aria-hidden="true"></div>
     <button class="toolbar-btn" id="measureBtn" aria-label="Measure Distance" title="Measure Distance" aria-pressed="false">
-      <svg><use href="#i-ruler"/></svg>
+      <i class="fa-solid fa-ruler" aria-hidden="true"></i>
     </button>
     <button class="toolbar-btn" id="shareMapBtn" aria-label="Share Map" title="Share Map">
-      <svg><use href="#i-share"/></svg>
+      <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
     </button>
     <div class="toolbar-sep" aria-hidden="true"></div>
     <button class="toolbar-btn" id="legendBtn" aria-label="Show Map Legend" title="Show Map Legend" aria-expanded="false">
-      <svg><use href="#i-legend"/></svg>
+      <i class="fa-solid fa-list" aria-hidden="true"></i>
     </button>
     <button class="toolbar-btn" id="aboutBtn" aria-label="About EarthMap" title="About EarthMap">
-      <svg><use href="#i-info"/></svg>
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
     </button>
   </div>
 
@@ -425,6 +425,10 @@
       <button class="close-panel-btn" id="closeAboutPanel" aria-label="Close About Panel">×</button>
     </div>
     <div class="panel-content">
+      <nav class="info-pages" aria-label="About and privacy">
+        <a href="/about/">About</a>
+        <a href="/privacy/">Privacy</a>
+      </nav>
       <h3>Disclaimer</h3>
       <p>EarthMap shows satellite imagery for information only. Scenes can be late or incomplete. Do not use EarthMap as a substitute for official warnings. Always verify with local authorities. EarthMap is not liable for decisions made from this map.</p>
 
