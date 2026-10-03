@@ -87,10 +87,32 @@
   </script>
   <script src="/js/consent.js" defer></script>
 
+  <style>
+    html, body { margin: 0; height: 100%; background: #061018; overflow: hidden; }
+    .country-landing-h1 {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    body.country-landing iframe {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      display: block;
+    }
+  </style>
 </head>
 <body class="country-landing">
   <h1 class="country-landing-h1">Live satellite map of Brunei</h1>
   <p class="country-landing-h1">GK2A covers Brunei.</p>
-  <iframe title="Brunei live satellite map" src="/#7.4/4.5/114.7"></iframe>
+  <iframe title="Brunei live satellite map" src="https://earthmap.live/#7.4/4.5/114.7"></iframe>
 </body>
 </html>
