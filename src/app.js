@@ -142,7 +142,8 @@ export function createMap(maplibregl, Protocol) {
     center: isSatMosaicPage() ? [10, 12] : [-119.7, 37.6],
     zoom: isSatMosaicPage() ? 2.4 : 6,
     hash: true,               // keeps position in the URL so reloads don't lose you
-    maxPitch: 80,
+    pitch: isSatMosaicPage() ? 0 : undefined,
+    maxPitch: isSatMosaicPage() ? 0 : 80,
     attributionControl: false,
     // Scroll/trackpad zoom with no modifier — ctrl+scroll requirement removed (Rob).
 
@@ -170,6 +171,21 @@ export function createMap(maplibregl, Protocol) {
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'bottom-right');
   // Locate above zoom (flex order:0). FireMap SoT — not on vertical toolbar / near search.
   map.addControl(new LocateMeControl(), 'bottom-right');
+
+  // /satellites/ is a flat map. Homepage keeps the globe from the style.
+  if (isSatMosaicPage()) {
+    const flatten = () => {
+      try { map.setProjection({ type: 'mercator' }); } catch { /* ignore */ }
+      map.setMaxPitch(0);
+      map.setPitch(0);
+      map.setBearing(0);
+      try { map.dragRotate.disable(); } catch { /* ignore */ }
+      try { map.touchPitch.disable(); } catch { /* ignore */ }
+      try { map.touchZoomRotate.disableRotation(); } catch { /* ignore */ }
+    };
+    flatten();
+    map.on('style.load', flatten);
+  }
 
   // -------------------------------------------------------------------------
   // Terrain and sky

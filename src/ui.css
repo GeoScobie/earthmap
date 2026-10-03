@@ -2887,9 +2887,9 @@ html.sat-mosaic-page .geocolor-time-bar { display: none !important; }
   right: 64px;
   bottom: calc(12px + var(--em-ad-h, 0px));
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   padding: 8px 10px;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.72);
@@ -2901,6 +2901,7 @@ html.sat-mosaic-page .geocolor-time-bar { display: none !important; }
 html.sat-mosaic-page .sat-mosaic-loop { display: flex; }
 .sat-mosaic-main {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -2944,9 +2945,28 @@ html.sat-mosaic-page .sat-mosaic-loop { display: flex; }
 .sat-mosaic-nav a { color: #f4f7fb; text-decoration: none; }
 .sat-mosaic-nav a:hover { color: #7fd4ff; }
 .sat-mosaic-credit {
-  flex: 1 1 100%;
   margin: 0;
   color: #c5ced8;
   font-size: 11px;
 }
+.sat-mosaic-scrub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.sat-mosaic-scrub-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.sat-mosaic-scrub input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: #7fd4ff;
+  cursor: pointer;
+}
+.sat-mosaic-scrub input[type="range"]:disabled { cursor: default; opacity: 0.45; }
 

@@ -48,6 +48,7 @@ export function startSatMosaicLoop(map) {
   const playBtn = document.getElementById('satMosaicPlay');
   const whenEl = document.getElementById('satMosaicWhen');
   const statusEl = document.getElementById('satMosaicStatus');
+  const scrub = document.getElementById('satMosaicScrub');
   if (!bar || !map) return;
   bar.hidden = false;
   document.title = 'Sat · EarthMap';
@@ -73,6 +74,7 @@ export function startSatMosaicLoop(map) {
       gk: frameFromUnix(nearestStamp(catalogs.gk2a, target))
     };
     applySatLoopFrames(map, frames);
+    if (scrub && Number(scrub.value) !== index) scrub.value = String(index);
     if (whenEl) {
       const label = frameFromUnix(target);
       whenEl.textContent = label
@@ -108,6 +110,11 @@ export function startSatMosaicLoop(map) {
   };
 
   playBtn?.addEventListener('click', () => setPlaying(!playing));
+  scrub?.addEventListener('input', () => {
+    if (!steps.length) return;
+    setPlaying(false);
+    paint(Number(scrub.value));
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop();
     else if (playing) tick();
@@ -140,7 +147,14 @@ export function startSatMosaicLoop(map) {
       if (!steps.length) {
         setStatus('No scenes on file.');
         if (playBtn) playBtn.disabled = true;
+        if (scrub) scrub.disabled = true;
         return;
+      }
+      if (scrub) {
+        scrub.min = '0';
+        scrub.max = String(Math.max(0, steps.length - 1));
+        scrub.value = '0';
+        scrub.disabled = steps.length < 2;
       }
       setStatus(usedFallback
         ? 'No scenes in the last 4 hours for every disk. Showing the newest scenes on file. About every 10 minutes.'
