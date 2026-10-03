@@ -2687,3 +2687,80 @@ span.logo-wordmark {
 @media (max-width: 480px) {
   span.logo-wordmark { height: auto; font-size: 13px; }
 }
+
+/* ---------------------------------------------------------------------------
+   Reserved ad strip + legal links.
+   Empty placeholder only — no ad script. Hidden in ?embed=1 with the rest
+   of the chrome. Privacy and About pages do not include this strip.
+   --------------------------------------------------------------------------- */
+:root { --em-ad-h: 90px; }
+html.embed-mode { --em-ad-h: 0px; }
+
+html:not(.embed-mode) #map {
+  bottom: var(--em-ad-h);
+  height: auto;
+}
+
+.ad-slot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 90px;
+  z-index: 800;
+  background: #141414;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.map-legal {
+  position: fixed;
+  /* Under the logo chip, left of the open search card (z-index 1001). */
+  z-index: 900;
+  top: 62px;
+  left: 10px;
+  display: flex;
+  gap: 12px;
+  padding: 3px 2px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  pointer-events: auto;
+}
+.map-legal a {
+  color: #e8eef8;
+  text-decoration: none;
+}
+.map-legal a:hover,
+.map-legal a:focus-visible {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+html.embed-mode .ad-slot,
+html.embed-mode .map-legal {
+  display: none !important;
+}
+
+/* Fixed (viewport) chrome sits above the reserved strip. Controls inside #map
+   already move with the shortened map. */
+html:not(.embed-mode) .readout { bottom: calc(10px + var(--em-ad-h)); }
+html:not(.embed-mode) .legend-panel { bottom: calc(30px + var(--em-ad-h)); }
+html:not(.embed-mode) .goes-time-transport { bottom: calc(22px + var(--em-ad-h)); }
+html:not(.embed-mode) .measure-panel { bottom: calc(100px + var(--em-ad-h)); }
+html:not(.embed-mode) .geocolor-time-bar { bottom: calc(26px + var(--em-ad-h)); }
+html:not(.embed-mode) #em-consent { bottom: calc(90px + 12px) !important; }
+
+@media (max-width: 640px) {
+  html:not(.embed-mode) .goes-time-transport:not(.minimized),
+  html:not(.embed-mode) .goes-time-transport.minimized {
+    bottom: calc(28px + var(--em-ad-h));
+  }
+  html:not(.embed-mode) .legend-panel { bottom: calc(65px + var(--em-ad-h)); }
+  html:not(.embed-mode) .legend-toggle-btn { bottom: calc(25px + var(--em-ad-h)); }
+  html:not(.embed-mode) .geocolor-time-bar { bottom: calc(18px + var(--em-ad-h)); }
+}
+@media (max-width: 480px) {
+  html:not(.embed-mode) .measure-panel { bottom: calc(120px + var(--em-ad-h)); }
+}

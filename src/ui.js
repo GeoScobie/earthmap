@@ -506,8 +506,10 @@ function resolveGeocoderLanguage() {
   const search =
     typeof window !== 'undefined' && window.location ? window.location.search : '';
   const queryLang = new URLSearchParams(search).get('lang');
-  if (queryLang && /^[a-z]{2}$/i.test(queryLang.trim())) {
-    return queryLang.trim().toLowerCase();
+  // BCP-47-ish tags such as pt-BR and zh-Hans. Referrer path stays 2-letter.
+  const lang = queryLang ? queryLang.trim() : '';
+  if (/^[A-Za-z0-9-]{2,10}$/.test(lang)) {
+    return lang;
   }
 
   const referrer = typeof document !== 'undefined' ? document.referrer : '';

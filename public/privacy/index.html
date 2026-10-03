@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+  <meta name="description" content="How EarthMap uses cookies, Google Analytics, and a future ad slot. Accept or Reject in the consent banner, or block cookies in your browser." />
+  <link rel="canonical" href="https://earthmap.live/privacy/" />
+  <title>Privacy — EarthMap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="/css/earthmap.css" rel="stylesheet" />
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'analytics_storage': 'denied',
+      'region': ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH']
+    });
+    gtag('consent', 'default', {
+      'ad_storage': 'granted',
+      'ad_user_data': 'granted',
+      'ad_personalization': 'granted',
+      'analytics_storage': 'granted'
+    });
+    try {
+      var emc = localStorage.getItem('em_consent_v2');
+      if (emc === 'granted' || emc === 'denied') {
+        gtag('consent', 'update', {
+          'ad_storage': emc,
+          'ad_user_data': emc,
+          'ad_personalization': emc,
+          'analytics_storage': emc
+        });
+      }
+    } catch (e) {}
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59Q4Q2L53N"></script>
+  <script>
+    gtag('js', new Date());
+    gtag('config', 'G-59Q4Q2L53N');
+  </script>
+  <script src="/js/consent.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <a class="logo" href="/">EarthMap</a>
+      <nav><a href="/about/">About</a></nav>
+    </header>
+    <h1>Privacy</h1>
+    <p class="meta">EarthMap.live</p>
+    <p>EarthMap uses cookies. That is how we measure the site, and how ads would work if we turn them on later.</p>
+    <h2>Google Analytics</h2>
+    <p>We use Google Analytics, measurement ID <strong>G-59Q4Q2L53N</strong>, to see which pages people open and how the globe is used. Google receives that traffic data under its own terms.</p>
+    <h2>Ads</h2>
+    <p>We may add third-party ads later through Google AdSense. There are no ad units on EarthMap today, including on this page. If ads go live, AdSense may set its own cookies to show and measure them.</p>
+    <h2>Opt out</h2>
+    <p>Use the consent banner on the site: <strong>Accept</strong> allows measurement and ad cookies, <strong>Reject</strong> turns them off. You can also block or clear cookies in your browser. Reject, or blocking cookies, does not change the satellite imagery.</p>
+    <p><a href="/">Back to the globe</a></p>
+  </main>
+</body>
+</html>

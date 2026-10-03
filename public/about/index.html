@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+  <meta name="description" content="EarthMap is a live geostationary satellite globe. GEO imagery of Earth, not a wildfire product." />
+  <link rel="canonical" href="https://earthmap.live/about/" />
+  <title>About — EarthMap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="/css/earthmap.css" rel="stylesheet" />
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'analytics_storage': 'denied',
+      'region': ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH']
+    });
+    gtag('consent', 'default', {
+      'ad_storage': 'granted',
+      'ad_user_data': 'granted',
+      'ad_personalization': 'granted',
+      'analytics_storage': 'granted'
+    });
+    try {
+      var emc = localStorage.getItem('em_consent_v2');
+      if (emc === 'granted' || emc === 'denied') {
+        gtag('consent', 'update', {
+          'ad_storage': emc,
+          'ad_user_data': emc,
+          'ad_personalization': emc,
+          'analytics_storage': emc
+        });
+      }
+    } catch (e) {}
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59Q4Q2L53N"></script>
+  <script>
+    gtag('js', new Date());
+    gtag('config', 'G-59Q4Q2L53N');
+  </script>
+  <script src="/js/consent.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <a class="logo" href="/">EarthMap</a>
+      <nav><a href="/privacy/">Privacy</a></nav>
+    </header>
+    <h1>About EarthMap</h1>
+    <p>EarthMap is a live geostationary satellite globe. The picture is GEO imagery: satellites that stay over one spot and watch the same face of the Earth, clouds and storms included.</p>
+    <p>It is not a wildfire product. There is no fire-incident database here and no evacuation map. Open the globe and look at the planet from those satellites.</p>
+    <p><a href="/">Back to the globe</a> · <a href="/privacy/">Privacy</a></p>
+  </main>
+</body>
+</html>
