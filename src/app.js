@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------
 
 import { buildStyle } from './style.js';
-import { brand, cartoLightLabels, sources, attribution } from './theme.js';
+import { brand, cartoLightLabels, streetsV11Labels, outdoorsV11Labels, darkV10Labels, lightV10Labels, navigationNightLabels, grayLightV10Labels, sources, attribution } from './theme.js';
 import { resolveDemNeeded, resolveBasemapId, isLightCartographic, isSatelliteBasemap } from './basemap-resolve.js';
 // isSatelliteBasemap used for terrain + default sat chrome
 import { setupContourDem } from './contour-dem.js';
@@ -222,7 +222,20 @@ export function createMap(maplibregl, Protocol) {
     // awaited: labels render immediately and icons pop in a moment later,
     // rather than the whole basemap waiting on a CDN.
     // Match carto (topo/light) label colors so Maki icons are not white-on-cream.
-    const poiColors = isLightCartographic(resolveBasemapId())
+    const basemap = resolveBasemapId();
+    const poiColors = basemap === 'disasterdb-topo'
+      ? { ...brand, ...outdoorsV11Labels }
+      : basemap === 'disasterdb-streets'
+      ? { ...brand, ...streetsV11Labels }
+      : basemap === 'disasterdb-dark'
+      ? { ...brand, ...darkV10Labels }
+      : basemap === 'disasterdb-light'
+      ? { ...brand, ...lightV10Labels }
+      : basemap === 'disasterdb-navigation'
+      ? { ...brand, ...navigationNightLabels }
+      : basemap === 'disasterdb-gray'
+      ? { ...brand, ...grayLightV10Labels }
+      : isLightCartographic(basemap)
       ? { ...brand, ...cartoLightLabels }
       : brand;
     loadPoiIcons(map, poiColors).catch((e) => console.warn('[icons]', e));

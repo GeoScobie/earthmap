@@ -9,7 +9,7 @@ import {
   hillshadeEnabled as themeHillshade
 } from './theme.js';
 
-/** @type {null|'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'} */
+/** @type {null|'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'} */
 let runtimeBasemapId = null;
 
 function queryParams() {
@@ -21,7 +21,7 @@ function queryParams() {
   }
 }
 
-/** @returns {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'} */
+/** @returns {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'} */
 export function resolveBasemapId() {
   if (runtimeBasemapId && BASEMAP_IDS.includes(runtimeBasemapId)) {
     return runtimeBasemapId;
@@ -79,17 +79,19 @@ export function resolveHillshadeEnabled(basemap = resolveBasemapId()) {
 }
 
 export function isCartographicBasemap(id = resolveBasemapId()) {
-  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-dark' || id === 'disasterdb-streets' || id === 'disasterdb-navigation' || id === 'disasterdb-gray';
+  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-dark' || id === 'disasterdb-streets' || id === 'disasterdb-navigation' || id === 'disasterdb-gray' || id === 'disasterdb-night-nav' || id === 'disasterdb-hybrid';
 }
 
 export function isLightCartographic(id = resolveBasemapId()) {
-  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-streets' || id === 'disasterdb-navigation' || id === 'disasterdb-gray';
+  // navigation matches FireMap's night-origin nav style (dark), so it is out.
+  // night-nav and hybrid are dark palettes too.
+  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-streets' || id === 'disasterdb-gray';
 }
 
 /** Contours on topo always; on light/dark when hillshade/DEM is on. */
 export function resolveContoursEnabled(basemap = resolveBasemapId()) {
   if (basemap === 'disasterdb-topo') return true;
-  if (basemap === 'disasterdb-light' || basemap === 'disasterdb-dark' || basemap === 'disasterdb-streets' || basemap === 'disasterdb-navigation' || basemap === 'disasterdb-gray') {
+  if (basemap === 'disasterdb-light' || basemap === 'disasterdb-dark' || basemap === 'disasterdb-streets' || basemap === 'disasterdb-navigation' || basemap === 'disasterdb-gray' || basemap === 'disasterdb-night-nav' || basemap === 'disasterdb-hybrid') {
     return resolveHillshadeEnabled(basemap);
   }
   return false;
