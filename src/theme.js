@@ -104,6 +104,10 @@ export const SAT_ONLY_OUTLINE_IDS = [
 //                       major roads. Not a Mapbox navigation-day match.
 //   'disasterdb-hybrid' Hybrid — dark muted land, light roads. Not imagery
 //                       and not a Mapbox satellite-streets color match.
+//   'disasterdb-navigation-day' Navigation Day — mapbox/navigation-day-v1.
+//   'disasterdb-satellite-streets' satellite-streets-v12 road/label colors.
+//   'disasterdb-hydro'  Quiet land, emphasized rivers/lakes. No watershed layer.
+//   'disasterdb-standard' Mapbox Standard default day colors (not 3D).
 //
 // Override cold start:
 //   1) ?basemap=satellite (or disasterdb-light / disasterdb-dark)
@@ -122,10 +126,14 @@ export const BASEMAP_IDS = [
   'disasterdb-navigation',
   'disasterdb-gray',
   'disasterdb-night-nav',
-  'disasterdb-hybrid'
+  'disasterdb-hybrid',
+  'disasterdb-navigation-day',
+  'disasterdb-satellite-streets',
+  'disasterdb-hydro',
+  'disasterdb-standard'
 ];
 
-/** @type {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'} */
+/** @type {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'|'disasterdb-navigation-day'|'disasterdb-satellite-streets'|'disasterdb-hydro'|'disasterdb-standard'} */
 export const basemapId = 'satellite';  // near-time NASA + GeoColor (Rob 2026-09-21)
 
 // Optional hillshade for cartographic modes (topo / light / dark).
@@ -402,6 +410,132 @@ export const grayLightV10Labels = {
   boundaryLineHi: 'hsl(0, 0%, 62%)',
   boundaryLine: 'hsl(0, 0%, 70%)',
   boundaryLineAdm2: 'hsl(0, 0%, 80%)',
+  stateOpacity: 1
+};
+
+// Label colors from public mapbox/navigation-day-v1.
+// Applied only for disasterdb-navigation-day. Sizes use the dayNav flag
+// (larger than the shared streets ramps). Motorway road-halo
+// hsla(60, 5%, 100%, 0.75) cannot split from the street halo below.
+export const navigationDayLabels = {
+  labelDim: 'hsl(230, 20%, 5%)',
+  labelText: 'hsl(230, 20%, 5%)',
+  labelMuted: 'hsl(0, 0%, 15%)',
+  roadLabel: 'hsl(0, 0%, 15%)',
+  roadLabelMinor: 'hsl(0, 0%, 15%)',
+  roadHalo: 'hsl(230, 10%, 92%)',
+  labelHalo: 'hsl(60, 5%, 100%)',
+  labelHaloSoft: 'hsla(60, 5%, 100%, 0)',
+  labelHaloSub: 'hsla(60, 5%, 100%, 0.75)',
+  labelSubdivision: 'hsl(230, 20%, 44%)',
+  stateLabel: 'hsl(230, 20%, 5%)',
+  countryLabel: 'hsl(230, 20%, 5%)',
+  countryHalo: 'hsl(60, 5%, 100%)',
+  waterLabel: 'hsl(197, 66%, 57%)',
+  waterLabelOcean: 'hsl(197, 94%, 58%)',
+  // poi common case (sizerank >= 5). Category halos cannot split.
+  poiPark: 'hsl(160, 80%, 21%)',
+  poiEducation: 'hsl(35, 60%, 34%)',
+  poiMedical: 'hsl(320, 32%, 52%)',
+  poiDefault: 'hsl(236, 6%, 48%)',
+  poiHalo: 'hsl(60, 5%, 100%)',
+  naturalLabel: 'hsl(236, 6%, 48%)',
+  boundaryLineHi: 'hsl(250, 90%, 80%)',
+  boundaryLine: 'hsl(250, 90%, 85%)',
+  boundaryLineAdm2: 'hsl(250, 53%, 75%)',
+  stateOpacity: 1
+};
+
+// Road/label overlay colors from public mapbox/satellite-streets-v12.
+// Applied only for disasterdb-satellite-streets. Sizes stay on the
+// non-v11 satellite label layout (this style's water labels have a halo).
+export const satelliteStreetsLabels = {
+  labelDim: 'hsl(0, 0%, 95%)',
+  labelText: 'hsl(0, 0%, 100%)',
+  labelMuted: 'hsl(0, 0%, 100%)',
+  roadLabel: 'hsl(0, 0%, 100%)',
+  roadLabelMinor: 'hsl(0, 0%, 100%)',
+  // motorway/trunk halo is hsla(0, 5%, 0%, 0.75); other classes are solid.
+  roadHalo: 'hsl(0, 5%, 0%)',
+  labelHalo: 'hsl(0, 5%, 0%)',
+  labelHaloSoft: 'hsla(0, 0%, 0%, 0.5)',
+  labelHaloSub: 'hsla(0, 5%, 0%, 0.75)',
+  labelSubdivision: 'hsl(0, 0%, 100%)',
+  stateLabel: 'hsl(0, 0%, 95%)',
+  countryLabel: 'hsl(0, 0%, 95%)',
+  countryHalo: 'hsl(0, 5%, 0%)',
+  waterLabel: 'hsl(240, 68%, 90%)',
+  waterLabelOcean: 'hsl(240, 96%, 82%)',
+  poiPark: 'hsl(110, 100%, 85%)',
+  poiEducation: 'hsl(30, 100%, 85%)',
+  poiMedical: 'hsl(0, 100%, 85%)',
+  poiDefault: 'hsl(0, 0%, 100%)',
+  poiHalo: 'hsl(0, 0%, 0%)',
+  naturalLabel: 'hsl(0, 0%, 100%)',
+  boundaryLineHi: 'hsl(260, 15%, 80%)',
+  boundaryLine: 'hsl(260, 15%, 85%)',
+  boundaryLineAdm2: 'hsl(260, 15%, 85%)',
+  stateOpacity: 0.5
+};
+
+// Hydro labels: dark ink on quiet land, stronger water ink. No watershed
+// names exist in the tiles.
+export const hydroLabels = {
+  labelDim: 'hsl(210, 18%, 18%)',
+  labelText: 'hsl(210, 18%, 18%)',
+  labelMuted: 'hsl(210, 8%, 32%)',
+  roadLabel: 'hsl(210, 8%, 32%)',
+  roadLabelMinor: 'hsl(210, 8%, 32%)',
+  roadHalo: 'hsl(40, 20%, 98%)',
+  labelHalo: 'hsl(40, 20%, 98%)',
+  labelHaloSoft: 'hsl(200, 40%, 96%)',
+  labelHaloSub: 'hsl(40, 20%, 98%)',
+  labelSubdivision: 'hsl(210, 10%, 32%)',
+  stateLabel: 'hsl(210, 12%, 36%)',
+  countryLabel: 'hsl(210, 18%, 18%)',
+  countryHalo: 'hsl(40, 20%, 98%)',
+  waterLabel: 'hsl(207, 85%, 22%)',
+  waterLabelOcean: 'hsl(207, 75%, 26%)',
+  poiPark: 'hsl(140, 25%, 28%)',
+  poiEducation: 'hsl(30, 30%, 32%)',
+  poiMedical: 'hsl(0, 40%, 36%)',
+  poiDefault: 'hsl(210, 10%, 28%)',
+  poiHalo: 'hsl(40, 20%, 98%)',
+  naturalLabel: 'hsl(140, 20%, 26%)',
+  boundaryLineHi: 'hsl(210, 10%, 45%)',
+  boundaryLine: 'hsl(210, 8%, 55%)',
+  boundaryLineAdm2: 'hsl(210, 6%, 65%)',
+  stateOpacity: 0.7
+};
+
+// Mapbox Standard default day theme (schema color* defaults, day preset).
+// Lighting-dependent halos collapse to the day stop (white).
+export const standardLabels = {
+  labelDim: 'hsl(0, 0%, 0%)',
+  labelText: 'hsl(0, 0%, 0%)',
+  labelMuted: 'hsl(0, 0%, 25%)',
+  roadLabel: 'hsl(0, 0%, 25%)',
+  roadLabelMinor: 'hsl(0, 0%, 25%)',
+  roadHalo: 'hsl(0, 0%, 100%)',
+  labelHalo: 'hsl(0, 0%, 100%)',
+  labelHaloSoft: 'hsla(0, 0%, 100%, 0)',
+  labelHaloSub: 'hsl(0, 0%, 100%)',
+  labelSubdivision: 'hsl(0, 0%, 0%)',
+  stateLabel: 'hsl(0, 0%, 0%)',
+  countryLabel: 'hsl(0, 0%, 0%)',
+  countryHalo: 'hsl(0, 0%, 100%)',
+  // day stop of the water-label expression on colorWater hsl(200, 100%, 80%)
+  waterLabel: 'hsl(200, 40%, 44%)',
+  waterLabelOcean: 'hsl(200, 40%, 44%)',
+  poiPark: 'hsl(203, 7%, 55%)',
+  poiEducation: 'hsl(203, 7%, 55%)',
+  poiMedical: 'hsl(203, 7%, 55%)',
+  poiDefault: 'hsl(203, 7%, 55%)',
+  poiHalo: 'hsl(0, 0%, 100%)',
+  naturalLabel: 'hsl(210, 20%, 46%)',
+  boundaryLineHi: 'hsl(345, 100%, 70%)',
+  boundaryLine: 'hsl(345, 100%, 70%)',
+  boundaryLineAdm2: 'hsl(345, 80%, 78%)',
   stateOpacity: 1
 };
 

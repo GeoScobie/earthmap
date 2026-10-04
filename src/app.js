@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------
 
 import { buildStyle } from './style.js';
-import { brand, cartoLightLabels, streetsV11Labels, outdoorsV11Labels, darkV10Labels, lightV10Labels, navigationNightLabels, grayLightV10Labels, sources, attribution } from './theme.js';
+import { brand, cartoLightLabels, streetsV11Labels, outdoorsV11Labels, darkV10Labels, lightV10Labels, navigationNightLabels, grayLightV10Labels, navigationDayLabels, satelliteStreetsLabels, hydroLabels, standardLabels, sources, attribution } from './theme.js';
 import { resolveDemNeeded, resolveBasemapId, isLightCartographic, isSatelliteBasemap } from './basemap-resolve.js';
 // isSatelliteBasemap used for terrain + default sat chrome
 import { setupContourDem } from './contour-dem.js';
@@ -235,6 +235,14 @@ export function createMap(maplibregl, Protocol) {
       ? { ...brand, ...navigationNightLabels }
       : basemap === 'disasterdb-gray'
       ? { ...brand, ...grayLightV10Labels }
+      : basemap === 'disasterdb-navigation-day'
+      ? { ...brand, ...navigationDayLabels }
+      : basemap === 'disasterdb-satellite-streets'
+      ? { ...brand, ...satelliteStreetsLabels }
+      : basemap === 'disasterdb-hydro'
+      ? { ...brand, ...hydroLabels }
+      : basemap === 'disasterdb-standard'
+      ? { ...brand, ...standardLabels }
       : isLightCartographic(basemap)
       ? { ...brand, ...cartoLightLabels }
       : brand;

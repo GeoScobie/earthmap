@@ -1,6 +1,6 @@
 import {
   brand, fonts, sources, attribution, handoff, awsLocation, grade, sentinel,
-  cartoLightLabels, streetsV11Labels, outdoorsV11Labels, darkV10Labels, lightV10Labels, navigationNightLabels, grayLightV10Labels, hillshade, contours, waterFillOpacity, waterLineOpacity
+  cartoLightLabels, streetsV11Labels, outdoorsV11Labels, darkV10Labels, lightV10Labels, navigationNightLabels, grayLightV10Labels, navigationDayLabels, satelliteStreetsLabels, hydroLabels, standardLabels, hillshade, contours, waterFillOpacity, waterLineOpacity
 } from './theme.js';
 import { poiIconExpression } from './icons.js';
 import { layers as pmLayers } from '@protomaps/basemaps';
@@ -13,6 +13,10 @@ import {
   disasterdbGrayFlavor,
   disasterdbNightNavFlavor,
   disasterdbHybridFlavor,
+  disasterdbNavigationDayFlavor,
+  disasterdbSatelliteStreetsFlavor,
+  disasterdbHydroFlavor,
+  disasterdbStandardFlavor,
   isCartoBaseLayer
 } from './flavors.js';
 import {
@@ -59,6 +63,10 @@ function paintColors(basemapId) {
   if (basemapId === 'disasterdb-light') return { ...brand, ...lightV10Labels };
   if (basemapId === 'disasterdb-navigation') return { ...brand, ...navigationNightLabels };
   if (basemapId === 'disasterdb-gray') return { ...brand, ...grayLightV10Labels };
+  if (basemapId === 'disasterdb-navigation-day') return { ...brand, ...navigationDayLabels };
+  if (basemapId === 'disasterdb-satellite-streets') return { ...brand, ...satelliteStreetsLabels };
+  if (basemapId === 'disasterdb-hydro') return { ...brand, ...hydroLabels };
+  if (basemapId === 'disasterdb-standard') return { ...brand, ...standardLabels };
   if (!isLightCartographic(basemapId)) return brand;
   return { ...brand, ...cartoLightLabels };
 }
@@ -71,6 +79,10 @@ function flavorFor(basemapId) {
   if (basemapId === 'disasterdb-gray') return disasterdbGrayFlavor();
   if (basemapId === 'disasterdb-night-nav') return disasterdbNightNavFlavor();
   if (basemapId === 'disasterdb-hybrid') return disasterdbHybridFlavor();
+  if (basemapId === 'disasterdb-navigation-day') return disasterdbNavigationDayFlavor();
+  if (basemapId === 'disasterdb-satellite-streets') return disasterdbSatelliteStreetsFlavor();
+  if (basemapId === 'disasterdb-hydro') return disasterdbHydroFlavor();
+  if (basemapId === 'disasterdb-standard') return disasterdbStandardFlavor();
   return disasterdbTopoFlavor(); // disasterdb-topo
 }
 
@@ -83,6 +95,10 @@ function styleName(basemapId) {
   if (basemapId === 'disasterdb-gray') return 'EarthMap — Gray';
   if (basemapId === 'disasterdb-night-nav') return 'EarthMap — Night Navigation';
   if (basemapId === 'disasterdb-hybrid') return 'EarthMap — Hybrid';
+  if (basemapId === 'disasterdb-navigation-day') return 'EarthMap — Navigation Day';
+  if (basemapId === 'disasterdb-satellite-streets') return 'EarthMap — Satellite Streets';
+  if (basemapId === 'disasterdb-hydro') return 'EarthMap — Hydro';
+  if (basemapId === 'disasterdb-standard') return 'EarthMap — Standard';
   if (basemapId === 'satellite') return 'EarthMap — Sat';
   return 'EarthMap — Satellite Hybrid';
 }
@@ -94,9 +110,10 @@ function styleName(basemapId) {
  *  Paint order (bottom → top): roads-simple → coast/ADM → labels.
  *  Matches FireMap Studio (imagery → road-simple → admin → labels).
  *  Live GeoColor inserts BEFORE roads-simple so major roads stay over sat. */
-function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines = false, streets = false, dark = false, light = false, topo = false, nav = false, gray = false }) {
-  // outdoors/streets-v11, dark/light-v10, FireMap nav-night, and gray(light) share Mapbox label size / weight / halo-width ramps.
-  const v11 = streets || dark || light || topo || nav || gray;
+function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines = false, streets = false, dark = false, light = false, topo = false, nav = false, gray = false, dayNav = false, hydro = false, standard = false }) {
+  // outdoors/streets-v11, dark/light-v10, FireMap nav-night, gray, navigation-day, and Standard share Mapbox label size / weight / halo-width ramps.
+  // dayNav overrides a few size stops below. hydro only bumps water labels.
+  const v11 = streets || dark || light || topo || nav || gray || dayNav || standard;
   const satVis = satOutlines ? 'visible' : 'none';
   // Country / ADM0 — exclude maritime-only segments when tiles expose it
   // (EEZ clutter; true coast comes from earth outline below).
@@ -278,9 +295,12 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
                 'symbol-placement': 'line',
                 'symbol-sort-key': ['get', 'min_zoom'],
                 'text-field': labelField,
-                'text-font': fonts.regular,
+                'text-font': dayNav ? fonts.medium : fonts.regular,
                 // streets-v11 road-label: 10px at z10 → 16px at z18 for major classes
-                'text-size': v11
+                // navigation-day-v1 major classes: 11 at z10 → 17.6 at z18
+                'text-size': dayNav
+                  ? sizeRamp([[10, 11], [18, 17.6]])
+                  : v11
                   ? sizeRamp([[10, 10], [18, 16]])
                   : sizeRamp([[11, 10], [14, 12], [18, 14]]),
                 'text-max-angle': 30,
@@ -307,7 +327,10 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
                 'text-field': labelField,
                 'text-font': fonts.regular,
                 // streets-v11 street class: 9px at z10 → 14px at z18
-                'text-size': v11
+                // navigation-day-v1 street class: 8.8 at z10 → 15.4 at z18
+                'text-size': dayNav
+                  ? sizeRamp([[10, 8.8], [18, 15.4]])
+                  : v11
                   ? sizeRamp([[12, 9], [18, 14]])
                   : sizeRamp([[14, 10], [17, 12]]),
                 'text-max-angle': 30,
@@ -337,7 +360,9 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           // water read as recessive against the imagery.
           'text-font': v11 ? fonts.regular : fonts.extraLight,
           // streets-v11 water-point-label large end (no sizerank on PM water)
-          'text-size': v11
+          'text-size': hydro
+            ? sizeRamp([[3, 14], [10, 20], [16, 24]])
+            : v11
             ? sizeRamp([[7, 24], [10, 18]])
             : sizeRamp([[3, 11], [10, 14], [16, 18]]),
           // Studio letter-spaces oceans hard (0.25) and seas/bays less (0.15).
@@ -364,8 +389,8 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           ],
           // Half-strength halo, per Studio. Water labels are meant to sit back.
           'text-halo-color': c.labelHaloSoft,
-          'text-halo-width': v11 ? 0 : 1,
-          'text-halo-blur': v11 ? 0 : 1
+          'text-halo-width': hydro ? 1.25 : (v11 ? 0 : 1),
+          'text-halo-blur': hydro ? 0.6 : (v11 ? 0 : 1)
         }
       },
 
@@ -379,12 +404,14 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         'source-layer': 'water',
         // Protomaps carries rivers and canals as LineStrings in `water`.
         filter: ['in', ['get', 'kind'], ['literal', ['river', 'canal', 'stream']]],
-        minzoom: 13,
+        minzoom: hydro ? 10 : 13,
         layout: {
           'text-field': labelField,
           'text-font': v11 ? fonts.regular : fonts.extraLight,
           // streets-v11 waterway-label: 12 at z13 → 16 at z18
-          'text-size': v11
+          'text-size': hydro
+            ? sizeRamp([[9, 12], [14, 16], [18, 22]])
+            : v11
             ? sizeRamp([[13, 12], [18, 16]])
             : sizeRamp([[13, 12], [18, 18]]),
           'text-line-height': 1.3,
@@ -394,8 +421,8 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         paint: {
           'text-color': c.waterLabel,
           'text-halo-color': c.labelHaloSoft,
-          'text-halo-width': v11 ? 0 : 1,
-          'text-halo-blur': v11 ? 0 : 1
+          'text-halo-width': hydro ? 1.25 : (v11 ? 0 : 1),
+          'text-halo-blur': hydro ? 0.6 : (v11 ? 0 : 1)
         }
       },
 
@@ -419,7 +446,10 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           'text-field': labelField,
           'text-font': v11 ? fonts.medium : fonts.black,     // Studio: natural labels are Black
           // streets-v11 natural-point-label is ~12px, stepping to 18
-          'text-size': v11
+          // navigation-day common sizerank is 13.2; prominent is 19.8
+          'text-size': dayNav
+            ? sizeRamp([[4, 13.2], [17, 19.8]])
+            : v11
             ? sizeRamp([[4, 12], [17, 18]])
             : sizeRamp([[4, 11], [10, 13], [12, 15]]),
           'text-max-width': 8,
@@ -459,7 +489,10 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           'text-field': labelField,
           'text-font': v11 ? fonts.medium : fonts.black,        // Studio uses Black for every POI
           // streets-v11 poi-label: 12px common case, 18px at z17
-          'text-size': v11
+          // navigation-day common sizerank is 13.2; prominent is 19.8
+          'text-size': dayNav
+            ? sizeRamp([[12, 13.2], [17, 19.8]])
+            : v11
             ? sizeRamp([[12, 12], [17, 18]])
             : sizeRamp([[12, 11], [17, 13]]),
           // Studio panel: letter spacing 0 em, max width 10 em. (The JSON
@@ -527,7 +560,16 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           // same size. Studio's actual spread is closer to 2x.
           //
           // Widened to span the full population_rank range (4..12+ observed).
-          'text-size': v11
+          'text-size': dayNav
+            // navigation-day-v1 settlement-major tops out at 36.4 (z15).
+            // Major and minor layers plus symbolrank collapse onto population_rank.
+            ? [
+              'interpolate', ['cubic-bezier', 0.2, 0, 0.9, 1], ['zoom'],
+              3,  ['step', ['get', 'population_rank'], 7.15, 7, 10.45, 9, 12.1, 11, 13.2],
+              8,  ['step', ['get', 'population_rank'], 16.5, 7, 19.5, 9, 22.1, 11, 23.4],
+              15, ['step', ['get', 'population_rank'], 20.8, 7, 26, 9, 33.8, 11, 36.4]
+            ]
+            : v11
             // streets-v11 settlement-label stops at z3 and z15.
             // population_rank is high-is-important (SF = 12); symbolrank is the reverse.
             // >=11 → largest (12→28), >=9 → 11→26, >=7 → 9.5→20, else 6.5→17.
@@ -596,7 +638,13 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           'text-font': v11 ? fonts.regular : fonts.settlement,
           // macrohood == Studio's 'suburb' tier: bigger and more tracked.
           // streets-v11: suburb 11→17, neighborhood 10.5→16
-          'text-size': v11
+          'text-size': dayNav
+            ? [
+              'interpolate', ['cubic-bezier', 0.5, 0, 1, 1], ['zoom'],
+              11, ['match', ['get', 'kind'], 'macrohood', 12.1, 11.55],
+              15, ['match', ['get', 'kind'], 'macrohood', 18.7, 17.6]
+            ]
+            : v11
             ? [
               'interpolate', ['cubic-bezier', 0.5, 0, 1, 1], ['zoom'],
               11, ['match', ['get', 'kind'], 'macrohood', 11, 10.5],
@@ -648,7 +696,9 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           'text-field': labelField,
           'text-font': fonts.bold,   // the ONLY place Studio uses Bold
           // streets-v11 state-label: 10px at z4 → 24px at z9 (no symbolrank on PM regions)
-          'text-size': v11
+          'text-size': dayNav
+            ? ['interpolate', ['cubic-bezier', 0.85, 0.7, 0.65, 1], ['zoom'], 4, 12, 9, 28.8]
+            : v11
             ? ['interpolate', ['cubic-bezier', 0.85, 0.7, 0.65, 1], ['zoom'], 4, 10, 9, 24]
             : sizeRamp([[4, 10], [9, 16]]),
           'text-transform': 'uppercase',
@@ -674,7 +724,9 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           'text-field': labelField,
           'text-font': v11 ? fonts.medium : fonts.settlement,
           // streets-v11 country-label large end: 11px at z1 → 28px at z9
-          'text-size': v11
+          'text-size': dayNav
+            ? ['interpolate', ['cubic-bezier', 0.2, 0, 0.7, 1], ['zoom'], 1, 15.4, 9, 39.2]
+            : v11
             ? ['interpolate', ['cubic-bezier', 0.2, 0, 0.7, 1], ['zoom'], 1, 11, 9, 28]
             : sizeRamp([[1, 11], [5, 15], [9, 20]]),
           'text-line-height': 1.1,   // Studio panel
@@ -845,6 +897,34 @@ function buildCartographicStyle(basemapId, opts = {}) {
     }
   }
 
+  // Hydro: emphasize river/stream lines and lake/ocean fill that already
+  // exist on the water source-layer. No watershed polygons in the tiles.
+  if (basemapId === 'disasterdb-hydro' && !nearTime) {
+    if (waterFill?.paint) {
+      waterFill.paint['fill-opacity'] = 1;
+    }
+    const river = base.find((l) => l.id === 'water_river');
+    if (river) {
+      river.minzoom = 8;
+      river.paint = {
+        ...(river.paint || {}),
+        'line-color': flavor.water,
+        'line-width': ['interpolate', ['exponential', 1.6], ['zoom'], 8, 0.8, 12, 3, 16, 8, 18, 16],
+        'line-opacity': 1
+      };
+    }
+    const stream = base.find((l) => l.id === 'water_stream');
+    if (stream) {
+      stream.minzoom = 12;
+      stream.paint = {
+        ...(stream.paint || {}),
+        'line-color': flavor.water,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 12, 0.6, 16, 2.2],
+        'line-opacity': 1
+      };
+    }
+  }
+
   const insertBeforeWater = (layer) => {
     const waterAt = base.findIndex((l) => l.id === 'water');
     if (waterAt >= 0) base.splice(waterAt, 0, layer);
@@ -939,7 +1019,10 @@ function buildCartographicStyle(basemapId, opts = {}) {
     light: basemapId === 'disasterdb-light' && !nearTime,
     topo: basemapId === 'disasterdb-topo' && !nearTime,
     nav: basemapId === 'disasterdb-navigation' && !nearTime,
-    gray: basemapId === 'disasterdb-gray' && !nearTime
+    gray: basemapId === 'disasterdb-gray' && !nearTime,
+    dayNav: basemapId === 'disasterdb-navigation-day' && !nearTime,
+    hydro: basemapId === 'disasterdb-hydro' && !nearTime,
+    standard: basemapId === 'disasterdb-standard' && !nearTime
   });
 
   // NASA Blue Marble under carto fills — visible in near-time (satellite) mode.
@@ -1004,7 +1087,11 @@ export function buildStyle() {
       basemapId === 'disasterdb-navigation' ||
       basemapId === 'disasterdb-gray' ||
       basemapId === 'disasterdb-night-nav' ||
-      basemapId === 'disasterdb-hybrid'
+      basemapId === 'disasterdb-hybrid' ||
+      basemapId === 'disasterdb-navigation-day' ||
+      basemapId === 'disasterdb-satellite-streets' ||
+      basemapId === 'disasterdb-hydro' ||
+      basemapId === 'disasterdb-standard'
         ? basemapId
         : 'disasterdb-topo',
       { nearTime: basemapId === 'satellite' }
