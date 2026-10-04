@@ -2,7 +2,6 @@
 import { goesGeocolor } from './theme.js';
 import { applySatLoopFrames, floorUtcToOwnedFrame } from './goes.js';
 
-const FOUR_H = 4 * 60 * 60;
 const DWELL_MS = 500;
 const SLUGS = ['goes-east', 'goes-west', 'meteosat', 'gk2a'];
 
@@ -16,10 +15,6 @@ function stampsOf(manifest, slug) {
   const list = manifest && manifest[slug];
   if (!Array.isArray(list)) return [];
   return list.map(Number).filter((n) => Number.isFinite(n)).sort((a, b) => a - b);
-}
-
-function inLastFourHours(list, nowSec) {
-  return list.filter((t) => t >= nowSec - FOUR_H && t <= nowSec + 120);
 }
 
 /** Closest real stamp. On a tie, keep the earlier one. Never invent a time. */
@@ -43,12 +38,24 @@ function frameFromUnix(unix) {
   return floorUtcToOwnedFrame(unix * 1000);
 }
 
+function formatLocalSceneClock(unix) {
+  if (!Number.isFinite(unix)) return 'Sat —';
+  const d = new Date(unix * 1000);
+  try {
+    return d.toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch {
+    const pad = (n) => String(n).padStart(2, '0');
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return `${days[d.getDay()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+}
+
 export function startSatMosaicLoop(map) {
   const bar = document.getElementById('satMosaicLoop');
   const playBtn = document.getElementById('satMosaicPlay');
   const whenEl = document.getElementById('satMosaicWhen');
-  const statusEl = document.getElementById('satMosaicStatus');
-  const scrub = document.getElementById('satMosaicScrub');
+  const playIcon = playBtn?.querySelector('.sat-mosaic-play-icon--play');
+  const pauseIcon = playBtn?.querySelector('.sat-mosaic-play-icon--pause');
   if (!bar || !map) return;
   bar.hidden = false;
   document.title = 'Satellite loop';
@@ -59,8 +66,14 @@ export function startSatMosaicLoop(map) {
   let playing = false;
   let timer = null;
 
-  const setStatus = (text) => {
-    if (statusEl) statusEl.textContent = text;
+  const syncPlayUi = () => {
+    if (!playBtn) return;
+    playBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+    playBtn.disabled = steps.length < 2;
+    playBtn.title = playing ? 'Pause' : 'Play';
+    playBtn.setAttribute('aria-label', playing ? 'Pause Sat loop' : 'Play Sat loop');
+    if (playIcon) playIcon.hidden = playing;
+    if (pauseIcon) pauseIcon.hidden = !playing;
   };
 
   const paint = (i) => {
@@ -74,12 +87,9 @@ export function startSatMosaicLoop(map) {
       gk: frameFromUnix(nearestStamp(catalogs.gk2a, target))
     };
     applySatLoopFrames(map, frames);
-    if (scrub && Number(scrub.value) !== index) scrub.value = String(index);
     if (whenEl) {
       const label = frameFromUnix(target);
-      whenEl.textContent = label
-        ? `${label.ymd} ${label.hhmm.slice(0, 2)}:${label.hhmm.slice(2)} UTC · ${index + 1}/${steps.length}`
-        : '—';
+      whenEl.textContent = formatLocalSceneClock(target);
       whenEl.dateTime = label ? label.iso : '';
     }
   };
@@ -100,27 +110,19 @@ export function startSatMosaicLoop(map) {
 
   const setPlaying = (on) => {
     playing = on && steps.length > 1;
-    if (playBtn) {
-      playBtn.textContent = playing ? 'Pause' : 'Play';
-      playBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
-      playBtn.disabled = steps.length < 2;
-    }
+    syncPlayUi();
     if (playing) tick();
     else stop();
   };
 
   playBtn?.addEventListener('click', () => setPlaying(!playing));
-  scrub?.addEventListener('input', () => {
-    if (!steps.length) return;
-    setPlaying(false);
-    paint(Number(scrub.value));
-  });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop();
     else if (playing) tick();
   });
 
-  setStatus('Loading Sat scenes…');
+  syncPlayUi();
+  if (whenEl) whenEl.textContent = 'Sat —';
   const url = `${String(goesGeocolor.timesJson || 'https://sat.disasterdb.com/geocolor/times.json').replace(/\/$/, '')}?t=${Date.now()}`;
   fetch(url, { cache: 'no-store' })
     .then((res) => {
@@ -128,42 +130,26 @@ export function startSatMosaicLoop(map) {
       return res.json();
     })
     .then((data) => {
-      const nowSec = Date.now() / 1000;
+      // Every real stamp on file for the four disks (union). No hour window.
+      // Do not invent gaps. Exclude himawari / goes-west-widl.
       const union = new Set();
-      let usedFallback = false;
       catalogs = {};
       for (const slug of SLUGS) {
         const all = stampsOf(data, slug);
-        let recent = inLastFourHours(all, nowSec);
-        if (!recent.length && all.length) {
-          const newest = all[all.length - 1];
-          recent = all.filter((t) => t >= newest - FOUR_H && t <= newest);
-          usedFallback = true;
-        }
-        catalogs[slug] = recent.length ? recent : all;
-        for (const t of catalogs[slug]) union.add(t);
+        catalogs[slug] = all;
+        for (const t of all) union.add(t);
       }
       steps = [...union].sort((a, b) => a - b);
       if (!steps.length) {
-        setStatus('No scenes on file.');
-        if (playBtn) playBtn.disabled = true;
-        if (scrub) scrub.disabled = true;
+        if (whenEl) whenEl.textContent = 'Sat —';
+        syncPlayUi();
         return;
       }
-      if (scrub) {
-        scrub.min = '0';
-        scrub.max = String(Math.max(0, steps.length - 1));
-        scrub.value = '0';
-        scrub.disabled = steps.length < 2;
-      }
-      setStatus(usedFallback
-        ? 'No scenes in the last 4 hours for every disk. Showing the newest scenes on file. About every 10 minutes.'
-        : '4-hour Sat loop. Each disk uses its nearest scene. About every 10 minutes.');
       paint(0);
       setPlaying(true);
     })
     .catch(() => {
-      setStatus('Could not load scene times.');
-      if (playBtn) playBtn.disabled = true;
+      if (whenEl) whenEl.textContent = 'Sat —';
+      syncPlayUi();
     });
 }

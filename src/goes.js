@@ -731,7 +731,7 @@ let gkIntentionalScrub = false;
 let gkScrubTimer = 0;
 /** Latest scrub index waiting to apply (coalesce; only this position paints). */
 let gkPendingScrubIdx = null;
-/** Play window length in hours (times.json frames ≤ tip age). */
+/** Legacy theme override only. Playlist is every gk2a stamp in times.json. */
 const GK_PLAY_HOURS = 4;
 /** ~350ms/step → ~2.8 fps of distinct frames (~4h / ~21–24 frames ≈ 7–9s wall). */
 const GK_PLAY_INTERVAL_MS = 350;
@@ -1340,18 +1340,17 @@ function visibleSatLabelForTransport(map) {
   return TRANSPORT_SAT_META[key]?.label || key;
 }
 
-/** Transport meta: "GOES-East · last ~4h" (center owner, not every sat in view). */
+/** Transport meta: center-owner sat name (playlist is all scenes on file). */
 function paintTransportMeta(map = goesUiMap) {
   const meta = document.getElementById('goesTimeTransportMeta');
   if (!meta) return;
-  const hours = playHoursLabel();
   const name = visibleSatLabelForTransport(map);
   if (name) {
-    meta.textContent = `${name} · last ~${hours}h`;
-    meta.title = `${name} — last ~${hours} hours`;
+    meta.textContent = name;
+    meta.title = `${name} — Sat scenes on file`;
   } else {
-    meta.textContent = `Last ~${hours}h`;
-    meta.title = `Last ~${hours} hours`;
+    meta.textContent = 'Sat';
+    meta.title = 'Sat scenes on file';
   }
 }
 
@@ -2303,7 +2302,8 @@ function paintMinimizedChip(frame) {
   const host = document.getElementById('satSceneAge');
   const ms = frameMs(frame);
   const on = eitherGeocolorOn() && Number.isFinite(ms);
-  const label = on ? formatSatSceneLabel(ms) : '';
+  // Bottom-center Sat clock: local weekday + time of the frame being shown.
+  const label = on ? formatLocalClock(new Date(ms)) : 'Sat —';
   if (chipEl) chipEl.textContent = label;
   if (host) host.hidden = !on;
 }
@@ -2636,20 +2636,14 @@ function clearGkPlayTimer() {
 }
 
 /**
- * Last ~gkPlayHours of GK2A frames from times.json (oldest → tip).
- * Uses whatever slots exist in the age window — does not invent missing
- * 10-min cadence gaps. Optional gkPlayFrames hard-caps the slice.
- * Play list stays GK-anchored; applyGkPlayFrame matches West + Meteosat
- * nearest-at-or-before each selected unix. East stays tip-only. Does not
- * depend on #74.
+ * Every real GK2A stamp in times.json (oldest → tip). No hour window.
+ * Does not invent missing 10-min cadence gaps. Optional gkPlayFrames still
+ * hard-caps the slice if a theme override sets it. Play list stays
+ * GK-anchored; applyGkPlayFrame matches West + Meteosat nearest-at-or-before
+ * each selected unix. East stays tip-only.
  */
 async function rebuildGkPlayList(state) {
-  const hours =
-    Number(goesGeocolor.gkPlayHours) > 0
-      ? Number(goesGeocolor.gkPlayHours)
-      : GK_PLAY_HOURS;
-  const windowSec = hours * 3600;
-  // Optional #77-era hard cap: if set, take last N of the hours window.
+  // Optional hard cap only when theme sets gkPlayFrames; otherwise all stamps.
   const maxFramesOverride =
     Number(goesGeocolor.gkPlayFrames) > 0
       ? Number(goesGeocolor.gkPlayFrames)
@@ -2667,15 +2661,14 @@ async function rebuildGkPlayList(state) {
       : list.length
         ? list[list.length - 1]
         : null;
-    const inWindow =
+    // All stamps on file at or before tip (+60s slack). No fixed hour window.
+    const inManifest =
       tipUnix == null
         ? list
-        : list.filter(
-            (u) => u <= tipUnix + 60 && u >= tipUnix - windowSec
-          );
+        : list.filter((u) => u <= tipUnix + 60);
     const slice = maxFramesOverride
-      ? inWindow.slice(-maxFramesOverride)
-      : inWindow;
+      ? inManifest.slice(-maxFramesOverride)
+      : inManifest;
     const seen = new Set();
     for (const unix of slice) {
       const frame = floorUtcToOwnedFrame(unix * 1000);
@@ -3181,7 +3174,6 @@ function syncTimeTransport() {
   }
   if (spinIcon) spinIcon.hidden = !gkBuffering;
 
-  const playHours = playHoursLabel();
   if (gkBuffering) {
     btn.title = 'Buffering scenes…';
     btn.setAttribute('aria-label', 'Buffering satellite play');
@@ -3192,7 +3184,7 @@ function syncTimeTransport() {
     btn.title = 'Resume';
     btn.setAttribute('aria-label', 'Resume satellite play');
   } else {
-    btn.title = `Play last ~${playHours}h of scenes`;
+    btn.title = 'Play Sat scenes on file';
     btn.setAttribute('aria-label', 'Play satellite loop');
   }
 
@@ -3264,7 +3256,7 @@ function scheduleScrubSeek(map, index, { immediate = false } = {}) {
 }
 
 /**
- * Bottom-center time transport for GK2A (~gkPlayHours window, loops).
+ * Bottom-center time transport for GK2A (all scenes on file, loops).
  * Visible via toolbar Satellite button, theme.goesGeocolor.timeSlider, or ?scrub=1.
  * Play/pause + scrub-to-frame + Latest (snap tip). Sidebar clock removed.
  * Handlers always wire; visibility is gated (not forever-hidden behind query only).

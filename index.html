@@ -492,8 +492,6 @@
     </span>
   </p>
 
-  <div class="ad-slot" aria-hidden="true"></div>
-
   <script>
   (function () {
     try {
@@ -507,10 +505,16 @@
   </script>
 
   <div id="satMosaicLoop" class="sat-mosaic-loop" hidden>
-    <div class="sat-mosaic-main">
-      <button type="button" class="sat-mosaic-play" id="satMosaicPlay" disabled aria-pressed="false">Play</button>
-      <time id="satMosaicWhen">—</time>
-      <p id="satMosaicStatus">Loading Sat scenes…</p>
+    <div class="sat-mosaic-chip-row">
+      <span class="goes-time-chip-pill sat-mosaic-chip" id="satMosaicChip">
+        <button type="button" class="sat-mosaic-play" id="satMosaicPlay" disabled aria-pressed="false" aria-label="Play Sat loop" title="Play">
+          <span class="sat-mosaic-play-icon sat-mosaic-play-icon--play" aria-hidden="true">▶</span>
+          <span class="sat-mosaic-play-icon sat-mosaic-play-icon--pause" hidden aria-hidden="true">❚❚</span>
+        </button>
+        <svg class="goes-time-chip-sat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
+        <b class="goes-time-chip-dot"></b>
+        <time id="satMosaicWhen" class="goes-time-chip-text">Sat —</time>
+      </span>
     </div>
     <nav class="sat-mosaic-nav" aria-label="Satellites">
       <a href="https://earthmap.live/">Map</a>
@@ -520,10 +524,6 @@
       <a href="https://earthmap.live/satellites/gk2a/">GK2A</a>
     </nav>
     <p class="sat-mosaic-credit">Contains modified EUMETSAT Meteosat data.</p>
-    <label class="sat-mosaic-scrub">
-      <span class="sat-mosaic-scrub-label">Time</span>
-      <input type="range" id="satMosaicScrub" min="0" max="0" value="0" step="1" disabled aria-label="Sat time, last 4 hours">
-    </label>
   </div>
 
   <script type="module" src="/src/main.js"></script>
