@@ -1,6 +1,6 @@
 import {
   brand, fonts, sources, attribution, handoff, awsLocation, grade, sentinel,
-  cartoLightLabels, hillshade, contours, waterFillOpacity, waterLineOpacity
+  cartoLightLabels, streetsV11Labels, outdoorsV11Labels, darkV10Labels, lightV10Labels, navigationNightLabels, grayLightV10Labels, hillshade, contours, waterFillOpacity, waterLineOpacity
 } from './theme.js';
 import { poiIconExpression } from './icons.js';
 import { layers as pmLayers } from '@protomaps/basemaps';
@@ -11,6 +11,8 @@ import {
   disasterdbStreetsFlavor,
   disasterdbNavigationFlavor,
   disasterdbGrayFlavor,
+  disasterdbNightNavFlavor,
+  disasterdbHybridFlavor,
   isCartoBaseLayer
 } from './flavors.js';
 import {
@@ -50,6 +52,13 @@ const labelField = ['coalesce', ['get', 'name:en'], ['get', 'name']];
 const awsEnabled = Boolean(awsLocation.apiKey);
 
 function paintColors(basemapId) {
+  // Matched Mapbox label sheets — not the shared light-carto sheet.
+  if (basemapId === 'disasterdb-topo') return { ...brand, ...outdoorsV11Labels };
+  if (basemapId === 'disasterdb-streets') return { ...brand, ...streetsV11Labels };
+  if (basemapId === 'disasterdb-dark') return { ...brand, ...darkV10Labels };
+  if (basemapId === 'disasterdb-light') return { ...brand, ...lightV10Labels };
+  if (basemapId === 'disasterdb-navigation') return { ...brand, ...navigationNightLabels };
+  if (basemapId === 'disasterdb-gray') return { ...brand, ...grayLightV10Labels };
   if (!isLightCartographic(basemapId)) return brand;
   return { ...brand, ...cartoLightLabels };
 }
@@ -60,6 +69,8 @@ function flavorFor(basemapId) {
   if (basemapId === 'disasterdb-streets') return disasterdbStreetsFlavor();
   if (basemapId === 'disasterdb-navigation') return disasterdbNavigationFlavor();
   if (basemapId === 'disasterdb-gray') return disasterdbGrayFlavor();
+  if (basemapId === 'disasterdb-night-nav') return disasterdbNightNavFlavor();
+  if (basemapId === 'disasterdb-hybrid') return disasterdbHybridFlavor();
   return disasterdbTopoFlavor(); // disasterdb-topo
 }
 
@@ -70,6 +81,8 @@ function styleName(basemapId) {
   if (basemapId === 'disasterdb-streets') return 'EarthMap — Streets';
   if (basemapId === 'disasterdb-navigation') return 'EarthMap — Navigation';
   if (basemapId === 'disasterdb-gray') return 'EarthMap — Gray';
+  if (basemapId === 'disasterdb-night-nav') return 'EarthMap — Night Navigation';
+  if (basemapId === 'disasterdb-hybrid') return 'EarthMap — Hybrid';
   if (basemapId === 'satellite') return 'EarthMap — Sat';
   return 'EarthMap — Satellite Hybrid';
 }
@@ -81,7 +94,9 @@ function styleName(basemapId) {
  *  Paint order (bottom → top): roads-simple → coast/ADM → labels.
  *  Matches FireMap Studio (imagery → road-simple → admin → labels).
  *  Live GeoColor inserts BEFORE roads-simple so major roads stay over sat. */
-function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines = false }) {
+function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines = false, streets = false, dark = false, light = false, topo = false, nav = false, gray = false }) {
+  // outdoors/streets-v11, dark/light-v10, FireMap nav-night, and gray(light) share Mapbox label size / weight / halo-width ramps.
+  const v11 = streets || dark || light || topo || nav || gray;
   const satVis = satOutlines ? 'visible' : 'none';
   // Country / ADM0 — exclude maritime-only segments when tiles expose it
   // (EEZ clutter; true coast comes from earth outline below).
@@ -264,15 +279,19 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
                 'symbol-sort-key': ['get', 'min_zoom'],
                 'text-field': labelField,
                 'text-font': fonts.regular,
-                'text-size': sizeRamp([[11, 10], [14, 12], [18, 14]]),
+                // streets-v11 road-label: 10px at z10 → 16px at z18 for major classes
+                'text-size': v11
+                  ? sizeRamp([[10, 10], [18, 16]])
+                  : sizeRamp([[11, 10], [14, 12], [18, 14]]),
                 'text-max-angle': 30,
-                'text-padding': 2
+                'text-padding': v11 ? 1 : 2,
+                ...(v11 ? { 'text-letter-spacing': 0.01 } : {})
               },
               paint: {
-                'text-color': c.labelDim,
-                'text-halo-color': c.labelHalo,
-                'text-halo-width': 1.2,
-                'text-halo-blur': 0.5
+                'text-color': c.roadLabel || c.labelDim,
+                'text-halo-color': c.roadHalo || c.labelHalo,
+                'text-halo-width': v11 ? 1 : 1.2,
+                'text-halo-blur': v11 ? 1 : 0.5
               }
             },
             {
@@ -287,15 +306,19 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
                 'symbol-sort-key': ['get', 'min_zoom'],
                 'text-field': labelField,
                 'text-font': fonts.regular,
-                'text-size': sizeRamp([[14, 10], [17, 12]]),
+                // streets-v11 street class: 9px at z10 → 14px at z18
+                'text-size': v11
+                  ? sizeRamp([[12, 9], [18, 14]])
+                  : sizeRamp([[14, 10], [17, 12]]),
                 'text-max-angle': 30,
-                'text-padding': 2
+                'text-padding': v11 ? 1 : 2,
+                ...(v11 ? { 'text-letter-spacing': 0.01 } : {})
               },
               paint: {
-                'text-color': c.labelMuted,
-                'text-halo-color': c.labelHalo,
+                'text-color': c.roadLabelMinor || c.labelMuted,
+                'text-halo-color': c.roadHalo || c.labelHalo,
                 'text-halo-width': 1,
-                'text-halo-blur': 0.5
+                'text-halo-blur': v11 ? 1 : 0.5
               }
             }
           ]
@@ -312,8 +335,11 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           'text-field': labelField,
           // Studio uses ExtraLight for every water label — it's what makes the
           // water read as recessive against the imagery.
-          'text-font': fonts.extraLight,
-          'text-size': sizeRamp([[3, 11], [10, 14], [16, 18]]),
+          'text-font': v11 ? fonts.regular : fonts.extraLight,
+          // streets-v11 water-point-label large end (no sizerank on PM water)
+          'text-size': v11
+            ? sizeRamp([[7, 24], [10, 18]])
+            : sizeRamp([[3, 11], [10, 14], [16, 18]]),
           // Studio letter-spaces oceans hard (0.25) and seas/bays less (0.15).
           'text-letter-spacing': [
             'match', ['get', 'kind'],
@@ -338,8 +364,8 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           ],
           // Half-strength halo, per Studio. Water labels are meant to sit back.
           'text-halo-color': c.labelHaloSoft,
-          'text-halo-width': 1,
-          'text-halo-blur': 1
+          'text-halo-width': v11 ? 0 : 1,
+          'text-halo-blur': v11 ? 0 : 1
         }
       },
 
@@ -356,8 +382,11 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         minzoom: 13,
         layout: {
           'text-field': labelField,
-          'text-font': fonts.extraLight,
-          'text-size': sizeRamp([[13, 12], [18, 18]]),
+          'text-font': v11 ? fonts.regular : fonts.extraLight,
+          // streets-v11 waterway-label: 12 at z13 → 16 at z18
+          'text-size': v11
+            ? sizeRamp([[13, 12], [18, 16]])
+            : sizeRamp([[13, 12], [18, 18]]),
           'text-line-height': 1.3,
           'symbol-placement': 'line',
           'text-max-angle': 30
@@ -365,8 +394,8 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         paint: {
           'text-color': c.waterLabel,
           'text-halo-color': c.labelHaloSoft,
-          'text-halo-width': 1,
-          'text-halo-blur': 1
+          'text-halo-width': v11 ? 0 : 1,
+          'text-halo-blur': v11 ? 0 : 1
         }
       },
 
@@ -388,15 +417,18 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         maxzoom: 12,      // poi-label takes over here
         layout: {
           'text-field': labelField,
-          'text-font': fonts.black,     // Studio: natural labels are Black
-          'text-size': sizeRamp([[4, 11], [10, 13], [12, 15]]),
+          'text-font': v11 ? fonts.medium : fonts.black,     // Studio: natural labels are Black
+          // streets-v11 natural-point-label is ~12px, stepping to 18
+          'text-size': v11
+            ? sizeRamp([[4, 12], [17, 18]])
+            : sizeRamp([[4, 11], [10, 13], [12, 15]]),
           'text-max-width': 8,
           'text-line-height': 1.2,
           'text-padding': 4,
           'symbol-sort-key': ['get', 'min_zoom']
         },
         paint: {
-          'text-color': c.poiPark,
+          'text-color': c.naturalLabel || c.poiPark,
           'text-halo-color': c.poiHalo,
           'text-halo-width': 0.5,
           'text-halo-blur': 0.5
@@ -425,8 +457,11 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         minzoom: 12,
         layout: {
           'text-field': labelField,
-          'text-font': fonts.black,        // Studio uses Black for every POI
-          'text-size': sizeRamp([[12, 11], [17, 13]]),
+          'text-font': v11 ? fonts.medium : fonts.black,        // Studio uses Black for every POI
+          // streets-v11 poi-label: 12px common case, 18px at z17
+          'text-size': v11
+            ? sizeRamp([[12, 12], [17, 18]])
+            : sizeRamp([[12, 11], [17, 13]]),
           // Studio panel: letter spacing 0 em, max width 10 em. (The JSON
           // omits letter-spacing entirely, which means the default 0 — I'd
           // guessed 0.01 and 9 before reading the panel.)
@@ -457,7 +492,7 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
              'recreation_ground', 'playground', 'pitch'], c.poiPark,
             ['school', 'university', 'college', 'library'], c.poiEducation,
             ['hospital', 'clinic', 'doctors', 'pharmacy'], c.poiMedical,
-            c.labelText
+            c.poiDefault || c.labelText
           ],
           'text-halo-color': c.poiHalo,
           'text-halo-width': 0.5,
@@ -472,7 +507,7 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         'source-layer': 'places',
         layout: {
           'text-field': labelField,
-          'text-font': fonts.settlement,
+          'text-font': v11 ? fonts.medium : fonts.settlement,
           // Studio sizes settlements by `symbolrank` so big cities outrank
           // small towns at the same zoom. Protomaps' equivalent field is
           // `population_rank` (higher = bigger place), so the hierarchy is
@@ -492,7 +527,16 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           // same size. Studio's actual spread is closer to 2x.
           //
           // Widened to span the full population_rank range (4..12+ observed).
-          'text-size': [
+          'text-size': v11
+            // streets-v11 settlement-label stops at z3 and z15.
+            // population_rank is high-is-important (SF = 12); symbolrank is the reverse.
+            // >=11 → largest (12→28), >=9 → 11→26, >=7 → 9.5→20, else 6.5→17.
+            ? [
+              'interpolate', ['cubic-bezier', 0.2, 0, 0.9, 1], ['zoom'],
+              3,  ['step', ['get', 'population_rank'], 6.5, 7, 9.5, 9, 11, 11, 12],
+              15, ['step', ['get', 'population_rank'], 17, 7, 20, 9, 26, 11, 28]
+            ]
+            : [
             'interpolate', ['cubic-bezier', 0.2, 0, 0.9, 1], ['zoom'],
             3,  ['step', ['get', 'population_rank'], 10, 7, 11, 9, 12.1, 11, 14.3],
             6,  ['step', ['get', 'population_rank'], 11, 7, 13.2, 9, 15.4, 11, 19.8],
@@ -523,7 +567,7 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         paint: {
           'text-color': c.labelDim,
           'text-halo-color': c.labelHalo,
-          'text-halo-width': fonts.settlementHaloWidth,
+          'text-halo-width': v11 ? 1 : fonts.settlementHaloWidth,
           'text-halo-blur': 1
         }
       },
@@ -549,15 +593,24 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         maxzoom: 15,
         layout: {
           'text-field': labelField,
-          'text-font': fonts.settlement,
+          'text-font': v11 ? fonts.regular : fonts.settlement,
           // macrohood == Studio's 'suburb' tier: bigger and more tracked.
-          'text-size': [
+          // streets-v11: suburb 11→17, neighborhood 10.5→16
+          'text-size': v11
+            ? [
+              'interpolate', ['cubic-bezier', 0.5, 0, 1, 1], ['zoom'],
+              11, ['match', ['get', 'kind'], 'macrohood', 11, 10.5],
+              15, ['match', ['get', 'kind'], 'macrohood', 17, 16]
+            ]
+            : [
             'interpolate', ['cubic-bezier', 0.5, 0, 1, 1], ['zoom'],
             11, ['match', ['get', 'kind'], 'macrohood', 12.1, 11.55],
             15, ['match', ['get', 'kind'], 'macrohood', 16.5, 15.4]
           ],
           'text-transform': 'uppercase',
-          'text-letter-spacing': [
+          'text-letter-spacing': v11
+            ? ['match', ['get', 'kind'], 'macrohood', 0.15, 0.1]
+            : [
             'match', ['get', 'kind'], 'macrohood', 0.15, 0.05
           ],
           'text-max-width': 7,
@@ -576,9 +629,9 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
           ]
         },
         paint: {
-          'text-color': c.labelText,
+          'text-color': c.labelSubdivision || c.labelText,
           'text-halo-color': c.labelHaloSub,
-          'text-halo-width': fonts.settlementHaloWidth,
+          'text-halo-width': v11 ? 1 : fonts.settlementHaloWidth,
           'text-halo-blur': 0.5
         }
       },
@@ -594,17 +647,20 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         layout: {
           'text-field': labelField,
           'text-font': fonts.bold,   // the ONLY place Studio uses Bold
-          'text-size': sizeRamp([[4, 10], [9, 16]]),
+          // streets-v11 state-label: 10px at z4 → 24px at z9 (no symbolrank on PM regions)
+          'text-size': v11
+            ? ['interpolate', ['cubic-bezier', 0.85, 0.7, 0.65, 1], ['zoom'], 4, 10, 9, 24]
+            : sizeRamp([[4, 10], [9, 16]]),
           'text-transform': 'uppercase',
           'text-letter-spacing': 0.15,
           'text-max-width': 6
         },
         paint: {
-          'text-color': c.labelDim,
+          'text-color': c.stateLabel || c.labelDim,
           'text-halo-color': c.labelHalo,
           'text-halo-width': 1,
-          // Studio holds states at half opacity so they sit under city names.
-          'text-opacity': 0.5
+          // Studio satellite holds states at half opacity. streets-v11 / dark-v10 do not.
+          'text-opacity': c.stateOpacity ?? 0.5
         }
       },
       {
@@ -616,18 +672,21 @@ function buildOverlays(c, { includeRoads, includeRoadLabels = false, satOutlines
         maxzoom: 10,
         layout: {
           'text-field': labelField,
-          'text-font': fonts.settlement,
-          'text-size': sizeRamp([[1, 11], [5, 15], [9, 20]]),
+          'text-font': v11 ? fonts.medium : fonts.settlement,
+          // streets-v11 country-label large end: 11px at z1 → 28px at z9
+          'text-size': v11
+            ? ['interpolate', ['cubic-bezier', 0.2, 0, 0.7, 1], ['zoom'], 1, 11, 9, 28]
+            : sizeRamp([[1, 11], [5, 15], [9, 20]]),
           'text-line-height': 1.1,   // Studio panel
           // NOTE: Studio does NOT uppercase or letter-space country labels.
           // This file used to do both. Removed to match.
           'text-max-width': 6
         },
         paint: {
-          'text-color': c.labelDim,
-          'text-halo-color': c.labelHalo,
+          'text-color': c.countryLabel || c.labelDim,
+          'text-halo-color': c.countryHalo || c.labelHalo,
           // Studio: 1.25. Bumped with the rest — see fonts.settlementHaloWidth.
-          'text-halo-width': fonts.settlementHaloWidth
+          'text-halo-width': v11 ? 1.25 : fonts.settlementHaloWidth
         }
       }
 
@@ -868,7 +927,20 @@ function buildCartographicStyle(basemapId, opts = {}) {
 
   // roads-simple: same planet PMTiles as roads_*; thin grey FireMap look over
   // GeoColor. Visibility sat-only (basemap-mode); topo keeps cased roads_*.
-  const overlays = buildOverlays(c, { includeRoads: true, includeRoadLabels: true, satOutlines: nearTime });
+  const overlays = buildOverlays(c, {
+    includeRoads: true,
+    includeRoadLabels: true,
+    satOutlines: nearTime,
+    // Label size/weight/halo track Mapbox v11/v10 ramps for matched flavors.
+    // Satellite near-time still builds the topo stack and must keep the
+    // existing (non-v11) label layout.
+    streets: basemapId === 'disasterdb-streets' && !nearTime,
+    dark: basemapId === 'disasterdb-dark' && !nearTime,
+    light: basemapId === 'disasterdb-light' && !nearTime,
+    topo: basemapId === 'disasterdb-topo' && !nearTime,
+    nav: basemapId === 'disasterdb-navigation' && !nearTime,
+    gray: basemapId === 'disasterdb-gray' && !nearTime
+  });
 
   // NASA Blue Marble under carto fills — visible in near-time (satellite) mode.
   /* nearTime already set above */
@@ -930,7 +1002,9 @@ export function buildStyle() {
       basemapId === 'disasterdb-dark' ||
       basemapId === 'disasterdb-streets' ||
       basemapId === 'disasterdb-navigation' ||
-      basemapId === 'disasterdb-gray'
+      basemapId === 'disasterdb-gray' ||
+      basemapId === 'disasterdb-night-nav' ||
+      basemapId === 'disasterdb-hybrid'
         ? basemapId
         : 'disasterdb-topo',
       { nearTime: basemapId === 'satellite' }

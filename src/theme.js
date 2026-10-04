@@ -93,14 +93,17 @@ export const SAT_ONLY_OUTLINE_IDS = [
 //   'satellite'         Prod default — near-time GeoColor over Protomaps.
 //                       Ocean/land fills stay under the rasters (style.js).
 //                       ?basemap=disasterdb-topo still forces topo.
-//   'disasterdb-topo'   Cartographic topo / Mapbox-Outdoors feel via
-//                       @protomaps/basemaps layers() + custom Flavor.
-//                       Own R2 PMTiles only. Not the load default.
-//   'disasterdb-light'  Light — paper land, blue water, quiet roads.
-//   'disasterdb-dark'   Dark — night recolor of topo.
-//   'disasterdb-streets' Streets — streets-v11 recolor of the light structure.
-//   'disasterdb-navigation' Navigation — pale ground, strong yellow/white roads.
-//   'disasterdb-gray'   Gray — muted grayscale cartography.
+//   'disasterdb-topo'   Topo — colors + Lexend label layout tracked to
+//                       Mapbox outdoors-v11. Not the load default.
+//   'disasterdb-light'  Light — Mapbox light-v10 grays + Lexend labels.
+//   'disasterdb-dark'   Dark — Mapbox dark-v10 grays + Lexend labels.
+//   'disasterdb-streets' Streets — Mapbox streets-v11 + Lexend labels.
+//   'disasterdb-navigation' Navigation — FireMap nav (navigation-night-v1).
+//   'disasterdb-gray'   Gray — desaturated light-v10 + Lexend labels.
+//   'disasterdb-night-nav' Night navigation — near-black ground, yellow/white
+//                       major roads. Not a Mapbox navigation-day match.
+//   'disasterdb-hybrid' Hybrid — dark muted land, light roads. Not imagery
+//                       and not a Mapbox satellite-streets color match.
 //
 // Override cold start:
 //   1) ?basemap=satellite (or disasterdb-light / disasterdb-dark)
@@ -117,10 +120,12 @@ export const BASEMAP_IDS = [
   'disasterdb-dark',
   'disasterdb-streets',
   'disasterdb-navigation',
-  'disasterdb-gray'
+  'disasterdb-gray',
+  'disasterdb-night-nav',
+  'disasterdb-hybrid'
 ];
 
-/** @type {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'} */
+/** @type {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'} */
 export const basemapId = 'satellite';  // near-time NASA + GeoColor (Rob 2026-09-21)
 
 // Optional hillshade for cartographic modes (topo / light / dark).
@@ -194,6 +199,211 @@ export const cartoLightLabels = {
   poiHalo: 'rgba(245, 242, 234, 0.9)'
 };
 
+
+// Label / admin colors copied from Mapbox streets-v11 symbol + admin layers.
+// Applied only for basemap disasterdb-streets (see style.js paintColors).
+// Other cartographic flavors keep cartoLightLabels / brand.
+export const streetsV11Labels = {
+  // road-label, settlement-label, state-label, country-label: hsl(0, 0%, 0%)
+  labelText: 'hsl(0, 0%, 0%)',
+  labelDim: 'hsl(0, 0%, 0%)',
+  labelMuted: 'hsl(0, 0%, 0%)',
+  labelHalo: 'hsl(0, 0%, 100%)',
+  // water-point-label / waterway-label have no halo
+  labelHaloSoft: 'hsla(0, 0%, 100%, 0)',
+  labelHaloSub: 'hsl(0, 0%, 100%)',
+  // settlement-subdivision-label
+  labelSubdivision: 'hsl(230, 29%, 35%)',
+  // water-point-label: lakes hsl(230, 48%, 44%), ocean/sea/bay hsl(205, 84%, 88%)
+  waterLabel: 'hsl(230, 48%, 44%)',
+  waterLabelOcean: 'hsl(205, 84%, 88%)',
+  // poi-label common case (sizerank >= 5)
+  poiPark: 'hsl(100, 100%, 20%)',
+  poiEducation: 'hsl(51, 100%, 20%)',
+  poiMedical: 'hsl(340, 39%, 42%)',
+  poiDefault: 'hsl(26, 25%, 32%)',
+  poiHalo: 'hsl(0, 0%, 100%)',
+  // natural-point-label
+  naturalLabel: 'hsl(26, 25%, 32%)',
+  // admin-1 at z7, admin-1 low-z, admin-0
+  boundaryLine: 'hsl(230, 8%, 62%)',
+  boundaryLineAdm2: 'hsl(230, 14%, 77%)',
+  boundaryLineHi: 'hsl(230, 8%, 51%)',
+  stateOpacity: 1
+};
+
+// Label / admin colors copied from Mapbox outdoors-v11 symbol + admin layers.
+// outdoors-v11 shares streets-v11 symbol paints (black settlement ink, white
+// halo, park/education/medical POI hues). Applied only for disasterdb-topo.
+// Sizes share the v11 ramps via style.js `v11` / `topo` flag.
+export const outdoorsV11Labels = {
+  // road-label, settlement-label, state-label, country-label: hsl(0, 0%, 0%)
+  labelText: 'hsl(0, 0%, 0%)',
+  labelDim: 'hsl(0, 0%, 0%)',
+  labelMuted: 'hsl(0, 0%, 0%)',
+  labelHalo: 'hsl(0, 0%, 100%)',
+  // water-point-label / waterway-label have no halo
+  labelHaloSoft: 'hsla(0, 0%, 100%, 0)',
+  labelHaloSub: 'hsl(0, 0%, 100%)',
+  // settlement-subdivision-label
+  labelSubdivision: 'hsl(230, 29%, 35%)',
+  // water-point-label: lakes hsl(230, 48%, 44%), ocean/sea/bay hsl(205, 84%, 88%)
+  waterLabel: 'hsl(230, 48%, 44%)',
+  waterLabelOcean: 'hsl(205, 84%, 88%)',
+  // poi-label common case (sizerank >= 5)
+  poiPark: 'hsl(100, 100%, 20%)',
+  poiEducation: 'hsl(51, 100%, 20%)',
+  poiMedical: 'hsl(340, 39%, 42%)',
+  poiDefault: 'hsl(26, 25%, 32%)',
+  poiHalo: 'hsl(0, 0%, 100%)',
+  // natural-point-label
+  naturalLabel: 'hsl(26, 25%, 32%)',
+  // admin-1 at z7, admin-1 low-z, admin-0
+  boundaryLine: 'hsl(230, 8%, 62%)',
+  boundaryLineAdm2: 'hsl(230, 14%, 77%)',
+  boundaryLineHi: 'hsl(230, 8%, 51%)',
+  stateOpacity: 1
+};
+
+// Label / admin colors copied from Mapbox dark-v10.
+// Applied only for basemap disasterdb-dark. Sizes are shared with streets
+// (same Mapbox ramps) via style.js `v11`.
+export const darkV10Labels = {
+  // settlement-label large end (symbolrank < 11). Smaller ranks are 85% / 70%.
+  labelDim: 'hsl(0, 0%, 90%)',
+  labelText: 'hsl(0, 0%, 60%)',
+  labelMuted: 'hsl(0, 0%, 78%)',
+  // road-label
+  roadLabel: 'hsl(0, 0%, 78%)',
+  roadLabelMinor: 'hsl(0, 0%, 78%)',
+  roadHalo: 'hsl(0, 0%, 13%)',
+  // settlement halo. State uses the same 10% / 0.75.
+  labelHalo: 'hsla(0, 0%, 10%, 0.75)',
+  labelHaloSoft: 'hsla(0, 0%, 10%, 0)',
+  labelHaloSub: 'hsla(0, 0%, 10%, 0.75)',
+  labelSubdivision: 'hsl(0, 0%, 70%)',
+  // state-label / country-label are dimmer than cities
+  stateLabel: 'hsl(0, 0%, 50%)',
+  countryLabel: 'hsl(0, 0%, 45%)',
+  countryHalo: 'hsl(0, 0%, 10%)',
+  // water-point-label and waterway-label are one gray, oceans included
+  waterLabel: 'hsl(0, 0%, 45%)',
+  waterLabelOcean: 'hsl(0, 0%, 45%)',
+  // poi-label has no category hues in dark-v10
+  poiPark: 'hsl(0, 0%, 60%)',
+  poiEducation: 'hsl(0, 0%, 60%)',
+  poiMedical: 'hsl(0, 0%, 60%)',
+  poiDefault: 'hsl(0, 0%, 60%)',
+  poiHalo: 'hsl(0, 0%, 13%)',
+  naturalLabel: 'hsl(0, 0%, 85%)',
+  // admin-0, admin-1 at z7, low-zoom admin
+  boundaryLineHi: 'hsl(0, 0%, 43%)',
+  boundaryLine: 'hsl(0, 0%, 35%)',
+  boundaryLineAdm2: 'hsl(0, 0%, 27%)',
+  stateOpacity: 1
+};
+
+
+
+// Label / admin colors from FireMap Navigation
+// (disasterdb/cm17bo79203s201r722er0wsz ≈ navigation-night-v1).
+// Applied only for basemap disasterdb-navigation. Sizes share the v11 ramps
+// (nav ramps are slightly larger at high z; one Protomaps key cannot express
+// major vs minor settlement split or sizerank).
+export const navigationNightLabels = {
+  // settlement-major/minor / state / country
+  labelDim: 'hsl(215, 30%, 75%)',
+  labelText: 'hsl(215, 30%, 75%)',
+  labelMuted: 'hsl(215, 30%, 75%)',
+  // road-label-navigation
+  roadLabel: 'hsl(0, 0%, 90%)',
+  roadLabelMinor: 'hsl(0, 0%, 90%)',
+  roadHalo: 'hsl(213, 9%, 19%)',
+  labelHalo: 'hsl(215, 20%, 25%)',
+  // water labels use a soft dark halo in this style
+  labelHaloSoft: 'hsla(215, 12%, 16%, 0.5)',
+  labelHaloSub: 'hsla(215, 20%, 25%, 0.75)',
+  labelSubdivision: 'hsl(215, 30%, 85%)',
+  stateLabel: 'hsl(215, 30%, 75%)',
+  countryLabel: 'hsl(215, 30%, 75%)',
+  countryHalo: 'hsl(215, 20%, 25%)',
+  // water-point-label: lakes hsl(197, 0%, 90%), ocean hsl(197, 11%, 63%)
+  waterLabel: 'hsl(197, 0%, 90%)',
+  waterLabelOcean: 'hsl(197, 11%, 63%)',
+  // poi-label
+  poiPark: 'hsl(150, 50%, 85%)',
+  poiEducation: 'hsl(236, 50%, 95%)',
+  poiMedical: 'hsl(0, 50%, 85%)',
+  poiDefault: 'hsl(236, 50%, 95%)',
+  poiHalo: 'hsl(215, 15%, 23%)',
+  naturalLabel: 'hsl(236, 50%, 95%)',
+  boundaryLineHi: 'hsl(250, 10%, 65%)',
+  boundaryLine: 'hsl(250, 10%, 70%)',
+  boundaryLineAdm2: 'hsl(250, 10%, 70%)',
+  stateOpacity: 0.5
+};
+
+// Label / admin colors copied from Mapbox light-v10.
+// Applied only for basemap disasterdb-light. Sizes share the v11 ramps.
+export const lightV10Labels = {
+  // settlement-label / country-label / road-label large end
+  labelDim: 'hsl(0, 0%, 42%)',
+  labelText: 'hsl(0, 0%, 42%)',
+  labelMuted: 'hsl(0, 0%, 42%)',
+  roadLabel: 'hsl(0, 0%, 42%)',
+  roadLabelMinor: 'hsl(0, 0%, 42%)',
+  labelHalo: 'hsl(0, 0%, 100%)',
+  labelHaloSoft: 'hsla(0, 0%, 100%, 0)',
+  labelHaloSub: 'hsl(0, 0%, 100%)',
+  labelSubdivision: 'hsl(0, 0%, 62%)',
+  // state-label is lighter than cities
+  stateLabel: 'hsl(0, 0%, 66%)',
+  countryLabel: 'hsl(0, 0%, 42%)',
+  // water-point-label and waterway-label
+  waterLabel: 'hsl(187, 7%, 51%)',
+  waterLabelOcean: 'hsl(187, 7%, 51%)',
+  // poi-label common case hsl(230, 0%, 56%) — no category hues
+  poiPark: 'hsl(0, 0%, 56%)',
+  poiEducation: 'hsl(0, 0%, 56%)',
+  poiMedical: 'hsl(0, 0%, 56%)',
+  poiDefault: 'hsl(0, 0%, 56%)',
+  poiHalo: 'hsl(0, 0%, 100%)',
+  naturalLabel: 'hsl(0, 0%, 42%)',
+  boundaryLineHi: 'hsl(0, 0%, 62%)',
+  boundaryLine: 'hsl(0, 0%, 70%)',
+  boundaryLineAdm2: 'hsl(0, 0%, 80%)',
+  stateOpacity: 1
+};
+
+// Label / admin colors: grayscale reading of Mapbox light-v10 (PR #125).
+// Same lightness stops as lightV10Labels; residual hue (water) zeroed.
+// Applied only for basemap disasterdb-gray. Sizes share the v11 / light ramps.
+export const grayLightV10Labels = {
+  labelDim: 'hsl(0, 0%, 42%)',
+  labelText: 'hsl(0, 0%, 42%)',
+  labelMuted: 'hsl(0, 0%, 42%)',
+  roadLabel: 'hsl(0, 0%, 42%)',
+  roadLabelMinor: 'hsl(0, 0%, 42%)',
+  labelHalo: 'hsl(0, 0%, 100%)',
+  labelHaloSoft: 'hsla(0, 0%, 100%, 0)',
+  labelHaloSub: 'hsl(0, 0%, 100%)',
+  labelSubdivision: 'hsl(0, 0%, 62%)',
+  stateLabel: 'hsl(0, 0%, 66%)',
+  countryLabel: 'hsl(0, 0%, 42%)',
+  // light-v10 water hsl(187, 7%, 51%) → gray
+  waterLabel: 'hsl(0, 0%, 51%)',
+  waterLabelOcean: 'hsl(0, 0%, 51%)',
+  poiPark: 'hsl(0, 0%, 56%)',
+  poiEducation: 'hsl(0, 0%, 56%)',
+  poiMedical: 'hsl(0, 0%, 56%)',
+  poiDefault: 'hsl(0, 0%, 56%)',
+  poiHalo: 'hsl(0, 0%, 100%)',
+  naturalLabel: 'hsl(0, 0%, 42%)',
+  boundaryLineHi: 'hsl(0, 0%, 62%)',
+  boundaryLine: 'hsl(0, 0%, 70%)',
+  boundaryLineAdm2: 'hsl(0, 0%, 80%)',
+  stateOpacity: 1
+};
 
 // ---------------------------------------------------------------------------
 // Typography — LEXEND, read straight off your Mapbox Studio style
