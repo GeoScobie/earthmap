@@ -9,7 +9,7 @@ import {
   hillshadeEnabled as themeHillshade
 } from './theme.js';
 
-/** @type {null|'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'} */
+/** @type {null|'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'|'disasterdb-navigation-day'|'disasterdb-satellite-streets'|'disasterdb-hydro'|'disasterdb-standard'} */
 let runtimeBasemapId = null;
 
 function queryParams() {
@@ -21,7 +21,7 @@ function queryParams() {
   }
 }
 
-/** @returns {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'} */
+/** @returns {'satellite'|'disasterdb-topo'|'disasterdb-light'|'disasterdb-dark'|'disasterdb-streets'|'disasterdb-navigation'|'disasterdb-gray'|'disasterdb-night-nav'|'disasterdb-hybrid'|'disasterdb-navigation-day'|'disasterdb-satellite-streets'|'disasterdb-hydro'|'disasterdb-standard'} */
 export function resolveBasemapId() {
   if (runtimeBasemapId && BASEMAP_IDS.includes(runtimeBasemapId)) {
     return runtimeBasemapId;
@@ -79,19 +79,20 @@ export function resolveHillshadeEnabled(basemap = resolveBasemapId()) {
 }
 
 export function isCartographicBasemap(id = resolveBasemapId()) {
-  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-dark' || id === 'disasterdb-streets' || id === 'disasterdb-navigation' || id === 'disasterdb-gray' || id === 'disasterdb-night-nav' || id === 'disasterdb-hybrid';
+  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-dark' || id === 'disasterdb-streets' || id === 'disasterdb-navigation' || id === 'disasterdb-gray' || id === 'disasterdb-night-nav' || id === 'disasterdb-hybrid' || id === 'disasterdb-navigation-day' || id === 'disasterdb-satellite-streets' || id === 'disasterdb-hydro' || id === 'disasterdb-standard';
 }
 
 export function isLightCartographic(id = resolveBasemapId()) {
   // navigation matches FireMap's night-origin nav style (dark), so it is out.
-  // night-nav and hybrid are dark palettes too.
-  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-streets' || id === 'disasterdb-gray';
+  // night-nav, hybrid, and satellite-streets are dark fields.
+  // navigation-day, hydro, and standard are pale.
+  return id === 'disasterdb-topo' || id === 'disasterdb-light' || id === 'disasterdb-streets' || id === 'disasterdb-gray' || id === 'disasterdb-navigation-day' || id === 'disasterdb-hydro' || id === 'disasterdb-standard';
 }
 
 /** Contours on topo always; on light/dark when hillshade/DEM is on. */
 export function resolveContoursEnabled(basemap = resolveBasemapId()) {
   if (basemap === 'disasterdb-topo') return true;
-  if (basemap === 'disasterdb-light' || basemap === 'disasterdb-dark' || basemap === 'disasterdb-streets' || basemap === 'disasterdb-navigation' || basemap === 'disasterdb-gray' || basemap === 'disasterdb-night-nav' || basemap === 'disasterdb-hybrid') {
+  if (basemap === 'disasterdb-light' || basemap === 'disasterdb-dark' || basemap === 'disasterdb-streets' || basemap === 'disasterdb-navigation' || basemap === 'disasterdb-gray' || basemap === 'disasterdb-night-nav' || basemap === 'disasterdb-hybrid' || basemap === 'disasterdb-navigation-day' || basemap === 'disasterdb-satellite-streets' || basemap === 'disasterdb-hydro' || basemap === 'disasterdb-standard') {
     return resolveHillshadeEnabled(basemap);
   }
   return false;

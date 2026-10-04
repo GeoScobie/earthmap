@@ -824,6 +824,404 @@ export function disasterdbHybridFlavor() {
   };
 }
 
+/**
+ * Navigation Day palette sampled from public mapbox/navigation-day-v1.
+ * Id stays separate from disasterdb-night-nav (that flavor is still the
+ * earlier near-black yellow-road palette, not this style). Pale ground,
+ * yellow motorway, white other roads. Lexend stacks; no Lexend Italic.
+ * Not the prod default.
+ */
+export function disasterdbNavigationDayFlavor() {
+  const light = namedFlavor('light');
+  return {
+    ...light,
+    // land / background
+    background: 'hsl(60, 0%, 99%)',
+    earth: 'hsl(60, 0%, 99%)',
+    // national-park + landuse park
+    park_a: 'hsl(100, 71%, 80%)',
+    park_b: 'hsl(100, 71%, 80%)',
+    // landcover default (wood/grass). Snow is white and cannot split.
+    wood_a: 'hsl(82, 40%, 92%)',
+    wood_b: 'hsl(82, 40%, 92%)',
+    scrub_a: 'hsl(82, 40%, 92%)',
+    scrub_b: 'hsl(82, 40%, 92%)',
+    hospital: 'hsl(320, 22%, 96%)',
+    industrial: 'hsl(60, 0%, 99%)',
+    school: 'hsl(35, 23%, 90%)',
+    pedestrian: 'hsl(60, 2%, 94%)',
+    glacier: 'hsl(197, 88%, 98%)',
+    sand: 'hsl(100, 54%, 98%)',
+    beach: 'hsl(100, 54%, 98%)',
+    aerodrome: 'hsl(244, 14%, 91%)',
+    runway: 'hsl(244, 14%, 91%)',
+    // water fill and waterway are the same hue in navigation-day-v1
+    water: 'hsl(197, 98%, 78%)',
+    zoo: 'hsl(60, 2%, 94%)',
+    military: 'hsl(60, 0%, 99%)',
+    pier: 'hsl(60, 0%, 99%)',
+    buildings: 'hsl(60, 0%, 95%)',
+    // motorway fill hsl(45, 98%, 80%), case hsl(45, 88%, 65%).
+    // Trunk hsl(51, 90%, 85%) / case hsl(51, 83%, 65%) cannot split (kind=highway).
+    highway: 'hsl(45, 98%, 80%)',
+    highway_casing_early: 'hsl(45, 88%, 65%)',
+    highway_casing_late: 'hsl(45, 88%, 65%)',
+    // primary / secondary / tertiary / street fill hsl(230, 10%, 92%), case hsl(230, 8%, 85%)
+    major: 'hsl(230, 10%, 92%)',
+    major_casing_early: 'hsl(230, 8%, 85%)',
+    major_casing_late: 'hsl(230, 8%, 85%)',
+    minor_a: 'hsl(230, 10%, 92%)',
+    minor_b: 'hsl(230, 10%, 92%)',
+    minor_casing: 'hsl(230, 8%, 85%)',
+    minor_service: 'hsl(230, 10%, 92%)',
+    minor_service_casing: 'hsl(230, 8%, 85%)',
+    link: 'hsl(45, 98%, 80%)',
+    link_casing: 'hsl(45, 88%, 65%)',
+    other: 'hsl(230, 10%, 92%)',
+    railway: 'hsl(75, 5%, 90%)',
+    boundaries: 'hsl(250, 90%, 80%)',
+    regular: 'Lexend Regular',
+    bold: 'Lexend Bold',
+    italic: 'Lexend Regular',
+    tunnel_highway: 'hsl(45, 91%, 88%)',
+    tunnel_highway_casing: 'hsl(45, 88%, 65%)',
+    tunnel_major: 'hsl(230, 10%, 92%)',
+    tunnel_major_casing: 'hsl(230, 1%, 72%)',
+    tunnel_minor: 'hsl(230, 10%, 92%)',
+    tunnel_minor_casing: 'hsl(230, 1%, 72%)',
+    tunnel_link: 'hsl(45, 91%, 88%)',
+    tunnel_link_casing: 'hsl(45, 88%, 65%)',
+    tunnel_other: 'hsl(230, 10%, 92%)',
+    tunnel_other_casing: 'hsl(230, 1%, 72%)',
+    bridges_highway: 'hsl(45, 98%, 80%)',
+    bridges_highway_casing: 'hsl(45, 88%, 65%)',
+    bridges_major: 'hsl(230, 10%, 92%)',
+    bridges_major_casing: 'hsl(230, 8%, 85%)',
+    bridges_minor: 'hsl(230, 10%, 92%)',
+    bridges_minor_casing: 'hsl(230, 8%, 85%)',
+    bridges_link: 'hsl(45, 98%, 80%)',
+    bridges_link_casing: 'hsl(45, 88%, 65%)',
+    bridges_other: 'hsl(230, 10%, 92%)',
+    bridges_other_casing: 'hsl(230, 8%, 85%)',
+    landcover: {
+      grassland: 'hsl(82, 40%, 92%)',
+      barren: 'hsl(100, 54%, 98%)',
+      urban_area: 'hsl(60, 0%, 99%)',
+      farmland: 'hsl(82, 40%, 92%)',
+      glacier: 'hsl(197, 88%, 98%)',
+      scrub: 'hsl(82, 40%, 92%)',
+      forest: 'hsl(82, 40%, 92%)'
+    },
+    city_label: 'hsl(230, 20%, 5%)',
+    city_label_halo: 'hsl(60, 5%, 100%)',
+    state_label: 'hsl(230, 20%, 5%)',
+    state_label_halo: 'hsl(60, 5%, 100%)',
+    country_label: 'hsl(230, 20%, 5%)',
+    ocean_label: 'hsl(197, 94%, 58%)',
+    subplace_label: 'hsl(230, 20%, 44%)',
+    subplace_label_halo: 'hsla(60, 5%, 100%, 0.75)',
+    roads_label_major: 'hsl(0, 0%, 15%)',
+    roads_label_major_halo: 'hsl(230, 10%, 92%)',
+    roads_label_minor: 'hsl(0, 0%, 15%)',
+    roads_label_minor_halo: 'hsl(230, 10%, 92%)'
+  };
+}
+
+/**
+ * Satellite-streets road + label overlay colors from public
+ * mapbox/satellite-streets-v12. No imagery in this flavor, so land stays
+ * the dark muted ground already used by disasterdb-hybrid (roads need a
+ * dark field). Road casing/fill and Lexend label colors come from the
+ * Mapbox style, not an invented road palette. Id is separate from
+ * disasterdb-hybrid, which is not this match. Not the prod default.
+ */
+export function disasterdbSatelliteStreetsFlavor() {
+  const dark = namedFlavor('dark');
+  return {
+    ...dark,
+    background: '#2c302c',
+    earth: '#3c4038',
+    park_a: '#3a4436',
+    park_b: '#343e32',
+    wood_a: '#364036',
+    wood_b: '#303a30',
+    scrub_a: '#3e4034',
+    scrub_b: '#383a30',
+    hospital: '#443c3c',
+    industrial: '#3a3c3e',
+    school: '#403e36',
+    pedestrian: '#3a3c38',
+    glacier: '#4a5458',
+    sand: '#4a4638',
+    beach: '#524c3c',
+    aerodrome: '#3c3e3c',
+    runway: '#4a4c4a',
+    // satellite-streets has no vector water fill (imagery). Keep a dark water
+    // so lakes read without inventing a blue overlay.
+    water: '#0a1218',
+    zoo: '#364038',
+    military: '#484838',
+    pier: '#4a4c4a',
+    buildings: '#343632',
+    // high-zoom motorway hsla(30, 100%, 70%, 0.8). Trunk hsla(50, 89%, 70%, 0.8)
+    // cannot split. Case hsla(0, 1%, 22%, 0.7).
+    highway: 'hsla(30, 100%, 70%, 0.8)',
+    highway_casing_early: 'hsla(0, 1%, 22%, 0.7)',
+    highway_casing_late: 'hsla(0, 1%, 22%, 0.7)',
+    // primary / secondary / street fill hsla(0, 0%, 80%, 0.8), case hsla(0, 1%, 10%, 0.7)
+    major: 'hsla(0, 0%, 80%, 0.8)',
+    major_casing_early: 'hsla(0, 1%, 10%, 0.7)',
+    major_casing_late: 'hsla(0, 1%, 10%, 0.7)',
+    minor_a: 'hsla(0, 0%, 80%, 0.8)',
+    minor_b: 'hsla(0, 0%, 80%, 0.8)',
+    minor_casing: 'hsla(0, 1%, 10%, 0.7)',
+    minor_service: 'hsla(0, 0%, 80%, 0.8)',
+    minor_service_casing: 'hsla(0, 1%, 10%, 0.7)',
+    link: 'hsla(30, 100%, 70%, 0.8)',
+    link_casing: 'hsla(0, 1%, 22%, 0.7)',
+    // road-path
+    other: 'hsla(40, 95%, 90%, 0.8)',
+    railway: 'hsla(0, 0%, 80%, 0.8)',
+    boundaries: 'hsl(260, 15%, 80%)',
+    regular: 'Lexend Regular',
+    bold: 'Lexend Bold',
+    italic: 'Lexend Regular',
+    tunnel_highway: 'hsla(30, 100%, 80%, 0.8)',
+    tunnel_highway_casing: 'hsla(0, 1%, 22%, 0.7)',
+    tunnel_major: 'hsla(0, 0%, 80%, 0.8)',
+    tunnel_major_casing: 'hsla(0, 0%, 0%, 0.7)',
+    tunnel_minor: 'hsla(0, 0%, 80%, 0.8)',
+    tunnel_minor_casing: 'hsla(0, 0%, 0%, 0.7)',
+    tunnel_link: 'hsla(30, 100%, 80%, 0.8)',
+    tunnel_link_casing: 'hsla(0, 1%, 22%, 0.7)',
+    tunnel_other: 'hsla(40, 95%, 90%, 0.8)',
+    tunnel_other_casing: 'hsla(0, 0%, 0%, 0.7)',
+    bridges_highway: 'hsla(30, 100%, 70%, 0.8)',
+    bridges_highway_casing: 'hsla(0, 1%, 22%, 0.7)',
+    bridges_major: 'hsla(0, 0%, 80%, 0.8)',
+    bridges_major_casing: 'hsla(0, 1%, 10%, 0.7)',
+    bridges_minor: 'hsla(0, 0%, 80%, 0.8)',
+    bridges_minor_casing: 'hsla(0, 1%, 10%, 0.7)',
+    bridges_link: 'hsla(30, 100%, 70%, 0.8)',
+    bridges_link_casing: 'hsla(0, 1%, 22%, 0.7)',
+    bridges_other: 'hsla(40, 95%, 90%, 0.8)',
+    bridges_other_casing: 'hsla(0, 1%, 10%, 0.7)',
+    landcover: {
+      grassland: 'rgba(62, 70, 54, 1)',
+      barren: 'rgba(74, 68, 52, 1)',
+      urban_area: 'rgba(58, 58, 54, 1)',
+      farmland: 'rgba(68, 72, 52, 1)',
+      glacier: 'rgba(80, 90, 96, 1)',
+      scrub: 'rgba(66, 68, 52, 1)',
+      forest: 'rgba(48, 60, 46, 1)'
+    },
+    city_label: 'hsl(0, 0%, 95%)',
+    city_label_halo: 'hsl(0, 5%, 0%)',
+    state_label: 'hsl(0, 0%, 95%)',
+    state_label_halo: 'hsl(0, 5%, 0%)',
+    country_label: 'hsl(0, 0%, 95%)',
+    ocean_label: 'hsl(240, 96%, 82%)',
+    subplace_label: 'hsl(0, 0%, 100%)',
+    subplace_label_halo: 'hsla(0, 5%, 0%, 0.75)',
+    roads_label_major: 'hsl(0, 0%, 100%)',
+    roads_label_major_halo: 'hsl(0, 5%, 0%)',
+    roads_label_minor: 'hsl(0, 0%, 100%)',
+    roads_label_minor_halo: 'hsl(0, 5%, 0%)'
+  };
+}
+
+/**
+ * Hydrography emphasis on layers that exist in disasterdb-planet-z15.
+ * The archive has boundaries, buildings, earth, landcover, landuse, places,
+ * pois, roads, water — no watershed, basin, or catchment layer, so none is
+ * invented. Land is quiet; water polygons (lakes/ocean) and water lines
+ * (river/stream) share one strong blue. Not the prod default.
+ */
+export function disasterdbHydroFlavor() {
+  const light = namedFlavor('light');
+  return {
+    ...light,
+    background: 'hsl(40, 6%, 94%)',
+    earth: 'hsl(40, 6%, 94%)',
+    park_a: 'hsl(80, 8%, 88%)',
+    park_b: 'hsl(80, 8%, 88%)',
+    wood_a: 'hsl(80, 8%, 88%)',
+    wood_b: 'hsl(80, 8%, 88%)',
+    scrub_a: 'hsl(80, 6%, 90%)',
+    scrub_b: 'hsl(80, 6%, 90%)',
+    hospital: 'hsl(40, 6%, 94%)',
+    industrial: 'hsl(40, 6%, 94%)',
+    school: 'hsl(40, 6%, 94%)',
+    pedestrian: 'hsl(40, 6%, 92%)',
+    glacier: 'hsl(200, 10%, 92%)',
+    sand: 'hsl(40, 10%, 90%)',
+    beach: 'hsl(40, 10%, 90%)',
+    aerodrome: 'hsl(40, 4%, 90%)',
+    runway: 'hsl(40, 4%, 86%)',
+    water: 'hsl(205, 72%, 42%)',
+    zoo: 'hsl(80, 8%, 88%)',
+    military: 'hsl(40, 6%, 90%)',
+    pier: 'hsl(40, 5%, 80%)',
+    buildings: 'hsl(40, 5%, 88%)',
+    highway: 'hsl(40, 4%, 78%)',
+    highway_casing_early: 'hsl(40, 4%, 70%)',
+    highway_casing_late: 'hsl(40, 4%, 70%)',
+    major: 'hsl(40, 4%, 82%)',
+    major_casing_early: 'hsl(40, 4%, 74%)',
+    major_casing_late: 'hsl(40, 4%, 74%)',
+    minor_a: 'hsl(40, 3%, 86%)',
+    minor_b: 'hsl(40, 3%, 86%)',
+    minor_casing: 'hsl(40, 3%, 78%)',
+    minor_service: 'hsl(40, 3%, 88%)',
+    minor_service_casing: 'hsl(40, 3%, 80%)',
+    link: 'hsl(40, 4%, 78%)',
+    link_casing: 'hsl(40, 4%, 70%)',
+    other: 'hsl(40, 3%, 84%)',
+    railway: 'hsl(40, 3%, 76%)',
+    boundaries: 'hsl(210, 8%, 62%)',
+    regular: 'Lexend Regular',
+    bold: 'Lexend Bold',
+    italic: 'Lexend Regular',
+    tunnel_highway: 'hsl(40, 4%, 82%)',
+    tunnel_highway_casing: 'hsl(40, 4%, 74%)',
+    tunnel_major: 'hsl(40, 3%, 86%)',
+    tunnel_major_casing: 'hsl(40, 3%, 78%)',
+    tunnel_minor: 'hsl(40, 3%, 86%)',
+    tunnel_minor_casing: 'hsl(40, 3%, 78%)',
+    tunnel_link: 'hsl(40, 4%, 82%)',
+    tunnel_link_casing: 'hsl(40, 4%, 74%)',
+    tunnel_other: 'hsl(40, 3%, 86%)',
+    tunnel_other_casing: 'hsl(40, 3%, 78%)',
+    bridges_highway: 'hsl(40, 4%, 78%)',
+    bridges_highway_casing: 'hsl(40, 4%, 70%)',
+    bridges_major: 'hsl(40, 4%, 82%)',
+    bridges_major_casing: 'hsl(40, 4%, 74%)',
+    bridges_minor: 'hsl(40, 3%, 86%)',
+    bridges_minor_casing: 'hsl(40, 3%, 78%)',
+    bridges_link: 'hsl(40, 4%, 78%)',
+    bridges_link_casing: 'hsl(40, 4%, 70%)',
+    bridges_other: 'hsl(40, 3%, 84%)',
+    bridges_other_casing: 'hsl(40, 3%, 78%)',
+    landcover: {
+      grassland: 'hsl(80, 8%, 90%)',
+      barren: 'hsl(40, 8%, 90%)',
+      urban_area: 'hsl(40, 4%, 90%)',
+      farmland: 'hsl(70, 10%, 90%)',
+      glacier: 'hsl(200, 10%, 92%)',
+      scrub: 'hsl(80, 6%, 90%)',
+      forest: 'hsl(90, 8%, 86%)'
+    },
+    city_label: 'hsl(210, 18%, 18%)',
+    city_label_halo: 'hsl(40, 20%, 98%)',
+    state_label: 'hsl(210, 12%, 36%)',
+    state_label_halo: 'hsl(40, 20%, 98%)',
+    country_label: 'hsl(210, 18%, 18%)',
+    ocean_label: 'hsl(207, 80%, 22%)',
+    subplace_label: 'hsl(210, 10%, 32%)',
+    subplace_label_halo: 'hsl(40, 20%, 98%)',
+    roads_label_major: 'hsl(210, 8%, 32%)',
+    roads_label_major_halo: 'hsl(40, 20%, 98%)',
+    roads_label_minor: 'hsl(210, 8%, 32%)',
+    roads_label_minor_halo: 'hsl(40, 20%, 98%)'
+  };
+}
+
+/**
+ * Mapbox Standard default day theme (schema defaults, not the 3D/lighting
+ * model). colorMotorways vs colorTrunks cannot split. Buildings, models,
+ * indoor, and the theme LUT are not reproduced. Not the prod default.
+ */
+export function disasterdbStandardFlavor() {
+  const light = namedFlavor('light');
+  return {
+    ...light,
+    background: 'hsl(20, 20%, 95%)',
+    earth: 'hsl(20, 20%, 95%)',
+    park_a: 'hsl(115, 60%, 84%)',
+    park_b: 'hsl(115, 60%, 84%)',
+    wood_a: 'hsl(115, 60%, 84%)',
+    wood_b: 'hsl(115, 60%, 84%)',
+    scrub_a: 'hsl(115, 60%, 84%)',
+    scrub_b: 'hsl(115, 60%, 84%)',
+    hospital: 'hsl(0, 50%, 92%)',
+    industrial: 'hsl(230, 15%, 92%)',
+    school: 'hsl(40, 50%, 88%)',
+    pedestrian: 'hsl(20, 20%, 97%)',
+    glacier: 'hsl(200, 30%, 94%)',
+    sand: 'hsl(40, 30%, 90%)',
+    beach: 'hsl(40, 30%, 90%)',
+    aerodrome: 'hsl(230, 10%, 90%)',
+    runway: 'hsl(230, 10%, 86%)',
+    water: 'hsl(200, 100%, 80%)',
+    zoo: 'hsl(115, 60%, 84%)',
+    military: 'hsl(20, 20%, 95%)',
+    pier: 'hsl(20, 15%, 88%)',
+    buildings: 'hsl(40, 43%, 93%)',
+    // colorMotorways. colorTrunks hsl(235, 20%, 70%) cannot split.
+    highway: 'hsl(214, 23%, 70%)',
+    highway_casing_early: 'hsl(214, 20%, 75%)',
+    highway_casing_late: 'hsl(214, 20%, 75%)',
+    // colorRoads / colorHdRoads
+    major: 'hsl(224, 25%, 80%)',
+    major_casing_early: 'hsl(214, 20%, 75%)',
+    major_casing_late: 'hsl(214, 20%, 75%)',
+    minor_a: 'hsl(224, 25%, 80%)',
+    minor_b: 'hsl(224, 25%, 80%)',
+    minor_casing: 'hsl(214, 20%, 75%)',
+    minor_service: 'hsl(224, 25%, 80%)',
+    minor_service_casing: 'hsl(214, 20%, 75%)',
+    link: 'hsl(214, 23%, 70%)',
+    link_casing: 'hsl(214, 20%, 75%)',
+    other: 'hsl(295, 10%, 93%)',
+    railway: 'hsl(214, 20%, 75%)',
+    boundaries: 'hsl(345, 100%, 70%)',
+    regular: 'Lexend Regular',
+    bold: 'Lexend Bold',
+    italic: 'Lexend Regular',
+    tunnel_highway: 'hsl(214, 18%, 78%)',
+    tunnel_highway_casing: 'hsl(214, 16%, 82%)',
+    tunnel_major: 'hsl(224, 18%, 86%)',
+    tunnel_major_casing: 'hsl(214, 16%, 82%)',
+    tunnel_minor: 'hsl(224, 18%, 86%)',
+    tunnel_minor_casing: 'hsl(214, 16%, 82%)',
+    tunnel_link: 'hsl(214, 18%, 78%)',
+    tunnel_link_casing: 'hsl(214, 16%, 82%)',
+    tunnel_other: 'hsl(295, 8%, 94%)',
+    tunnel_other_casing: 'hsl(0, 10%, 80%)',
+    bridges_highway: 'hsl(214, 23%, 70%)',
+    bridges_highway_casing: 'hsl(214, 20%, 75%)',
+    bridges_major: 'hsl(224, 25%, 80%)',
+    bridges_major_casing: 'hsl(214, 20%, 75%)',
+    bridges_minor: 'hsl(224, 25%, 80%)',
+    bridges_minor_casing: 'hsl(214, 20%, 75%)',
+    bridges_link: 'hsl(214, 23%, 70%)',
+    bridges_link_casing: 'hsl(214, 20%, 75%)',
+    bridges_other: 'hsl(295, 10%, 93%)',
+    bridges_other_casing: 'hsl(0, 10%, 80%)',
+    landcover: {
+      grassland: 'hsl(115, 60%, 84%)',
+      barren: 'hsl(40, 20%, 90%)',
+      urban_area: 'hsl(20, 15%, 92%)',
+      farmland: 'hsl(80, 40%, 86%)',
+      glacier: 'hsl(200, 30%, 94%)',
+      scrub: 'hsl(115, 40%, 86%)',
+      forest: 'hsl(115, 60%, 84%)'
+    },
+    city_label: 'hsl(0, 0%, 0%)',
+    city_label_halo: 'hsl(0, 0%, 100%)',
+    state_label: 'hsl(0, 0%, 0%)',
+    state_label_halo: 'hsl(0, 0%, 100%)',
+    country_label: 'hsl(0, 0%, 0%)',
+    ocean_label: 'hsl(200, 40%, 44%)',
+    subplace_label: 'hsl(0, 0%, 0%)',
+    subplace_label_halo: 'hsl(0, 0%, 100%)',
+    roads_label_major: 'hsl(0, 0%, 25%)',
+    roads_label_major_halo: 'hsl(0, 0%, 100%)',
+    roads_label_minor: 'hsl(0, 0%, 25%)',
+    roads_label_minor_halo: 'hsl(0, 0%, 100%)'
+  };
+}
+
 /** Layer ids from layers() that we keep for cartographic fills + roads. */
 export const CARTO_LAYER_ID_RE =
   /^(background|earth|landcover|landuse_|water$|water_stream|water_river|buildings|roads_)/;
