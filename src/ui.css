@@ -2825,26 +2825,32 @@ html:not(.embed-mode) #map {
   pointer-events: none;
 }
 
-/* Sat scene age sits under the title chip. Not a control. */
+/* Homepage Sat age: FireMap collapsed chip, bottom center. Not a slider. */
 .sat-scene-age {
-  position: relative;
-  z-index: 1;
-  align-self: flex-start;
-  margin: 6px 0 0;
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  color: #e8eef8;
-  font-family: 'Lexend', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.3;
+  position: fixed;
+  left: 50%;
+  bottom: calc(22px + var(--em-ad-h, 0px));
+  transform: translateX(-50%);
+  z-index: 1100;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-family: 'Lexend', system-ui, sans-serif;
+  line-height: 1;
   white-space: nowrap;
   pointer-events: none;
 }
 .sat-scene-age[hidden] { display: none !important; }
+html:not(.sat-mosaic-page) {
+  --em-ad-h: 0px;
+}
+html:not(.sat-mosaic-page) .ad-slot,
+html:not(.sat-mosaic-page) .goes-time-transport,
+html:not(.sat-mosaic-page) .geocolor-time-bar {
+  display: none !important;
+}
 
 html.embed-mode .ad-slot,
 html.embed-mode .sat-scene-age,

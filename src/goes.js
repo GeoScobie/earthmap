@@ -2175,6 +2175,7 @@ async function primeTimeTransport(map) {
       '[goes-geocolor] prime → live tip',
       newestTipFrame(map, state)?.iso || state.gkFrame?.iso || '—'
     );
+    armHomepageSatPlay(map, state);
     return state;
   }
   const frames = state.gkPlayFrames || [];
@@ -2188,6 +2189,19 @@ async function primeTimeTransport(map) {
   syncScrubRange(idx, frames.length);
   syncTimeTransport();
   return state;
+}
+
+let homePlayArmed = false;
+
+/** Homepage only: loop Sat with no slider. /satellite-loop/ keeps its own player. */
+function armHomepageSatPlay(map, state) {
+  if (document.documentElement.classList.contains('sat-mosaic-page')) return;
+  if (document.documentElement.classList.contains('embed-mode')) return;
+  if (homePlayArmed || gkPlaying || gkBuffering || gkUserDragging) return;
+  if (!(state?.gkPlayFrames || []).length) return;
+  homePlayArmed = true;
+  state.gkPlayIndex = state.gkPlayFrames.length - 1;
+  startGkPlay(map);
 }
 
 function playHoursLabel() {
@@ -3409,6 +3423,7 @@ export function wireGoesSatMode(map) {
     if (!on) {
       scrubberTestOpen = false;
       transportUserOpen = false;
+      homePlayArmed = false;
       transportExpanded = false;
       stopTransportAgeTicker();
       if (map) snapGkPlayToTip(map);
