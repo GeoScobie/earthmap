@@ -1155,6 +1155,10 @@ function restackGoesLayers(map, before) {
     } else if (map.getLayer(lo)) {
       map.moveLayer(lo, before);
     }
+    const z5 = progLayerId(layerId);
+    if (map.getLayer(z5) && map.getLayer(layerId)) {
+      map.moveLayer(z5, layerId);
+    }
   }
 }
 
@@ -1456,7 +1460,7 @@ function visibilityFromCheckbox(checkboxId) {
 function honourCheckbox(map, checkboxId, layerId) {
   const box = document.getElementById(checkboxId);
   const vis = box?.checked ? 'visible' : 'none';
-  for (const id of [layerId, loId(layerId)]) {
+  for (const id of [layerId, loId(layerId), progLayerId(layerId)]) {
     if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis);
   }
 }
@@ -1584,9 +1588,146 @@ function frameAtOrBefore(satKey, targetUnix, manifest, fallback) {
   return floorUtcToOwnedFrame(u * 1000);
 }
 
+const SAT_PROG_Z = 5;
+const progSourceId = (sourceId) => `${sourceId}-z5`;
+const progLayerId = (layerId) => `${layerId}-z5`;
+const PROG_LAYER_BY_SOURCE = {
+  [GOES_EAST_SOURCE_ID]: GOES_EAST_LAYER_ID,
+  [GOES_WEST_SOURCE_ID]: GOES_WEST_LAYER_ID,
+  [GOES_METEOSAT_SOURCE_ID]: GOES_METEOSAT_LAYER_ID,
+  [GOES_GK2A_SOURCE_ID]: GOES_GK2A_LAYER_ID
+};
+const progSwapGen = new Map();
+const progSwapTimer = new Map();
+
+/**
+ * Old slider/animation imagery stays available for testing.
+ * Default is the progressive swap. Add ?satclassic=1 (or ?satload=classic)
+ * to keep the previous setTiles path with no z5 hold.
+ */
+function satClassicTilePath() {
+  try {
+    const q = new URLSearchParams(location.search);
+    return q.get('satclassic') === '1' || q.get('satload') === 'classic';
+  } catch {
+    return false;
+  }
+}
+
+function revealDetailOpacity(map, layerId) {
+  if (!layerId || !map.getLayer(layerId)) return;
+  map.setPaintProperty(layerId, 'raster-opacity', goesRasterPaint()['raster-opacity']);
+}
+
+function hideProgLayer(map, layerId) {
+  const id = progLayerId(layerId);
+  if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
+}
+
+function ensureProgLayer(map, sourceId, layerId, url) {
+  const sid = progSourceId(sourceId);
+  const lid = progLayerId(layerId);
+  const detail = map.getSource(sourceId);
+  if (!detail || !map.getLayer(layerId)) return;
+  const vis = map.getLayoutProperty(layerId, 'visibility') || 'visible';
+  if (!map.getSource(sid)) {
+    const spec = {
+      type: 'raster',
+      tiles: [url],
+      tileSize: detail.tileSize || 256,
+      maxzoom: SAT_PROG_Z,
+      attribution: ''
+    };
+    if (detail.bounds) spec.bounds = detail.bounds;
+    map.addSource(sid, spec);
+  }
+  if (!map.getLayer(lid)) {
+    map.addLayer(
+      {
+        id: lid,
+        type: 'raster',
+        source: sid,
+        maxzoom: goesFadeCutoff(),
+        layout: { visibility: vis },
+        paint: goesRasterPaint()
+      },
+      layerId
+    );
+  } else {
+    map.setLayoutProperty(lid, 'visibility', vis);
+  }
+}
+
+function armProgSwap(map, sourceId, layerId) {
+  const gen = (progSwapGen.get(sourceId) || 0) + 1;
+  progSwapGen.set(sourceId, gen);
+  const prevTimer = progSwapTimer.get(sourceId);
+  if (prevTimer) clearTimeout(prevTimer);
+  let sawContent = false;
+  let finished = false;
+  const done = () => {
+    if (finished || progSwapGen.get(sourceId) !== gen) return;
+    finished = true;
+    map.off('sourcedata', onData);
+    const timer = progSwapTimer.get(sourceId);
+    if (timer) clearTimeout(timer);
+    progSwapTimer.delete(sourceId);
+    const zoom = typeof map.getZoom === 'function' ? map.getZoom() : 0;
+    if (!(zoom > SAT_PROG_Z)) hideProgLayer(map, layerId);
+    revealDetailOpacity(map, layerId);
+  };
+  const onData = (e) => {
+    if (!e || e.sourceId !== sourceId || progSwapGen.get(sourceId) !== gen) {
+      if (e && e.sourceId === sourceId) map.off('sourcedata', onData);
+      return;
+    }
+    if (e.sourceDataType === 'content' || e.sourceDataType === 'metadata') sawContent = true;
+    if (!sawContent) return;
+    if (e.sourceDataType !== 'idle' && !e.isSourceLoaded) return;
+    try {
+      if (!map.isSourceLoaded(sourceId)) return;
+    } catch {
+      return;
+    }
+    done();
+  };
+  map.on('sourcedata', onData);
+  progSwapTimer.set(sourceId, setTimeout(done, 8000));
+}
+
 function safeSetTiles(map, sourceId, url, opts = {}) {
-  safeSetTilesOne(map, sourceId, url, opts);
+  const layerId = PROG_LAYER_BY_SOURCE[sourceId];
+  if (!layerId || satClassicTilePath()) {
+    if (layerId) {
+      hideProgLayer(map, layerId);
+      revealDetailOpacity(map, layerId);
+    }
+    safeSetTilesOne(map, sourceId, url, opts);
+    safeSetTilesOne(map, loId(sourceId), url, opts);
+    return;
+  }
+  const zoom = typeof map.getZoom === 'function' ? map.getZoom() : 0;
   safeSetTilesOne(map, loId(sourceId), url, opts);
+  if (!(zoom > SAT_PROG_Z)) {
+    hideProgLayer(map, layerId);
+    revealDetailOpacity(map, layerId);
+    safeSetTilesOne(map, sourceId, url, opts);
+    return;
+  }
+  // Zoomed in: show overzoomed z5 immediately, keep best tiles invisible
+  // until this frame's detail source has pre-rendered, then swap up.
+  // Detail maxzoom stays z7, so "best" is the view zoom capped at the Sat pyramid.
+  try {
+    ensureProgLayer(map, sourceId, layerId, url);
+    safeSetTilesOne(map, progSourceId(sourceId), url, opts);
+    if (map.getLayer(layerId)) map.setPaintProperty(layerId, 'raster-opacity', 0);
+    safeSetTilesOne(map, sourceId, url, opts);
+    armProgSwap(map, sourceId, layerId);
+  } catch (e) {
+    console.warn('[goes-geocolor] progressive tiles', sourceId, e?.message || e);
+    revealDetailOpacity(map, layerId);
+    safeSetTilesOne(map, sourceId, url, opts);
+  }
 }
 
 function applyEastOwned(map, frame, opts = {}) {
