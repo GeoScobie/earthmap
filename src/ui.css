@@ -1926,22 +1926,22 @@ body.notification-banner-visible .vertical-toolbar {
 }
 
 /* =====================
-   Bottom-right GeoColor time transport (chip ↔ expand)
-   Parks flush of zoom; expanded clears zoom + right rail (~88px).
+   Sat time transport (chip ↔ expand), FireMap-style.
+   Collapsed chip and expanded bar both sit bottom center of the map.
    ===================== */
 .goes-time-transport {
   position: fixed;
-  right: max(88px, var(--wind-right, 88px));
+  right: auto;
   bottom: 22px;
-  left: auto;
-  transform: none;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1100;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  width: min(360px, calc(100vw - 112px));
-  max-width: 360px;
+  width: min(420px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
   padding: 8px 12px 9px 8px;
   background: rgba(18, 20, 24, 0.90);
   border: 1px solid rgba(255, 255, 255, 0.11);
@@ -1999,14 +1999,12 @@ body.notification-banner-visible .vertical-toolbar {
   white-space: nowrap;
 }
 .goes-time-transport.minimized {
-  right: var(--wind-right, 12px);
-  width: 120px;
+  width: auto;
   max-width: none;
   padding: 8px 11px 9px;
   border-radius: 11px;
   gap: 0;
 }
-.goes-time-transport.minimized.scrubbed { width: 168px; }
 .goes-time-transport.minimized .goes-time-chip {
   display: inline-flex;
   width: 100%;
@@ -2113,6 +2111,10 @@ body.notification-banner-visible .vertical-toolbar {
   pointer-events: none;
 }
 .goes-time-play-icon--play { margin-left: 1px; }
+span.goes-time-play-icon--play,
+span.goes-time-play-icon--pause { display: block; }
+span.goes-time-play-icon > svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+.goes-time-play-icon[hidden] { display: none !important; }
 .goes-time-play.buffering {
   color: #7fd4ff;
   border-color: rgba(127, 212, 255, 0.45);
@@ -2278,17 +2280,12 @@ body.notification-banner-visible .vertical-toolbar {
 
 @media (max-width: 640px) {
   .goes-time-transport:not(.minimized) {
-    left: auto;
-    right: max(88px, var(--wind-right, 88px));
     bottom: 28px;
-    width: min(280px, calc(100vw - 112px));
-    max-width: calc(100vw - 112px);
+    width: min(320px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
     padding: 7px 10px 8px 7px;
   }
   .goes-time-transport.minimized {
-    left: auto;
-    right: var(--wind-right, 12px);
-    /* FireMap SoT: mobile sat chip/expanded bottom 28 flush-right. */
     bottom: 28px;
     width: auto;
     max-width: calc(100vw - 24px);
@@ -2832,7 +2829,6 @@ html:not(.embed-mode) #map {
   pointer-events: none;
 }
 .sat-scene-age[hidden] { display: none !important; }
-html:not(.sat-mosaic-page) .goes-time-transport,
 html:not(.sat-mosaic-page) .geocolor-time-bar {
   display: none !important;
 }
@@ -2868,8 +2864,9 @@ html:not(.embed-mode) #em-consent { bottom: 12px !important; }
 /* /satellite-loop/: bottom-center Sat clock pill. No wide slider panel. */
 html:not(.sat-mosaic-page) #satMosaicLoop { display: none !important; }
 html.sat-mosaic-page #satSceneAge,
-html.sat-mosaic-page .goes-time-transport,
+html.sat-mosaic-page #goesTimeTransport,
 html.sat-mosaic-page .geocolor-time-bar { display: none !important; }
+html:not(.sat-mosaic-page) .sat-mosaic-transport { display: none !important; }
 .sat-mosaic-loop {
   position: fixed;
   z-index: 1102;
@@ -2888,51 +2885,23 @@ html.sat-mosaic-page .geocolor-time-bar { display: none !important; }
   box-shadow: none;
   font-family: 'Lexend', system-ui, sans-serif;
   pointer-events: none;
-  max-width: min(92vw, 420px);
+  max-width: calc(100vw - 24px);
 }
 .sat-mosaic-loop[hidden] { display: none !important; }
 html.sat-mosaic-page .sat-mosaic-loop { display: flex; }
-.sat-mosaic-chip-row {
+/* Same chip → expand transport as the homepage, inside the centered loop box. */
+.goes-time-transport.sat-mosaic-transport {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto !important;
+  transform: none;
   pointer-events: auto;
 }
-.sat-mosaic-chip {
-  pointer-events: auto;
-  gap: 6px;
-  padding: 4px 10px 4px 4px;
+.goes-time-transport.sat-mosaic-transport:not(.minimized) {
+  width: min(420px, calc(100vw - 24px));
 }
-.sat-mosaic-play {
-  border: 0;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.10);
-  color: inherit;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 9px;
-  line-height: 1;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex: 0 0 auto;
-}
-.sat-mosaic-play:hover,
-.sat-mosaic-play:focus-visible {
-  background: rgba(255, 255, 255, 0.18);
-  outline: none;
-}
-.sat-mosaic-play:disabled { opacity: 0.45; cursor: default; }
-.sat-mosaic-play-icon[hidden] { display: none !important; }
-.sat-mosaic-play-icon--pause { letter-spacing: -1px; font-size: 8px; }
-#satMosaicWhen {
-  font-weight: 700;
-  font-size: inherit;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  margin: 0;
-}
+.goes-time-transport.sat-mosaic-transport.minimized { width: auto; }
 .sat-mosaic-nav {
   display: flex;
   flex-wrap: wrap;

@@ -444,13 +444,44 @@
 
   <div class="readout" id="readout" aria-live="off"></div>
 
-  <p class="sat-scene-age" id="satSceneAge" hidden>
-    <span class="goes-time-chip-pill">
-      <svg class="goes-time-chip-sat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
-      <b class="goes-time-chip-dot"></b>
-      <span id="goesTimeAgeChip" class="goes-time-chip-text">Sat —</span>
-    </span>
-  </p>
+  <!-- Sat time: collapsed chip bottom center; tap to expand play + scrub (bottom middle). -->
+  <div id="goesTimeTransport" class="goes-time-transport minimized" hidden aria-label="Sat time — tap to expand">
+    <button type="button" id="goesTimeHideBtn" class="goes-time-handle" aria-label="Minimize Sat time controls">
+      Hide
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5"/></svg>
+    </button>
+    <button type="button" id="goesTimeChip" class="goes-time-chip" aria-label="Show Sat time controls" title="Show time controls">
+      <span class="goes-time-chip-pill" aria-hidden="true">
+        <svg class="goes-time-chip-sat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
+        <b class="goes-time-chip-dot"></b>
+        <span id="goesTimeAgeChip" class="goes-time-chip-text">Sat —</span>
+      </span>
+      <svg class="goes-time-chip-chev" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5"/></svg>
+    </button>
+    <div class="goes-time-transport-expanded">
+      <button type="button" id="goesTimePlayBtn" class="goes-time-play" aria-label="Play Sat loop" title="Play Sat scenes on file" aria-pressed="false">
+        <span class="goes-time-play-icon goes-time-play-icon--play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg></span>
+        <span class="goes-time-play-icon goes-time-play-icon--pause" aria-hidden="true" hidden><svg viewBox="0 0 24 24"><path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"/></svg></span>
+        <span class="goes-time-play-icon goes-time-play-icon--spin" aria-hidden="true" hidden></span>
+      </button>
+      <div class="goes-time-transport-body">
+        <div class="goes-time-transport-head">
+          <div class="goes-time-when" aria-live="polite">
+            <span id="goesTimeLocal" class="goes-time-local">—</span>
+            <span id="goesTimeUtc" class="goes-time-utc">—</span>
+          </div>
+          <span id="goesTimeAge" class="goes-time-age" title="Age of the scene shown">—</span>
+          <button type="button" id="goesTimeLatestBtn" class="goes-time-latest" hidden>Latest</button>
+        </div>
+        <input type="range" id="goesTimeScrubRange" class="goes-time-scrub-range"
+          min="0" max="0" value="0" step="1"
+          aria-label="Scrub Sat time">
+        <div class="goes-time-transport-meta">
+          <span id="goesTimeTransportMeta">Sat scenes on file</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
   (function () {
@@ -465,16 +496,42 @@
   </script>
 
   <div id="satMosaicLoop" class="sat-mosaic-loop" hidden>
-    <div class="sat-mosaic-chip-row">
-      <span class="goes-time-chip-pill sat-mosaic-chip" id="satMosaicChip">
-        <button type="button" class="sat-mosaic-play" id="satMosaicPlay" disabled aria-pressed="false" aria-label="Play Sat loop" title="Play">
-          <span class="sat-mosaic-play-icon sat-mosaic-play-icon--play" aria-hidden="true">▶</span>
-          <span class="sat-mosaic-play-icon sat-mosaic-play-icon--pause" hidden aria-hidden="true">❚❚</span>
+    <div id="satMosaicTransport" class="goes-time-transport minimized sat-mosaic-transport" hidden aria-label="Sat time — tap to expand">
+      <button type="button" id="satMosaicHideBtn" class="goes-time-handle" aria-label="Minimize Sat time controls">
+        Hide
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5"/></svg>
+      </button>
+      <button type="button" id="satMosaicChip" class="goes-time-chip" aria-label="Show Sat time controls" title="Show time controls">
+        <span class="goes-time-chip-pill" aria-hidden="true">
+          <svg class="goes-time-chip-sat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
+          <b class="goes-time-chip-dot"></b>
+          <span id="satMosaicWhen" class="goes-time-chip-text">Sat —</span>
+        </span>
+        <svg class="goes-time-chip-chev" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5"/></svg>
+      </button>
+      <div class="goes-time-transport-expanded">
+        <button type="button" id="satMosaicPlayBtn" class="goes-time-play" aria-label="Play Sat loop" title="Play Sat scenes on file" aria-pressed="false">
+          <span class="goes-time-play-icon goes-time-play-icon--play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg></span>
+          <span class="goes-time-play-icon goes-time-play-icon--pause" aria-hidden="true" hidden><svg viewBox="0 0 24 24"><path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"/></svg></span>
+          <span class="goes-time-play-icon goes-time-play-icon--spin" aria-hidden="true" hidden></span>
         </button>
-        <svg class="goes-time-chip-sat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
-        <b class="goes-time-chip-dot"></b>
-        <time id="satMosaicWhen" class="goes-time-chip-text">Sat —</time>
-      </span>
+        <div class="goes-time-transport-body">
+          <div class="goes-time-transport-head">
+            <div class="goes-time-when" aria-live="polite">
+              <span id="satMosaicLocal" class="goes-time-local">—</span>
+              <span id="satMosaicUtc" class="goes-time-utc">—</span>
+            </div>
+            <span id="satMosaicAge" class="goes-time-age" title="Age of the scene shown">—</span>
+            <button type="button" id="satMosaicLatestBtn" class="goes-time-latest" hidden>Latest</button>
+          </div>
+          <input type="range" id="satMosaicScrubRange" class="goes-time-scrub-range"
+            min="0" max="0" value="0" step="1"
+            aria-label="Scrub Sat time">
+          <div class="goes-time-transport-meta">
+            <span id="satMosaicTransportMeta">Sat scenes on file</span>
+          </div>
+        </div>
+      </div>
     </div>
     <nav class="sat-mosaic-nav" aria-label="Satellites">
       <a href="https://earthmap.live/">Map</a>

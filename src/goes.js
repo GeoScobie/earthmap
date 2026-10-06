@@ -731,8 +731,14 @@ let gkIntentionalScrub = false;
 let gkScrubTimer = 0;
 /** Latest scrub index waiting to apply (coalesce; only this position paints). */
 let gkPendingScrubIdx = null;
-/** Legacy theme override only. Playlist is every gk2a stamp in times.json. */
-const GK_PLAY_HOURS = 4;
+/**
+ * Play window: up to 21 days back from the tip, using only real gk2a stamps
+ * in times.json. Today the manifest holds far less (~17h); the window just
+ * caps it so play reaches 3 weeks automatically once retention grows.
+ * theme.goesGeocolor.gkPlayHours still overrides.
+ */
+export const SAT_PLAY_WINDOW_HOURS = 21 * 24;
+const GK_PLAY_HOURS = SAT_PLAY_WINDOW_HOURS;
 /** ~350ms/step → ~2.8 fps of distinct frames (~4h / ~21–24 frames ≈ 7–9s wall). */
 const GK_PLAY_INTERVAL_MS = 350;
 /** Frames to warm before first play tick (rolling; rest keep prefetching). */
@@ -1340,18 +1346,37 @@ function visibleSatLabelForTransport(map) {
   return TRANSPORT_SAT_META[key]?.label || key;
 }
 
-/** Transport meta: center-owner sat name (playlist is all scenes on file). */
+/** Hours between first and last frame of a play list (real stamps only). */
+function spanHoursOf(frames) {
+  if (!frames || frames.length < 2) return 0;
+  const a = frameMs(frames[0]);
+  const b = frameMs(frames[frames.length - 1]);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return 0;
+  return Math.max(0, (b - a) / 3600000);
+}
+
+/** Honest span label: "~17h" / "~3d". Never claims more than is on file. */
+export function formatSpanLabel(hours) {
+  if (!Number.isFinite(hours) || hours <= 0) return '';
+  if (hours < 1) return `~${Math.max(1, Math.round(hours * 60))}m`;
+  if (hours < 48) return `~${Math.round(hours)}h`;
+  return `~${Math.round(hours / 24)}d`;
+}
+
+/** Transport meta: "GK2A · 89 scenes · last ~17h" (what is actually on file). */
 function paintTransportMeta(map = goesUiMap) {
   const meta = document.getElementById('goesTimeTransportMeta');
   if (!meta) return;
-  const name = visibleSatLabelForTransport(map);
-  if (name) {
-    meta.textContent = name;
-    meta.title = `${name} — Sat scenes on file`;
-  } else {
-    meta.textContent = 'Sat';
-    meta.title = 'Sat scenes on file';
-  }
+  const name = visibleSatLabelForTransport(map) || 'Sat';
+  const frames = goesUiState?.gkPlayFrames || [];
+  const span = formatSpanLabel(spanHoursOf(frames));
+  const parts = [name];
+  if (frames.length > 1) parts.push(`${frames.length} scenes`);
+  if (span) parts.push(`last ${span}`);
+  meta.textContent = parts.join(' · ');
+  meta.title = span
+    ? `${name} — ${frames.length} Sat scenes on file, last ${span}`
+    : `${name} — Sat scenes on file`;
 }
 
 /**
@@ -2174,7 +2199,6 @@ async function primeTimeTransport(map) {
       '[goes-geocolor] prime → live tip',
       newestTipFrame(map, state)?.iso || state.gkFrame?.iso || '—'
     );
-    armHomepageSatPlay(map, state);
     return state;
   }
   const frames = state.gkPlayFrames || [];
@@ -2192,7 +2216,11 @@ async function primeTimeTransport(map) {
 
 let homePlayArmed = false;
 
-/** Homepage only: loop Sat with no slider. /satellite-loop/ keeps its own player. */
+/**
+ * Legacy: homepage used to auto-loop with no slider. Now the chip expands
+ * into play + scrub, so nothing auto-plays. Kept unused for reference.
+ */
+// eslint-disable-next-line no-unused-vars
 function armHomepageSatPlay(map, state) {
   if (document.documentElement.classList.contains('sat-mosaic-page')) return;
   if (document.documentElement.classList.contains('embed-mode')) return;
@@ -2299,13 +2327,15 @@ function formatSatSceneLabel(ms) {
 
 function paintMinimizedChip(frame) {
   const chipEl = document.getElementById('goesTimeAgeChip');
-  const host = document.getElementById('satSceneAge');
   const ms = frameMs(frame);
   const on = eitherGeocolorOn() && Number.isFinite(ms);
   // Bottom-center Sat clock: local weekday + time of the frame being shown.
   const label = on ? formatLocalClock(new Date(ms)) : 'Sat —';
-  if (chipEl) chipEl.textContent = label;
-  if (host) host.hidden = !on;
+  if (chipEl) {
+    chipEl.textContent = label;
+    const pill = chipEl.closest('.goes-time-chip-pill');
+    if (pill) pill.classList.toggle('scrubbed', on && !isTransportChipLive());
+  }
 }
 
 function paintTransportAge(frame) {
@@ -2398,7 +2428,17 @@ function syncGoesLift(transport, minimized, bottomPx) {
   // FireMap SoT: ONLY expanded visible transport lifts dual-scale + logo.
   // lift = height + bottom + 10; wind max() combo via .goes-lift + CSS.
   const host = document.getElementById('map') || document.body;
-  const need = Boolean(transport && !transport.hidden && !minimized);
+  let need = Boolean(transport && !transport.hidden && !minimized);
+  if (need) {
+    // Centered bar: only lift bottom-left scale/logo when the bar actually
+    // reaches over them (narrow screens).
+    try {
+      const blEl = host.querySelector('.maplibregl-ctrl-bottom-left');
+      const tr = transport.getBoundingClientRect();
+      const br = blEl ? blEl.getBoundingClientRect() : null;
+      if (br && br.width > 0 && tr.left > br.right + 8) need = false;
+    } catch { /* ignore */ }
+  }
   let h = 0;
   if (need) {
     h = Math.round((transport.offsetHeight || 72) + (bottomPx || 22) + 10);
@@ -2412,111 +2452,28 @@ function syncGoesLift(transport, minimized, bottomPx) {
   }
 }
 
+/**
+ * Bottom center, collapsed chip and expanded bar alike (FireMap-style chip →
+ * expand, but centered horizontally over the map instead of right-parked).
+ */
 function positionTransport() {
   const transport = document.getElementById('goesTimeTransport');
   if (!transport || transport.hidden) return;
-  const host = document.getElementById('map') || document.body;
-  const windTab =
-    host.querySelector('.wind-tab.on') || document.querySelector('.wind-tab.on');
-  let windPark = windParkRightPx();
-  let windRight = windPark;
-  try {
-    const cssRight = getComputedStyle(host).getPropertyValue('--wind-right');
-    if (cssRight) {
-      const n = parseFloat(cssRight);
-      // Prefer live --wind-right when it looks like wind's zoom-only park (not chrome 88 floor).
-      if (Number.isFinite(n) && n >= 12 && n <= windPark + 8) windRight = n;
-    }
-  } catch { /* ignore */ }
-  windRight = Math.max(12, Math.min(windRight, windPark + 8));
-
-  const gap = 10;
   const minimized = transport.classList.contains('minimized');
-  const tw = transport.offsetWidth || (minimized ? 120 : 360);
-  let bottom = 22;
-  let right = windRight;
   const mobile = window.innerWidth < 640;
-
-  if (minimized) {
-    // Flush-right like wind nub: zoom-group park only (not chromeClear ~88).
-    // Do not call chromeClearPx here — it would rewrite --wind-right to 88.
-    right = windRight;
-    bottom = mobile ? 28 : 22;
-    if (windTab) {
-      // Stack above wind at the SAME right edge (do not slide left of wind).
-      const wrMin = windTab.getBoundingClientRect();
-      bottom = Math.max(
-        bottom,
-        Math.round(window.innerHeight - wrMin.top + gap)
-      );
-    }
-  } else {
-    // Expanded: chromeClear ~88 (zoom + right rail); may sit left of / above wind.
-    const chromeClear = chromeClearPx();
-    windRight = Math.max(windRight, chromeClear);
-    right = windRight;
-
-    if (windTab) {
-      const wr = windTab.getBoundingClientRect();
-      right = Math.round(window.innerWidth - wr.left + gap);
-      if (right + tw > window.innerWidth - 12) {
-        right = Math.max(chromeClear, windRight);
-        bottom = Math.round(window.innerHeight - wr.top + gap);
-      } else {
-        bottom = Math.max(22, Math.round(window.innerHeight - wr.bottom));
-        if (bottom < 16) bottom = 22;
-      }
-    } else {
-      right = Math.max(chromeClear, windRight);
-      bottom = 22;
-    }
-
-    right = Math.max(right, chromeClear);
-    if (mobile) {
-      if (right + tw > window.innerWidth - 8) {
-        right = Math.max(chromeClear, windRight);
-        bottom = Math.max(bottom, 28);
-        if (windTab) {
-          const wr2 = windTab.getBoundingClientRect();
-          bottom = Math.max(bottom, Math.round(window.innerHeight - wr2.top + gap));
-        }
-      } else {
-        bottom = Math.max(bottom, 28);
-      }
-    }
-
-    // If open transport still intersects the right rail in Y, sit below its bottom.
-    const railEl =
-      document.querySelector('.vertical-toolbar') ||
-      document.getElementById('verticalToolbar');
-    if (railEl && railEl.getClientRects && railEl.getClientRects().length) {
-      try {
-        const railR = railEl.getBoundingClientRect();
-        const th = transport.offsetHeight || (mobile ? 96 : 110);
-        const transportTop = window.innerHeight - bottom - th;
-        if (railR.bottom > transportTop - 8 && railR.left < window.innerWidth - right) {
-          bottom = Math.max(
-            bottom,
-            Math.round(window.innerHeight - railR.bottom + gap)
-          );
-        }
-      } catch { /* ignore */ }
-    }
-  }
-
-  transport.style.left = 'auto';
-  transport.style.right = `${right}px`;
+  const bottom = mobile ? 28 : 22;
+  transport.style.left = '50%';
+  transport.style.right = 'auto';
   transport.style.bottom = `${bottom}px`;
-  transport.style.transform = 'none';
+  transport.style.transform = 'translateX(-50%)';
   if (minimized) {
     transport.style.width = 'auto';
-    transport.style.maxWidth = `calc(100vw - ${right + 24}px)`;
-  } else if (mobile) {
-    transport.style.width = `min(280px, calc(100vw - ${right + 24}px))`;
-    transport.style.maxWidth = `calc(100vw - ${right + 24}px)`;
+    transport.style.maxWidth = 'calc(100vw - 24px)';
   } else {
-    transport.style.width = `min(360px, calc(100vw - ${right + 24}px))`;
-    transport.style.maxWidth = '360px';
+    transport.style.width = mobile
+      ? 'min(320px, calc(100vw - 24px))'
+      : 'min(420px, calc(100vw - 24px))';
+    transport.style.maxWidth = 'calc(100vw - 24px)';
   }
   syncGoesLift(transport, minimized, bottom);
 }
@@ -2636,13 +2593,16 @@ function clearGkPlayTimer() {
 }
 
 /**
- * Every real GK2A stamp in times.json (oldest → tip). No hour window.
+ * Real GK2A stamps in times.json (oldest → tip), capped at the play window
+ * (21 days by default; whatever exists if the manifest is shorter).
  * Does not invent missing 10-min cadence gaps. Optional gkPlayFrames still
  * hard-caps the slice if a theme override sets it. Play list stays
  * GK-anchored; applyGkPlayFrame matches West + Meteosat nearest-at-or-before
  * each selected unix. East stays tip-only.
  */
 async function rebuildGkPlayList(state) {
+  const hours = playHoursLabel();
+  const windowSec = hours * 3600;
   // Optional hard cap only when theme sets gkPlayFrames; otherwise all stamps.
   const maxFramesOverride =
     Number(goesGeocolor.gkPlayFrames) > 0
@@ -2661,11 +2621,11 @@ async function rebuildGkPlayList(state) {
       : list.length
         ? list[list.length - 1]
         : null;
-    // All stamps on file at or before tip (+60s slack). No fixed hour window.
+    // Real stamps on file at or before tip (+60s slack), at most `hours` back.
     const inManifest =
       tipUnix == null
         ? list
-        : list.filter((u) => u <= tipUnix + 60);
+        : list.filter((u) => u <= tipUnix + 60 && u >= tipUnix - windowSec);
     const slice = maxFramesOverride
       ? inManifest.slice(-maxFramesOverride)
       : inManifest;
@@ -2715,7 +2675,7 @@ async function rebuildGkPlayList(state) {
     '[goes-geocolor] gk play list',
     frames.length,
     'frames',
-    `(${hours}h)`,
+    `(window ${hours}h, on file ${spanHoursOf(frames)}h)`,
     frames[0]?.hhmm || '—',
     '→',
     frames[frames.length - 1]?.hhmm || '—'
@@ -3184,7 +3144,8 @@ function syncTimeTransport() {
     btn.title = 'Resume';
     btn.setAttribute('aria-label', 'Resume satellite play');
   } else {
-    btn.title = 'Play Sat scenes on file';
+    const span = formatSpanLabel(spanHoursOf(state?.gkPlayFrames || []));
+    btn.title = span ? `Play Sat scenes on file (last ${span})` : 'Play Sat scenes on file';
     btn.setAttribute('aria-label', 'Play satellite loop');
   }
 
@@ -3286,7 +3247,7 @@ function wireGoesTimeScrubTest(map) {
     chipBtn.dataset.goesChipWired = '1';
     chipBtn.addEventListener('click', () => {
       transportUserOpen = true;
-      setTransportExpanded(true);
+      setTransportExpanded(!transportExpanded);
       refreshTransportVisibility();
       syncSatModeButton();
       ensureList();
