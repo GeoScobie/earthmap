@@ -1403,6 +1403,38 @@ body.notification-banner-visible .vertical-toolbar {
 }
 
 
+/* Wind legend (FireMap parity, from firemap.live styles3.css).
+   Notes are explanation, not key entries: muted and indented to the label
+   column. Streak swatches are wider than tall and tapered left-to-right,
+   because the layer draws a streak with a bright head and a fading tail --
+   length and brightness both carry speed, so the two swatches differ in both. */
+.legend-panel .legend-group li.legend-note {
+  font-size: 11.5px;
+  color: #9AA4AE;
+  line-height: 1.35;
+  padding-left: 40px;
+  margin-bottom: 4px;
+  display: block;
+}
+.legend-panel .legend-streak {
+  width: 34px;
+  height: 7px;
+  margin-right: 10px;
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+.legend-panel .legend-streak.streak-strong {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 45%, rgba(255,255,255,0.98) 100%);
+}
+.legend-panel .legend-streak.streak-light {
+  width: 20px;
+  background: linear-gradient(90deg,
+    rgba(217,235,255,0) 0%, rgba(217,235,255,0.16) 50%, rgba(217,235,255,0.5) 100%);
+}
+
 .legend-panel .legend-icon-img {
   width: 20px;
   height: 20px;

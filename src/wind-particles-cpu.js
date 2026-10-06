@@ -85,8 +85,13 @@ const MAX_LAT = 85.051129;
 // Interpolation is geometric (not linear) because these are all multiplicative
 // quantities -- halving zoom should halve the count, not subtract a constant.
 const SCALE_ANCHORS = {
-  global: { zoom: 2,  count: 1500, screenSpeed: 22, pointSize: 6.5,
-            dropRate: 0.012, fadeOpacity: 0.920, lifetime: 2.5 },
+  // Global was cut 22 -> 15 px/s: at this zoom one pixel is ~80 km, so a speed
+  // that reads correctly over a city reads as a blur over an ocean basin.
+  // fadeOpacity rises with it to hold trail length constant -- trail_px scales
+  // as screenSpeed * ln(.05)/ln(fadeOpacity), so 15/0.945 gives the same ~13 px
+  // comet as 22/0.920 did, and only the motion slows.
+  global: { zoom: 2,  count: 1500, screenSpeed: 15, pointSize: 6.5,
+            dropRate: 0.012, fadeOpacity: 0.945, lifetime: 2.5 },
   // Anchored at z13, not z11: at street scale the interpolation was clamping
   // well before the zooms actually in use, so everything past z11 got identical
   // treatment. Trails here are long on purpose -- at this scale the wind field
@@ -99,6 +104,17 @@ const SCALE_ANCHORS = {
 
 // Wind speed the screenSpeed anchors are quoted for.
 const REF_WIND = 10;
+
+// Extra thinning applied BELOW the continental zooms, on top of the anchor
+// interpolation. Cutting the global anchor itself would also thin z5-z8, which
+// is the range that already looks right, so the reduction is confined to the
+// wide views where the field reads as a solid mat rather than as lines.
+const WIDE_THIN = { fullZoom: 5, wideZoom: 2, floor: 0.32 };
+function wideThin(zoom) {
+  const { fullZoom, wideZoom, floor } = WIDE_THIN;
+  const t = Math.max(0, Math.min(1, (fullZoom - zoom) / (fullZoom - wideZoom)));
+  return 1 - (1 - floor) * t;
+}
 
 /**
  * Simulation multiplier that renders a REF_WIND wind at `pxPerSec` on screen.
@@ -120,7 +136,7 @@ function scaleFor(zoom, anchors, latDeg = 0) {
   const mix = (a, b) => a * Math.pow(b / a, t);
   const pxPerSec = mix(g.screenSpeed, c.screenSpeed);
   return {
-    count: Math.round(mix(g.count, c.count)),
+    count: Math.max(24, Math.round(mix(g.count, c.count) * wideThin(zoom))),
     screenSpeed: pxPerSec,
     speed: timeScaleFor(pxPerSec, zoom, latDeg),   // derived, never set directly
     pointSize: mix(g.pointSize, c.pointSize),
@@ -266,6 +282,8 @@ export class WindParticlesCPU {
     this._particles = [];
     this._field = null;
     this._view = null;
+    this._centre = null;
+    this._globe = false;
     this._lastCam = '';
     this._raf = null;
     this._last = 0;
@@ -300,22 +318,47 @@ export class WindParticlesCPU {
     this._w = w; this._h = h;
   }
 
+  /**
+   * Decode one frame into a u/v lookup.
+   *
+   * MEMORY. Every swap costs a decoded 1440x721 bitmap (~4 MB) plus a
+   * getImageData array (~4 MB). Allocating a THIRD copy -- a fresh canvas
+   * backing store -- on every swap took the churn to ~12 MB per frame, and
+   * dragging the scrub track fires those back to back as fast as decodes
+   * finish. On a phone that reliably crossed iOS Safari's per-tab ceiling and
+   * the tab was killed, which reads to the user as a crash.
+   *
+   * So the scratch canvas is allocated once and reused: every frame in a run
+   * has identical dimensions, so it only ever resizes if the grid changes. The
+   * decoded image is released explicitly too -- dropping the last reference is
+   * not enough to make a mobile browser hand the decode buffer back promptly.
+   */
   async _loadField() {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    await new Promise((ok, bad) => {
-      img.onload = ok;
-      img.onerror = () => bad(new Error('cannot load ' + this.image));
-      img.src = this.image;
-    });
-    const c = document.createElement('canvas');
-    c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const g = c.getContext('2d', { willReadFrequently: true });
-    g.drawImage(img, 0, 0);
-    this._field = {
-      data: g.getImageData(0, 0, c.width, c.height).data,
-      w: c.width, h: c.height
-    };
+    try {
+      await new Promise((ok, bad) => {
+        img.onload = ok;
+        img.onerror = () => bad(new Error('cannot load ' + this.image));
+        img.src = this.image;
+      });
+
+      const w = img.naturalWidth, h = img.naturalHeight;
+      let c = this._scratch;
+      if (!c) {
+        c = this._scratch = document.createElement('canvas');
+        this._scratchCtx = c.getContext('2d', { willReadFrequently: true });
+      }
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+      const g = this._scratchCtx;
+      // Reused canvas: clear it, or a smaller frame would leave stale pixels.
+      g.clearRect(0, 0, w, h);
+      g.drawImage(img, 0, 0);
+      this._field = { data: g.getImageData(0, 0, w, h).data, w, h };
+    } finally {
+      img.onload = null; img.onerror = null;
+      img.src = '';
+    }
   }
 
   // --- wind field ----------------------------------------------------------
@@ -368,7 +411,27 @@ export class WindParticlesCPU {
    * fixes. Unprojecting a grid of screen points is projection-agnostic and
    * correct on globe, mercator, pitched and terrain views alike.
    */
+  /**
+   * Cache the view centre and whether a globe is actually in play.
+   *
+   * Both feed _limbKeep. getProjection() reports 'globe' on Mapbox and
+   * {type:'globe'} on MapLibre; anything else -- or a library too old to have
+   * the method -- means no limb, and the cull disables itself.
+   */
+  _syncCentre() {
+    const c = this.map.getCenter();
+    const rad = c.lat * Math.PI / 180;
+    this._centre = { lng: c.lng, sin: Math.sin(rad), cos: Math.cos(rad) };
+    let name = null;
+    try {
+      const pr = this.map.getProjection && this.map.getProjection();
+      name = pr && (pr.name || pr.type);
+    } catch (e) { name = null; }
+    this._globe = name === 'globe';
+  }
+
   _viewBounds() {
+    this._syncCentre();
     const N = 5, map = this.map, centre = map.getCenter();
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, seen = 0;
     for (let i = 0; i <= N; i++) {
@@ -393,6 +456,33 @@ export class WindParticlesCPU {
 
   // --- particles -----------------------------------------------------------
 
+  /**
+   * Fraction of a seed's density to keep at a given position, 0..1.
+   *
+   * On a globe the surface turns away from the camera towards the limb, so a
+   * distribution that is even on the sphere piles up into a dense rim at the
+   * horizon -- and when the view is centred at mid-latitude the north pole sits
+   * in exactly that rim, which is why it mats over first. Orthographic
+   * foreshortening goes as cos(gamma), the great-circle angle from the view
+   * centre, so thinning by cos(gamma) restores an even SCREEN density.
+   *
+   * Computed from spherical trig rather than by projecting: it costs no
+   * map.project() call, and it is only meaningful under a globe -- on mercator
+   * there is no limb, and this correctly returns 1 everywhere.
+   */
+  _limbKeep(mx, my) {
+    const c = this._centre;
+    if (!c) return 1;
+    const lat = mercYToLat(my) * Math.PI / 180;
+    let dLng = (mx * 360 - 180) - c.lng;
+    while (dLng > 180) dLng -= 360;
+    while (dLng < -180) dLng += 360;
+    const cosGamma = c.sin * Math.sin(lat) +
+                     c.cos * Math.cos(lat) * Math.cos(dLng * Math.PI / 180);
+    // Full density inside cos 0.55 (~57 deg out); nothing past cos 0.12 (~83 deg).
+    return Math.max(0, Math.min(1, (cosGamma - 0.12) / (0.55 - 0.12)));
+  }
+
   /** Respawn, biased toward the windiest of three candidate positions. */
   _spawn(p) {
     const v = this._view;
@@ -400,17 +490,30 @@ export class WindParticlesCPU {
       v[0] + Math.random() * (v[2] - v[0]),
       v[1] + Math.random() * (v[3] - v[1])
     ];
-    let best = pick();
-    if (Math.random() < this.densityBias) {
+    const globe = this._globe;
+    // Rejection sampling. A few tries is enough away from the limb; when the
+    // view really is mostly horizon the last candidate is spawned already dead
+    // so it retries next frame rather than spinning here.
+    let best = pick(), dead = false;
+    if (globe) {
+      let tries = 0;
+      while (Math.random() >= this._limbKeep(best[0], best[1])) {
+        if (++tries >= 6) { dead = true; break; }
+        best = pick();
+      }
+    }
+    if (!dead && Math.random() < this.densityBias) {
       let bestS = -1;
       for (let i = 0; i < 3; i++) {
         const c = i === 0 ? best : pick();
+        if (globe && Math.random() >= this._limbKeep(c[0], c[1])) continue;
         const w = this._sample(c[0], c[1]);
         const s = w ? Math.hypot(w[0], w[1]) : -1;
         if (s > bestS) { bestS = s; best = c; }
       }
     }
     p.x = best[0]; p.y = best[1];
+    if (dead) { p.age = 1; p.k = 1; return; }
     p.age = Math.random() * 0.35;                       // stagger rebirths
     p.k = 1 + (Math.random() - 0.5) * 2 * this.jitter;  // lifelong speed offset
   }
@@ -644,19 +747,30 @@ export class WindParticlesCPU {
   static async fromManifest(map, manifestUrl, opts = {}) {
     const man = await loadWindManifest(manifestUrl);
     const frame = man.frameFor(opts.when ?? Date.now());
-    return new WindParticlesCPU(map, {
-      ...opts,
+    // Manifest-derived values are DEFAULTS; explicit opts win. Spreading opts
+    // first instead silently discarded any caller override of uRange/vRange --
+    // which matters because a manifest can and does ship wrong encoding bounds,
+    // and the override is the only way to correct speeds without a redeploy.
+    // Keep the URL: the UI re-reads it to stay current on a long-lived tab.
+    const inst = new WindParticlesCPU(map, {
       manifest: man,
       image: frame.href,
       uRange: man.encoding.uRange,
       vRange: man.encoding.vRange,
-      hasMask: man.encoding.hasMask
+      hasMask: man.encoding.hasMask,
+      ...opts
     });
+    inst.manifestUrl = manifestUrl;
+    return inst;
   }
 
   remove() {
     if (this._raf) cancelAnimationFrame(this._raf);
     this.map.off('resize', this._onResize);
     this.canvas.remove();
+    // Collapse the scratch canvas rather than just dropping the reference:
+    // a 1440x721 backing store can outlive the object otherwise.
+    if (this._scratch) { this._scratch.width = this._scratch.height = 0; }
+    this._scratch = this._scratchCtx = this._field = null;
   }
 }
