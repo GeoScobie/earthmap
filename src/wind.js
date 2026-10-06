@@ -33,13 +33,33 @@ import { ParticleMotion } from 'mapbox-exif-layer';
 import { addWindArrows } from './wind-arrows.js';
 import { mountWindUI } from './wind-ui.js';
 
+// FireMap's wind host. Absolute HTTPS on purpose: EarthMap has no /wind/ tree.
+const WIND_HOST = 'https://firemap.live/data/wind/gfs/';
+
+// The published pixels are encoded at +/-40 m/s even though FireMap's manifest
+// currently advertises +/-50 -- firemap.live forces the same override. Drop it
+// once the manifest's encoding block reports -40/40.
+const FIREMAP_UV_RANGE = [-40, 40];
+
+// FireMap's manifest is refreshed per GFS cycle (~6 h apart, plus NOAA's
+// publication lag), not hourly, so its age is judged on a looser clock than
+// the 3 h playlist gate below. The frames themselves must still bracket now.
+const FIREMAP_MAX_AGE_HOURS = 12;
+
 // Most specific first. The first playlist whose extent contains the view centre
 // wins, so regional data takes over from global wherever it exists. Adding real
 // HRRR / HRDPS later means adding entries here -- no other change.
 const PLAYLISTS = [
   {
     name: 'global',
-    url: '/wind/gfs_10m/latest.json',
+    // FireMap's live GFS publish -- the same /data/wind/gfs/ tree firemap.live
+    // and its staging read (manifest.json + one PNG per forecast hour). It is
+    // served with Access-Control-Allow-Origin: *, so the PNGs decode through
+    // canvas without tainting it. EarthMap deliberately does NOT re-host a
+    // copy on its own origin: the ETL republishes there, and a second tree
+    // would silently go stale (and was 404ing on every Hostinger deploy).
+    url: WIND_HOST + 'manifest.json',
+    format: 'firemap',
     ramp: 'bright',
     // THREE SHORT COMETS per cell rather than one long streak. The library
     // draws one head plus `trailLength` tail points per particle and cannot
@@ -228,6 +248,46 @@ function pickFrame(frames, now = Date.now()) {
   return best;
 }
 
+/**
+ * FireMap manifest -> the playlist shape the rest of this file expects.
+ *
+ *   { updated, cycle, model, encoding: { width, height, bounds }, frames: [
+ *       { valid, fh, url: '20261005T18Z' } ] }
+ *
+ * `url` is relative to the manifest and may omit '.png' (firemap.live's own
+ * loader appends it). The 1440x721 grid has pixel CENTRES on -180 and on both
+ * poles, so lon0/lat0 are the bounds' west/north and dx/dy fall out of the
+ * size -- edgeBounds() then turns those back into edges.
+ */
+function fromFireMapManifest(man, manifestUrl) {
+  const enc = man.encoding || {};
+  const [w, s, e, n] = enc.bounds || [-180, -90, 180, 90];
+  const nx = enc.width || 1440;
+  const ny = enc.height || 721;
+  const base = manifestUrl.replace(/[^/]*$/, '');
+  return {
+    model: man.model || 'gfs',
+    cycle: man.cycle,
+    updated: man.updated,
+    issued_utc: man.updated || man.cycle,
+    base,
+    lon0: w,
+    lat0: n,
+    dx: (e - w) / nx,
+    dy: -(n - s) / (ny - 1),
+    nx,
+    ny,
+    u_range: FIREMAP_UV_RANGE,
+    v_range: FIREMAP_UV_RANGE,
+    units: 'mps',
+    frames: (man.frames || []).map((f) => ({
+      valid_utc: f.valid,
+      fh: f.fh,
+      file: /\.png$/i.test(f.url) ? f.url : f.url + '.png'
+    }))
+  };
+}
+
 /** Fetch every playlist once, dropping any that are missing or stale. */
 async function loadPlaylists() {
   const out = [];
@@ -235,9 +295,13 @@ async function loadPlaylists() {
     try {
       const res = await fetch(p.url, { cache: 'no-cache' });
       if (!res.ok) { console.warn('[wind] ' + p.name + ': ' + res.status); continue; }
-      const pl = await res.json();
+      const raw = await res.json();
+      const pl = p.format === 'firemap' ? fromFireMapManifest(raw, p.url) : raw;
       const ageH = (Date.now() - Date.parse(pl.issued_utc)) / 3.6e6;
-      if (ageH > MAX_AGE_HOURS) {
+      const maxAge = p.format === 'firemap' ? FIREMAP_MAX_AGE_HOURS : MAX_AGE_HOURS;
+      const near = pickFrame(pl.frames || []);
+      const gapH = near ? Math.abs(Date.parse(near.valid_utc) - Date.now()) / 3.6e6 : Infinity;
+      if (!(ageH <= maxAge) || gapH > MAX_AGE_HOURS) {
         console.warn('[wind] ' + p.name + ' is ' + ageH.toFixed(1) + ' h old — skipping');
         continue;
       }
