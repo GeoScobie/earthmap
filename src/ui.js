@@ -2,6 +2,7 @@ import { geocolor, geocoderUrl as themeGeocoderUrl } from './theme.js';
 import { wireBasemapToggle } from './basemap-mode.js';
 import { syncSatRoadsVisibility } from './roads-sat.js';
 import { installInfoBoxBuildStamp } from './build-stamp.js';
+import { mountGfsPlaceholders } from './gfs-placeholders.js';
 import {
   searchAgencyFiresByName,
   openAgencyFireFromSearch
@@ -339,7 +340,11 @@ function layerList(map) {
 // GFS field buttons are makeup. They only toggle a text legend.
 // They do not add a raster, a time slider, or a second wind control.
 // Extra fields sit in a horizontal bar; closing it keeps the legend.
+// Off the toolbar for now: mountGfsPlaceholders() adds nothing until
+// GFS_LAYERS_ENABLED is flipped in gfs-placeholders.js. Wind (#windBtn) is
+// wired separately in wind-ui.js and is unaffected.
 function wireGfsMakeup() {
+  if (!mountGfsPlaceholders()) return;
   const buttons = [...document.querySelectorAll('.gfs-layer-btn')];
   const card = $('gfsLegendCard');
   const bar = $('gfsAdvancedBar');
